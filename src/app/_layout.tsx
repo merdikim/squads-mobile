@@ -5,7 +5,7 @@ import { AppIdentity, createSolanaDevnet, MobileWalletProvider } from '@wallet-u
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 const cluster = createSolanaDevnet()
-const identity: AppIdentity = { name: 'Kit Expo Uniwind' }
+const identity: AppIdentity = { name: 'Squads' }
 
 export default function Layout() {
   return (

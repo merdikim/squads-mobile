@@ -4,7 +4,6 @@ import { Animated, Easing, Image, Pressable, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useMobileWallet } from '@wallet-ui/react-native-kit'
 import { ArrowRight } from 'lucide-react-native'
-import logo from '../assets/logo.png'
 import { router } from 'expo-router'
 
 const squadsLetters = ['S', 'Q', 'U', 'A', 'D', 'S']
@@ -50,7 +49,7 @@ export default function App() {
 
   useEffect(() => {
     if (account) {
-      router.push('/assets')
+      router.push('/home')
     }
   }, [account])
 
@@ -62,7 +61,7 @@ export default function App() {
             <Animated.View
               style={{ transform: [{ rotate: spin }] }}
             >
-              <Image source={logo} className="h-8 w-8" resizeMode="contain" />
+              <Image source={require('../assets/logo.png')} className="h-8 w-8" resizeMode="contain" />
             </Animated.View>
 
             <View className="ml-5 flex-row items-center justify-center">

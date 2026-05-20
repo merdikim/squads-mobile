@@ -1,30 +1,33 @@
 import { Tabs } from 'expo-router'
-import { CheckCircle2, UsersRound, Wallet } from 'lucide-react-native'
+import { CheckCircle2, Home, UsersRound } from 'lucide-react-native'
+import { TabsNavbar } from '../../components/TabsNavbar'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function TabsLayout() {
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor:'#fff' }}>
     <Tabs
       screenOptions={{
-        headerShown: false,
+        header: () => <TabsNavbar />,
+        sceneStyle: { backgroundColor: '#fff' },
         tabBarActiveTintColor: '#090A0F',
         tabBarInactiveTintColor: 'rgba(9, 10, 15, 0.45)',
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '700',
+          fontWeight: '500',
         },
         tabBarStyle: {
-          borderTopColor: 'rgba(9, 10, 15, 0.12)',
-          height: 84,
-          paddingBottom: 24,
+          //borderTopColor: 'rgba(9, 10, 15, 0.12)',
+          height: 80,
           paddingTop: 10,
         },
       }}
     >
       <Tabs.Screen
-        name="assets"
+        name="home"
         options={{
-          title: 'Assets',
-          tabBarIcon: ({ color, size }) => <Wallet color={color} size={size} strokeWidth={2.4} />,
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => <Home color={color} size={size} strokeWidth={2.4} />,
         }}
       />
       <Tabs.Screen
@@ -42,5 +45,6 @@ export default function TabsLayout() {
         }}
       />
     </Tabs>
+    </SafeAreaView>
   )
 }
