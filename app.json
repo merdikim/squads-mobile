@@ -6,7 +6,7 @@
     "web": {
       "output": "static"
     },
-    "name": "squads-mobile",
+    "name": "Squads",
     "slug": "squads-mobile",
     "android": {
       "package": "com.anonymous.kit_expo_uniwind"

@@ -2,16 +2,14 @@ import { StatusBar } from 'expo-status-bar'
 import { useEffect, useRef } from 'react'
 import { Animated, Easing, Image, Pressable, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useMobileWallet } from '@wallet-ui/react-native-kit'
 import { ArrowRight } from 'lucide-react-native'
-import logo from '../assets/logo.png'
-import { router } from 'expo-router'
+import { useMobileWallet } from '@wallet-ui/react-native-kit'
 
 const squadsLetters = ['S', 'Q', 'U', 'A', 'D', 'S']
 const introDuration = 2000
 const letterDuration = introDuration / squadsLetters.length
 
-export default function App() {
+export default function AssetsScreen() {
   const { account, connect, disconnect } = useMobileWallet()
   const spinValue = useRef(new Animated.Value(0)).current
   const letterValues = useRef(squadsLetters.map(() => new Animated.Value(0))).current
@@ -48,21 +46,13 @@ export default function App() {
     outputRange: ['0deg', `${squadsLetters.length * 45}deg`],
   })
 
-  useEffect(() => {
-    if (account) {
-      router.push('/assets')
-    }
-  }, [account])
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View className="flex-1 px-6 text-black">
-        <View className='flex-1 items-center justify-center'>
+        <View className="flex-1 items-center justify-center">
           <View className="flex-row items-center justify-center">
-            <Animated.View
-              style={{ transform: [{ rotate: spin }] }}
-            >
-              <Image source={logo} className="h-8 w-8" resizeMode="contain" />
+            <Animated.View style={{ transform: [{ rotate: spin }] }}>
+              <Image source={require('../../assets/logo.png')} className="h-8 w-8" resizeMode="contain" />
             </Animated.View>
 
             <View className="ml-5 flex-row items-center justify-center">
@@ -96,10 +86,16 @@ export default function App() {
         </View>
 
         <View className="flex-1 items-center justify-center">
-          <Text className="text-center text-4xl font-black leading-tight ">Secure and manage Solana assets</Text>
+          <Text className="text-center text-4xl font-black leading-tight">Secure and manage Solana assets</Text>
           <Text className="mt-5 text-center text-base leading-7 text-black/70">
-            Management of developer and treasury assets for on-chain organizations
+            Management of developer and treasury assets for on-chain organizations.
           </Text>
+          <View className="mt-8 w-full rounded-lg border border-black/10 p-4">
+            <Text className="text-xl font-black text-black">$2.4M secured</Text>
+            <Text className="mt-2 text-sm leading-6 text-black/65">
+              Track SOL, tokens, and treasury balances across your shared wallets.
+            </Text>
+          </View>
         </View>
 
         <View className="flex-1 justify-end pb-12">
@@ -110,16 +106,16 @@ export default function App() {
               </Text>
               <Pressable
                 onPress={disconnect}
-                className="h-12 w-full items-center justify-center rounded-lg bg-white active:bg-white/90 border border-black/30"
-                style={{ borderWidth: 1, borderColor: 'black'}}
+                className="h-12 w-full items-center justify-center rounded-lg border border-black/30 bg-white active:bg-white/90"
+                style={{ borderWidth: 1, borderColor: 'black' }}
               >
-                <Text className="text-base font-bold ">Disconnect Wallet</Text>
+                <Text className="text-base font-bold">Disconnect Wallet</Text>
               </Pressable>
             </View>
           ) : (
             <Pressable
               onPress={connect}
-              className="h-12 w-full flex flex-row gap-2 items-center justify-center rounded-lg bg-white active:bg-white/90 border border-black/30"
+              className="h-12 w-full flex-row items-center justify-center gap-2 rounded-lg border border-black/30 bg-white active:bg-white/90"
             >
               <Text className="text-base font-bold text-[#090A0F]">Get started</Text>
               <ArrowRight size={20} strokeWidth={2.5} />
@@ -128,7 +124,7 @@ export default function App() {
         </View>
       </View>
 
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
     </SafeAreaView>
   )
 }
