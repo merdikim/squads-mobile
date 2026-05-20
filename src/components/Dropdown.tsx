@@ -32,7 +32,7 @@ export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuM
   return (
     <View className="relative z-20">
       <Pressable onPress={handleToggle} className="h-10 flex-row items-center">
-        <Text className="text-sm font-bold text-black">{selectedItem?.label}</Text>
+        <Text className="text-sm font-bold text-black">{selectedItem?.label ?? 'Select multisig'}</Text>
         <ChevronDown color="#090A0F" size={16} strokeWidth={2.4} />
       </Pressable>
 

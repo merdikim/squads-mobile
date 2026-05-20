@@ -1,0 +1,345 @@
+import * as multisig from '@sqds/multisig'
+import {
+  Connection,
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+  TransactionMessage,
+  VersionedTransaction,
+} from '@solana/web3.js'
+
+export const SOLANA_RPC_URL = 'https://api.mainnet-beta.solana.com'
+export const DEVNET_EXPLORER_URL = 'https://explorer.solana.com/?cluster=devnet'
+
+const { Permission, Permissions } = multisig.types
+
+export type SquadsProposalSummary = {
+  address: string
+  transactionIndex: bigint
+  title: string
+  status: string
+  approvals: number
+  rejects: number
+  cancellations: number
+  hasApproved: boolean
+}
+
+export type SquadsMultisigSummary = {
+  address: string
+  vaultAddress: string
+  balanceLamports: number
+  threshold: number
+  members: string[]
+  transactionIndex: bigint
+  proposals: SquadsProposalSummary[]
+}
+
+export type ImportedSquadsMultisig = {
+  address: string
+  name: string
+  threshold: number
+  members: string[]
+}
+
+export type SignWeb3Transaction = (transaction: VersionedTransaction) => Promise<VersionedTransaction>
+
+export function createSquadsConnection() {
+  return new Connection(SOLANA_RPC_URL, 'confirmed')
+}
+
+export function formatSol(lamports: number) {
+  const sol = lamports / LAMPORTS_PER_SOL
+  return `${sol.toLocaleString(undefined, { maximumFractionDigits: 4 })} SOL`
+}
+
+export function shortenAddress(address: string) {
+  return `${address.slice(0, 4)}...${address.slice(-4)}`
+}
+
+function toPublicKey(address: string) {
+  return new PublicKey(address)
+}
+
+function getStatusLabel(status: { __kind: string }) {
+  return status.__kind
+}
+
+export async function fetchImportableMultisig(address: string): Promise<ImportedSquadsMultisig> {
+  try {
+    const connection = createSquadsConnection()
+    const multisigPda = toPublicKey(address)
+    const account = await multisig.accounts.Multisig.fromAccountAddress(connection, multisigPda)
+    console.log('Fetched multisig account:', account)
+
+    return {
+      address: multisigPda.toBase58(),
+      name: `Multisig ${shortenAddress(multisigPda.toBase58())}`,
+      threshold: account.threshold,
+      members: account.members.map((member) => member.key.toBase58()),
+    }
+  } catch (error) {
+    console.error('Error fetching importable multisig:', error)
+    throw new Error('Enter a valid Squads multisig account address.')
+  }
+}
+
+async function sendWalletTransaction({
+  connection,
+  transaction,
+  signTransaction,
+  localSigners = [],
+}: {
+  connection: Connection
+  transaction: VersionedTransaction
+  signTransaction: SignWeb3Transaction
+  localSigners?: Keypair[]
+}) {
+  if (localSigners.length > 0) {
+    transaction.sign(localSigners)
+  }
+
+  const signedTransaction = await signTransaction(transaction)
+  const signature = await connection.sendRawTransaction(signedTransaction.serialize(), {
+    skipPreflight: false,
+  })
+  const latestBlockhash = await connection.getLatestBlockhash()
+
+  await connection.confirmTransaction(
+    {
+      signature,
+      blockhash: latestBlockhash.blockhash,
+      lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+    },
+    'confirmed',
+  )
+
+  return signature
+}
+
+export async function fetchMultisigSummary({
+  address,
+  memberAddress,
+}: {
+  address: string
+  memberAddress?: string
+}): Promise<SquadsMultisigSummary> {
+  try {
+    const connection = createSquadsConnection()
+    const multisigPda = toPublicKey(address)
+    const { Multisig, Proposal } = multisig.accounts
+    const account = await Multisig.fromAccountAddress(connection, multisigPda)
+    const [vaultPda] = multisig.getVaultPda({ multisigPda, index: 0 })
+    const balanceLamports = await connection.getBalance(vaultPda)
+    const transactionIndex = BigInt(account.transactionIndex.toString())
+    const currentMember = memberAddress ? toPublicKey(memberAddress) : null
+    const proposals: SquadsProposalSummary[] = []
+    const firstIndex = transactionIndex > 10n ? transactionIndex - 9n : 1n
+
+    for (let index = firstIndex; index <= transactionIndex; index += 1n) {
+      const [proposalPda] = multisig.getProposalPda({
+        multisigPda,
+        transactionIndex: index,
+      })
+      const proposal = await Proposal.fromAccountAddress(connection, proposalPda)
+
+      proposals.unshift({
+        address: proposalPda.toBase58(),
+        transactionIndex: index,
+        title: `Vault transaction #${index.toString()}`,
+        status: getStatusLabel(proposal.status),
+        approvals: proposal.approved.length,
+        rejects: proposal.rejected.length,
+        cancellations: proposal.cancelled.length,
+        hasApproved: currentMember
+          ? proposal.approved.some((approvedMember) => approvedMember.equals(currentMember))
+          : false,
+      })
+    }
+
+    return {
+      address,
+      vaultAddress: vaultPda.toBase58(),
+      balanceLamports,
+      threshold: account.threshold,
+      members: account.members.map((member) => member.key.toBase58()),
+      transactionIndex,
+      proposals,
+    }
+  } catch (error) {
+    console.error('Error fetching multisig summary:', error)
+    throw new Error('Failed to fetch multisig summary')
+  }
+}
+
+export async function createSingleMemberMultisig({
+  creatorAddress,
+  signTransaction,
+}: {
+  creatorAddress: string
+  signTransaction: SignWeb3Transaction
+}) {
+  const connection = createSquadsConnection()
+  const creator = toPublicKey(creatorAddress)
+  const createKey = Keypair.generate()
+  const [multisigPda] = multisig.getMultisigPda({ createKey: createKey.publicKey })
+  const [programConfigPda] = multisig.getProgramConfigPda({})
+  const programConfig = await multisig.accounts.ProgramConfig.fromAccountAddress(connection, programConfigPda)
+  const latestBlockhash = await connection.getLatestBlockhash()
+
+  const transaction = multisig.transactions.multisigCreateV2({
+    blockhash: latestBlockhash.blockhash,
+    createKey: createKey.publicKey,
+    creator,
+    multisigPda,
+    configAuthority: null,
+    timeLock: 0,
+    members: [
+      {
+        key: creator,
+        permissions: Permissions.all(),
+      },
+    ],
+    threshold: 1,
+    rentCollector: null,
+    treasury: programConfig.treasury,
+    memo: 'Created from Squads Mobile',
+  })
+
+  const signature = await sendWalletTransaction({
+    connection,
+    transaction,
+    signTransaction,
+    localSigners: [createKey],
+  })
+
+  return {
+    address: multisigPda.toBase58(),
+    signature,
+  }
+}
+
+export async function createSolTransferProposal({
+  multisigAddress,
+  creatorAddress,
+  recipientAddress,
+  signTransaction,
+  lamports = LAMPORTS_PER_SOL / 100,
+}: {
+  multisigAddress: string
+  creatorAddress: string
+  recipientAddress: string
+  signTransaction: SignWeb3Transaction
+  lamports?: number
+}) {
+  const connection = createSquadsConnection()
+  const multisigPda = toPublicKey(multisigAddress)
+  const creator = toPublicKey(creatorAddress)
+  const recipient = toPublicKey(recipientAddress)
+  const [vaultPda] = multisig.getVaultPda({ multisigPda, index: 0 })
+  const account = await multisig.accounts.Multisig.fromAccountAddress(connection, multisigPda)
+  const transactionIndex = BigInt(account.transactionIndex.toString()) + 1n
+  const transferBlockhash = await connection.getLatestBlockhash()
+  const transferMessage = new TransactionMessage({
+    payerKey: vaultPda,
+    recentBlockhash: transferBlockhash.blockhash,
+    instructions: [
+      SystemProgram.transfer({
+        fromPubkey: vaultPda,
+        toPubkey: recipient,
+        lamports,
+      }),
+    ],
+  })
+
+  const createTransaction = multisig.transactions.vaultTransactionCreate({
+    blockhash: transferBlockhash.blockhash,
+    feePayer: creator,
+    multisigPda,
+    transactionIndex,
+    creator,
+    vaultIndex: 0,
+    ephemeralSigners: 0,
+    transactionMessage: transferMessage,
+    memo: `Transfer ${formatSol(lamports)} to ${shortenAddress(recipientAddress)}`,
+  })
+  const transactionSignature = await sendWalletTransaction({
+    connection,
+    transaction: createTransaction,
+    signTransaction,
+  })
+
+  const proposalBlockhash = await connection.getLatestBlockhash()
+  const createProposal = multisig.transactions.proposalCreate({
+    blockhash: proposalBlockhash.blockhash,
+    feePayer: creator,
+    multisigPda,
+    transactionIndex,
+    creator,
+  })
+  const proposalSignature = await sendWalletTransaction({
+    connection,
+    transaction: createProposal,
+    signTransaction,
+  })
+
+  return {
+    transactionIndex,
+    transactionSignature,
+    proposalSignature,
+  }
+}
+
+export async function approveProposal({
+  multisigAddress,
+  memberAddress,
+  transactionIndex,
+  signTransaction,
+}: {
+  multisigAddress: string
+  memberAddress: string
+  transactionIndex: bigint
+  signTransaction: SignWeb3Transaction
+}) {
+  const connection = createSquadsConnection()
+  const member = toPublicKey(memberAddress)
+  const latestBlockhash = await connection.getLatestBlockhash()
+  const transaction = multisig.transactions.proposalApprove({
+    blockhash: latestBlockhash.blockhash,
+    feePayer: member,
+    multisigPda: toPublicKey(multisigAddress),
+    transactionIndex,
+    member,
+    memo: 'Approved from Squads Mobile',
+  })
+
+  return sendWalletTransaction({ connection, transaction, signTransaction })
+}
+
+export async function executeProposal({
+  multisigAddress,
+  memberAddress,
+  transactionIndex,
+  signTransaction,
+}: {
+  multisigAddress: string
+  memberAddress: string
+  transactionIndex: bigint
+  signTransaction: SignWeb3Transaction
+}) {
+  const connection = createSquadsConnection()
+  const member = toPublicKey(memberAddress)
+  const latestBlockhash = await connection.getLatestBlockhash()
+  const transaction = await multisig.transactions.vaultTransactionExecute({
+    connection,
+    blockhash: latestBlockhash.blockhash,
+    feePayer: member,
+    multisigPda: toPublicKey(multisigAddress),
+    transactionIndex,
+    member,
+  })
+
+  return sendWalletTransaction({ connection, transaction, signTransaction })
+}
+
+export { LAMPORTS_PER_SOL, Permission, Permissions }

@@ -1,57 +1,51 @@
 import { StatusBar } from 'expo-status-bar'
-import { useState } from 'react'
-import { GestureResponderEvent, Pressable, Text, View } from 'react-native'
-import { Plus, UsersRound } from 'lucide-react-native'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Alert, GestureResponderEvent, Pressable, Text, View } from 'react-native'
+import { RefreshCw, UsersRound } from 'lucide-react-native'
+import { useMobileWallet } from '@wallet-ui/react-native-kit'
+import { useQueryClient } from '@tanstack/react-query'
 import { Dropdown } from '../../components/Dropdown'
+import { ProposalsMenu } from '../../components/cards/ProposalsMenu'
 import { AssetsMenu } from '../../components/home-screen/AssetsMenu'
 import { NftsMenu } from '../../components/home-screen/NftsMenu'
-import { ProposalsMenu } from '../../components/home-screen/ProposalsMenu'
-import { ImportMultisigModal } from '../../components/modal/ImportMultisigModal'
-
-const initialMultisigs = [
-  {
-    name: 'Moonbase Coffee Fund',
-    participants: 7,
-    balance: '$84,219.33',
-    publickKey: '0x7fa3b91c20de4488a67c99fb12e04d3c88a15001',
-  },
-  {
-    name: 'Neon Yacht DAO',
-    participants: 3,
-    balance: '$9,734,002.08',
-    publickKey: '0x41bd0f8a93cc17e55f29a7d3b081e04cc6b67219',
-  },
-  {
-    name: 'Library Snacks Ops',
-    participants: 12,
-    balance: '$312.45',
-    publickKey: '0x0e6f873b2c99af413dd08961b74282ec5aa7b0fd',
-  },
-  {
-    name: 'Pixel Embassy Vault',
-    participants: 9,
-    balance: '$1,208,640.91',
-    publickKey: '0xd26c1a52e0934b717089e65324cc769f418fa4b8',
-  },
-]
+import { NoMultisigsScreen } from '../../components/home-screen/NoMultisigsScreen'
+import { AddMultisigButton } from '../../components/modals/AddMultisigButton'
+import { ImportMultisigModal } from '../../components/modals/ImportMultisigModal'
+import {
+  approveProposal,
+  createSingleMemberMultisig,
+  createSolTransferProposal,
+  executeProposal,
+  fetchImportableMultisig,
+  fetchMultisigSummary,
+  formatSol,
+  shortenAddress,
+  type SignWeb3Transaction,
+  type SquadsMultisigSummary,
+  type SquadsProposalSummary,
+} from '../../lib/squads'
+import { saveMultisigToStorage } from '../../lib/multisigStorage'
+import useMultisigs from '../../hooks/useMultisigs'
 
 const menuItems = ['Proposals', 'Assets', 'NFTs'] as const
 
 type MenuItem = (typeof menuItems)[number]
 
-function AddMultisigButton({ onPress }: { onPress: (event: GestureResponderEvent) => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      className="h-11 flex-row items-center justify-center rounded-md bg-black active:bg-black/80"
-    >
-      <Plus color="#FFFFFF" size={16} strokeWidth={2} />
-      <Text className="ml-2 text-sm font-black text-white">Import Multisig</Text>
-    </Pressable>
-  )
-}
-
-function MenuContent({ selectedMenuItem }: { selectedMenuItem: MenuItem }) {
+function MenuContent({
+  selectedMenuItem,
+  summary,
+  isBusy,
+  onCreateProposal,
+  onApproveProposal,
+  onExecuteProposal,
+}: {
+  selectedMenuItem: MenuItem
+  summary?: SquadsMultisigSummary
+  isBusy?: boolean
+  onCreateProposal: () => void
+  onApproveProposal: (proposal: SquadsProposalSummary) => void
+  onExecuteProposal: (proposal: SquadsProposalSummary) => void
+}) {
   if (selectedMenuItem === 'Assets') {
     return <AssetsMenu />
   }
@@ -60,20 +54,71 @@ function MenuContent({ selectedMenuItem }: { selectedMenuItem: MenuItem }) {
     return <NftsMenu />
   }
 
-  return <ProposalsMenu />
+  return (
+    <ProposalsMenu
+      proposals={summary?.proposals ?? []}
+      threshold={summary?.threshold ?? 1}
+      isBusy={isBusy}
+      onCreateProposal={onCreateProposal}
+      onApproveProposal={onApproveProposal}
+      onExecuteProposal={onExecuteProposal}
+    />
+  )
 }
 
 export default function HomeScreen() {
+  const { account, signTransaction } = useMobileWallet()
+  const queryClient = useQueryClient()
+  const walletAddress = account?.address.toString()
+  const { data: multisigs = [] } = useMultisigs(walletAddress ?? '')
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>('Proposals')
-  const [multisigs, setMultisigs] = useState(initialMultisigs)
-  const [selectedMultisigKey, setSelectedMultisigKey] = useState(initialMultisigs[0].publickKey)
-  const selectedMultisig = multisigs.find((multisig) => multisig.publickKey === selectedMultisigKey) ?? multisigs[0]
+  const [selectedMultisigKey, setSelectedMultisigKey] = useState('')
+  const [selectedSummary, setSelectedSummary] = useState<SquadsMultisigSummary>()
+  const [statusText, setStatusText] = useState('')
+  const [isBusy, setIsBusy] = useState(false)
+  const selectedMultisig = multisigs.find((multisig) => multisig.address === selectedMultisigKey)
   const multisigDropdownItems = multisigs.map((multisig) => ({
-    key: multisig.publickKey,
+    key: multisig.address,
     label: multisig.name,
   }))
+  const selectedBalance = selectedSummary ? formatSol(selectedSummary.balanceLamports) : 'No multisig'
+  const selectedParticipants = selectedSummary?.members.length ?? 0
+  const signWeb3Transaction = signTransaction as unknown as SignWeb3Transaction
+
+  const existingAddresses = useMemo(() => multisigs.map((multisig) => multisig.address), [multisigs])
+
+  useEffect(() => {
+    if (!selectedMultisigKey && multisigs[0]) {
+      setSelectedMultisigKey(multisigs[0].address)
+    }
+  }, [multisigs, selectedMultisigKey])
+
+  const refreshSelectedMultisig = useCallback(
+    async (address = selectedMultisigKey) => {
+      if (!address) {
+        setSelectedSummary(undefined)
+        return
+      }
+
+      setStatusText('Loading multisig...')
+
+      try {
+        const summary = await fetchMultisigSummary({ address, memberAddress: walletAddress })
+        setSelectedSummary(summary)
+        setStatusText('')
+      } catch (error) {
+        setSelectedSummary(undefined)
+        setStatusText(error instanceof Error ? error.message : 'Unable to load this multisig.')
+      }
+    },
+    [selectedMultisigKey, walletAddress],
+  )
+
+  useEffect(() => {
+    void refreshSelectedMultisig()
+  }, [refreshSelectedMultisig])
 
   const selectMultisig = (publicKey: string) => {
     setSelectedMultisigKey(publicKey)
@@ -86,17 +131,164 @@ export default function HomeScreen() {
     setIsImportModalOpen(true)
   }
 
-  const handleImportMultisig = ({ address, name }: { address: string; name?: string }) => {
-    const importedMultisig = {
-      name: name || `Imported ${address.slice(0, 4)}...${address.slice(-4)}`,
-      participants: 0,
-      balance: '$0.00',
-      publickKey: address,
+  const createMultisig = (event: GestureResponderEvent) => {
+    event.stopPropagation()
+    setIsDropdownOpen(false)
+
+    if (!walletAddress) {
+      Alert.alert('Connect wallet', 'Connect your wallet before creating a Squads multisig.')
+      return
     }
 
-    setMultisigs((currentMultisigs) => [...currentMultisigs, importedMultisig])
-    setSelectedMultisigKey(address)
-    setIsImportModalOpen(false)
+    Alert.alert(
+      'Create devnet multisig',
+      `Your wallet will sign a Squads V4 multisig with threshold 1 and member ${shortenAddress(walletAddress)}.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Create',
+          onPress: () => {
+            void runAction(async () => {
+              const created = await createSingleMemberMultisig({
+                creatorAddress: walletAddress,
+                signTransaction: signWeb3Transaction,
+              })
+              const importedMultisig = {
+                name: `Multisig ${shortenAddress(created.address)}`,
+                address: created.address,
+              }
+
+              const savedMultisig = await saveMultisigToStorage(importedMultisig)
+              await queryClient.invalidateQueries({ queryKey: ['multisigs'] })
+              setSelectedMultisigKey(savedMultisig.address)
+              Alert.alert('Multisig created', `Signature ${shortenAddress(created.signature)}`)
+            })
+          },
+        },
+      ],
+    )
+  }
+
+  const handleImportMultisig = async (address: string) => {
+    const importableMultisig = await fetchImportableMultisig(address)
+    const savedMultisig = await saveMultisigToStorage(importableMultisig)
+
+    await queryClient.invalidateQueries({ queryKey: ['multisigs'] })
+    setSelectedMultisigKey(savedMultisig.address)
+
+    return savedMultisig
+  }
+
+  const runAction = async (action: () => Promise<void>) => {
+    setIsBusy(true)
+    setStatusText('Waiting for wallet approval...')
+
+    try {
+      await action()
+      await refreshSelectedMultisig()
+      setStatusText('')
+    } catch (error) {
+      setStatusText(error instanceof Error ? error.message : 'Transaction failed.')
+    } finally {
+      setIsBusy(false)
+    }
+  }
+
+  const createProposal = () => {
+    if (!walletAddress || !selectedMultisigKey) {
+      Alert.alert('Select multisig', 'Connect your wallet and select a Squads multisig first.')
+      return
+    }
+
+    Alert.alert(
+      'Create transfer proposal',
+      `This creates a proposal to transfer 0.01 SOL from vault ${shortenAddress(selectedSummary?.vaultAddress ?? selectedMultisigKey)} to ${shortenAddress(walletAddress)} on devnet.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Create',
+          onPress: () => {
+            void runAction(async () => {
+              const result = await createSolTransferProposal({
+                multisigAddress: selectedMultisigKey,
+                creatorAddress: walletAddress,
+                recipientAddress: walletAddress,
+                signTransaction: signWeb3Transaction,
+              })
+
+              Alert.alert('Proposal created', `Transaction #${result.transactionIndex.toString()}`)
+            })
+          },
+        },
+      ],
+    )
+  }
+
+  const approveSelectedProposal = (proposal: SquadsProposalSummary) => {
+    if (!walletAddress || !selectedMultisigKey) {
+      return
+    }
+
+    Alert.alert('Approve proposal', `Approve transaction #${proposal.transactionIndex.toString()} with your wallet.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Approve',
+        onPress: () => {
+          void runAction(async () => {
+            const signature = await approveProposal({
+              multisigAddress: selectedMultisigKey,
+              memberAddress: walletAddress,
+              transactionIndex: proposal.transactionIndex,
+              signTransaction: signWeb3Transaction,
+            })
+            Alert.alert('Proposal approved', `Signature ${shortenAddress(signature)}`)
+          })
+        },
+      },
+    ])
+  }
+
+  const executeSelectedProposal = (proposal: SquadsProposalSummary) => {
+    if (!walletAddress || !selectedMultisigKey) {
+      return
+    }
+
+    Alert.alert(
+      'Execute proposal',
+      `Execute vault transaction #${proposal.transactionIndex.toString()} on devnet. The vault must have enough SOL for the transfer.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Execute',
+          onPress: () => {
+            void runAction(async () => {
+              const signature = await executeProposal({
+                multisigAddress: selectedMultisigKey,
+                memberAddress: walletAddress,
+                transactionIndex: proposal.transactionIndex,
+                signTransaction: signWeb3Transaction,
+              })
+              Alert.alert('Proposal executed', `Signature ${shortenAddress(signature)}`)
+            })
+          },
+        },
+      ],
+    )
+  }
+
+  if (multisigs.length === 0) {
+    return (
+      <>
+        <NoMultisigsScreen isBusy={isBusy} onCreate={createMultisig} onImport={importMultisig} />
+        <StatusBar style="dark" />
+        <ImportMultisigModal
+          visible={isImportModalOpen}
+          existingAddresses={existingAddresses}
+          onClose={() => setIsImportModalOpen(false)}
+          onImport={handleImportMultisig}
+        />
+      </>
+    )
   }
 
   return (
@@ -112,24 +304,43 @@ export default function HomeScreen() {
             <View className="z-10 flex-row items-start justify-between">
               <Dropdown
                 items={multisigDropdownItems}
-                selectedKey={selectedMultisig.publickKey}
+                selectedKey={selectedMultisig?.address ?? selectedMultisigKey}
                 isOpen={isDropdownOpen}
                 onToggle={() => setIsDropdownOpen((value) => !value)}
                 onSelect={selectMultisig}
                 menuMaxHeight={260}
-                button={<AddMultisigButton onPress={importMultisig} />}
+                button={<AddMultisigButton isBusy={isBusy} onCreate={createMultisig} onImport={importMultisig} />}
               />
 
               <View className="h-10 flex-row items-center gap-1 rounded-md">
                 <UsersRound color="#090A0F" size={16} strokeWidth={2.4} />
-                <Text className="text-sm font-bold text-black">{selectedMultisig.participants}</Text>
+                <Text className="text-sm font-bold text-black">{selectedParticipants}</Text>
               </View>
             </View>
 
             <View className="z-0 flex-1 items-center justify-center">
               <Text className="text-sm font-bold uppercase text-black/45">Assets balance</Text>
-              <Text className="mt-3 text-center text-4xl font-black text-black">{selectedMultisig.balance}</Text>
+              <Text className="mt-3 text-center text-4xl font-black text-black">{selectedBalance}</Text>
+              {selectedSummary ? (
+                <Text className="mt-2 text-xs font-bold text-black/45">
+                  Vault {shortenAddress(selectedSummary.vaultAddress)}
+                </Text>
+              ) : null}
             </View>
+          </View>
+
+          <View className="mt-4 flex-row items-center justify-between gap-3">
+            <Text className="flex-1 text-xs font-bold text-black/45" numberOfLines={2}>
+              {statusText ||
+                (selectedMultisigKey ? `Devnet ${shortenAddress(selectedMultisigKey)}` : 'Create or import a multisig')}
+            </Text>
+            <Pressable
+              onPress={() => void refreshSelectedMultisig()}
+              disabled={isBusy || !selectedMultisigKey}
+              className="h-10 w-10 items-center justify-center rounded-md border border-black/10 active:bg-black/5"
+            >
+              <RefreshCw color="#090A0F" size={16} strokeWidth={2.4} />
+            </Pressable>
           </View>
 
           <View className="mt-5 flex-row rounded-lg border border-black/10 bg-white p-1">
@@ -148,14 +359,21 @@ export default function HomeScreen() {
             })}
           </View>
 
-          <MenuContent selectedMenuItem={selectedMenuItem} />
+          <MenuContent
+            selectedMenuItem={selectedMenuItem}
+            summary={selectedSummary}
+            isBusy={isBusy}
+            onCreateProposal={createProposal}
+            onApproveProposal={approveSelectedProposal}
+            onExecuteProposal={executeSelectedProposal}
+          />
         </View>
 
         <StatusBar style="dark" />
       </Pressable>
       <ImportMultisigModal
         visible={isImportModalOpen}
-        existingAddresses={multisigs.map((multisig) => multisig.publickKey)}
+        existingAddresses={existingAddresses}
         onClose={() => setIsImportModalOpen(false)}
         onImport={handleImportMultisig}
       />

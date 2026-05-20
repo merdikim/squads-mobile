@@ -1,26 +1,27 @@
 import { isAddress } from '@solana/kit'
 import { useEffect, useState } from 'react'
 import { Modal, Pressable, Text, TextInput, View } from 'react-native'
+import type { MultisigListItem } from '../../hooks/useMultisigs'
 
 type ImportMultisigModalProps = {
   visible: boolean
   existingAddresses: string[]
   onClose: () => void
-  onImport: (multisig: { address: string; name?: string }) => void
+  onImport: (address: string) => Promise<MultisigListItem>
 }
 
 export function ImportMultisigModal({ visible, existingAddresses, onClose, onImport }: ImportMultisigModalProps) {
   const [address, setAddress] = useState('')
-  const [name, setName] = useState('')
   const [addressError, setAddressError] = useState('')
-  const [nameError, setNameError] = useState('')
+  const [importedMultisig, setImportedMultisig] = useState<MultisigListItem>()
+  const [isImporting, setIsImporting] = useState(false)
 
   useEffect(() => {
     if (!visible) {
       setAddress('')
-      setName('')
       setAddressError('')
-      setNameError('')
+      setImportedMultisig(undefined)
+      setIsImporting(false)
     }
   }, [visible])
 
@@ -42,29 +43,26 @@ export function ImportMultisigModal({ visible, existingAddresses, onClose, onImp
     return ''
   }
 
-  const validateName = (value: string) => {
-    if (value.trim().length > 40) {
-      return 'Name must be 40 characters or fewer.'
-    }
-
-    return ''
-  }
-
-  const handleImport = () => {
+  const handleImport = async () => {
     const nextAddressError = validateAddress(address)
-    const nextNameError = validateName(name)
 
     setAddressError(nextAddressError)
-    setNameError(nextNameError)
+    setImportedMultisig(undefined)
 
-    if (nextAddressError || nextNameError) {
+    if (nextAddressError) {
       return
     }
 
-    onImport({
-      address: address.trim(),
-      name: name.trim() || undefined,
-    })
+    setIsImporting(true)
+
+    try {
+      const multisig = await onImport(address.trim())
+      setImportedMultisig(multisig)
+    } catch (error) {
+      setAddressError(error instanceof Error ? error.message : 'Unable to import this multisig.')
+    } finally {
+      setIsImporting(false)
+    }
   }
 
   return (
@@ -73,15 +71,16 @@ export function ImportMultisigModal({ visible, existingAddresses, onClose, onImp
         <Pressable className="rounded-lg bg-white p-5" onPress={(event) => event.stopPropagation()}>
           <Text className="text-xl font-black text-black">Import Multisig</Text>
           <Text className="mt-2 text-sm leading-6 text-black/60">
-            Add an existing multisig by entering its Solana address.
+            Enter the Squads multisig account address. We will fetch the account before saving it.
           </Text>
 
           <View className="mt-5">
-            <Text className="text-sm font-bold text-black">Solana address</Text>
+            <Text className="text-sm font-bold text-black">Multisig account address</Text>
             <TextInput
               value={address}
               onChangeText={(value) => {
                 setAddress(value)
+                setImportedMultisig(undefined)
                 if (addressError) {
                   setAddressError(validateAddress(value))
                 }
@@ -95,22 +94,15 @@ export function ImportMultisigModal({ visible, existingAddresses, onClose, onImp
             {addressError ? <Text className="mt-2 text-xs font-bold text-red-600">{addressError}</Text> : null}
           </View>
 
-          <View className="mt-4">
-            <Text className="text-sm font-bold text-black">Name optional</Text>
-            <TextInput
-              value={name}
-              onChangeText={(value) => {
-                setName(value)
-                if (nameError) {
-                  setNameError(validateName(value))
-                }
-              }}
-              placeholder="Give it a display name"
-              placeholderTextColor="rgba(0,0,0,0.35)"
-              className="mt-2 min-h-12 rounded-lg border border-black/15 px-3 text-sm text-black"
-            />
-            {nameError ? <Text className="mt-2 text-xs font-bold text-red-600">{nameError}</Text> : null}
-          </View>
+          {importedMultisig ? (
+            <View className="mt-4 rounded-lg border border-black/10 bg-black/5 p-3">
+              <Text className="text-xs font-bold uppercase text-black/45">Imported</Text>
+              <Text className="mt-1 text-base font-black text-black">{importedMultisig.name}</Text>
+              <Text className="mt-1 text-sm text-black/55">
+                {importedMultisig.members?.length ?? 0} members, threshold {importedMultisig.threshold ?? 1}
+              </Text>
+            </View>
+          ) : null}
 
           <View className="mt-6 flex-row gap-3">
             <Pressable
@@ -120,10 +112,13 @@ export function ImportMultisigModal({ visible, existingAddresses, onClose, onImp
               <Text className="text-base font-bold text-black">Cancel</Text>
             </Pressable>
             <Pressable
-              onPress={handleImport}
+              onPress={importedMultisig ? onClose : () => void handleImport()}
+              disabled={isImporting}
               className="h-12 flex-1 items-center justify-center rounded-lg bg-black active:bg-black/80"
             >
-              <Text className="text-base font-bold text-white">Import</Text>
+              <Text className="text-base font-bold text-white">
+                {importedMultisig ? 'Done' : isImporting ? 'Importing...' : 'Import'}
+              </Text>
             </Pressable>
           </View>
         </Pressable>

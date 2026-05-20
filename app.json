@@ -11,6 +11,11 @@
     "android": {
       "package": "com.anonymous.kit_expo_uniwind"
     },
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router"
+    ],
+    "ios": {
+      "bundleIdentifier": "com.anonymous.kit-expo-uniwind"
+    }
   }
 }
