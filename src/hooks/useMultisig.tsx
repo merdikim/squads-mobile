@@ -2,22 +2,22 @@ import { isAddress } from '@solana/kit'
 import { useQuery } from '@tanstack/react-query'
 import { fetchMultisigSummary } from '../lib/squads'
 
-const useMultisig = (multisigAddress: string) => {
-  const { data: multisig } = useQuery({
-    queryKey: ['multisig', multisigAddress],
+const useMultisig = (multisigAddress: string, memberAddress?: string) => {
+  const query = useQuery({
+    queryKey: ['multisig', multisigAddress, memberAddress],
     queryFn: async () => {
-        if (!isAddress(multisigAddress)) return null    
-        const multisigSummary = await fetchMultisigSummary({
-            address: multisigAddress,
-            memberAddress: ''
-        })
+      if (!isAddress(multisigAddress)) return null
+      const multisigSummary = await fetchMultisigSummary({
+        address: multisigAddress,
+        memberAddress,
+      })
 
-        return multisigSummary
+      return multisigSummary
     },
     enabled: !!multisigAddress,
   })
 
-  return { data: multisig }
+  return { ...query, data: query.data }
 }
 
 export default useMultisig

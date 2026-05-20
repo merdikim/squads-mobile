@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Alert, GestureResponderEvent, Pressable, Text, View } from 'react-native'
 import { RefreshCw, UsersRound } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-kit'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Dropdown } from '../../components/Dropdown'
 import { ProposalsMenu } from '../../components/cards/ProposalsMenu'
 import { AssetsMenu } from '../../components/home-screen/AssetsMenu'
@@ -25,6 +25,7 @@ import {
   type SquadsProposalSummary,
 } from '../../lib/squads'
 import { saveMultisigToStorage } from '../../lib/multisigStorage'
+import { getSelectedMultisigAddress, saveSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 import useMultisigs from '../../hooks/useMultisigs'
 
 const menuItems = ['Proposals', 'Assets', 'NFTs'] as const
@@ -71,6 +72,10 @@ export default function HomeScreen() {
   const queryClient = useQueryClient()
   const walletAddress = account?.address.toString()
   const { data: multisigs = [] } = useMultisigs(walletAddress ?? '')
+  const { data: storedSelectedMultisigKey = '' } = useQuery({
+    queryKey: ['selectedMultisigAddress'],
+    queryFn: getSelectedMultisigAddress,
+  })
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>('Proposals')
@@ -89,11 +94,23 @@ export default function HomeScreen() {
 
   const existingAddresses = useMemo(() => multisigs.map((multisig) => multisig.address), [multisigs])
 
+  const persistSelectedMultisig = useCallback(
+    async (address: string) => {
+      await saveSelectedMultisigAddress(address)
+      queryClient.setQueryData(['selectedMultisigAddress'], address)
+    },
+    [queryClient],
+  )
+
   useEffect(() => {
     if (!selectedMultisigKey && multisigs[0]) {
-      setSelectedMultisigKey(multisigs[0].address)
+      const storedMultisig = multisigs.find((multisig) => multisig.address === storedSelectedMultisigKey)
+      const nextMultisigKey = storedMultisig?.address ?? multisigs[0].address
+
+      setSelectedMultisigKey(nextMultisigKey)
+      void persistSelectedMultisig(nextMultisigKey)
     }
-  }, [multisigs, selectedMultisigKey])
+  }, [multisigs, persistSelectedMultisig, selectedMultisigKey, storedSelectedMultisigKey])
 
   const refreshSelectedMultisig = useCallback(
     async (address = selectedMultisigKey) => {
@@ -123,6 +140,7 @@ export default function HomeScreen() {
   const selectMultisig = (publicKey: string) => {
     setSelectedMultisigKey(publicKey)
     setIsDropdownOpen(false)
+    void persistSelectedMultisig(publicKey)
   }
 
   const importMultisig = (event: GestureResponderEvent) => {
@@ -161,6 +179,7 @@ export default function HomeScreen() {
               const savedMultisig = await saveMultisigToStorage(importedMultisig)
               await queryClient.invalidateQueries({ queryKey: ['multisigs'] })
               setSelectedMultisigKey(savedMultisig.address)
+              await persistSelectedMultisig(savedMultisig.address)
               Alert.alert('Multisig created', `Signature ${shortenAddress(created.signature)}`)
             })
           },
@@ -175,6 +194,7 @@ export default function HomeScreen() {
 
     await queryClient.invalidateQueries({ queryKey: ['multisigs'] })
     setSelectedMultisigKey(savedMultisig.address)
+    await persistSelectedMultisig(savedMultisig.address)
 
     return savedMultisig
   }
