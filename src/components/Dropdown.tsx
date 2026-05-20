@@ -1,5 +1,6 @@
 import { GestureResponderEvent, Pressable, ScrollView, Text, View } from 'react-native'
 import { ChevronDown } from 'lucide-react-native'
+import type { ReactNode } from 'react'
 
 export type DropdownItem = {
   key: string
@@ -13,13 +14,10 @@ type DropdownProps = {
   onToggle: () => void
   onSelect: (key: string) => void
   menuMaxHeight?: number
-  bottomAction?: {
-    label: string
-    onPress: () => void
-  }
+  button?: ReactNode
 }
 
-export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuMaxHeight, bottomAction }: DropdownProps) {
+export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuMaxHeight, button }: DropdownProps) {
   const selectedItem = items.find((item) => item.key === selectedKey)
   const handleToggle = (event: GestureResponderEvent) => {
     event.stopPropagation()
@@ -29,11 +27,6 @@ export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuM
   const handleSelect = (event: GestureResponderEvent, key: string) => {
     event.stopPropagation()
     onSelect(key)
-  }
-
-  const handleBottomAction = (event: GestureResponderEvent) => {
-    event.stopPropagation()
-    bottomAction?.onPress()
   }
 
   return (
@@ -62,14 +55,7 @@ export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuM
             ))}
           </ScrollView>
 
-          {bottomAction ? (
-            <Pressable
-              onPress={handleBottomAction}
-              className="mt-2 h-11 items-center justify-center rounded-md border-t border-black/10 active:bg-black/5"
-            >
-              <Text className="text-sm font-black text-black">{bottomAction.label}</Text>
-            </Pressable>
-          ) : null}
+          {button ? <View className="mt-2 border-t border-black/10 pt-2">{button}</View> : null}
         </View>
       ) : null}
     </View>
