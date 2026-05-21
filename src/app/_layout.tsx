@@ -1,12 +1,13 @@
 import '../global.css'
 
 import { Slot } from 'expo-router'
-import { AppIdentity, createSolanaDevnet, MobileWalletProvider } from '@wallet-ui/react-native-kit'
+import { AppIdentity, createSolanaMainnet, MobileWalletProvider } from '@wallet-ui/react-native-kit'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { APP_NAME, RPC_URL } from '../constants'
 
-const cluster = createSolanaDevnet()
-const identity: AppIdentity = { name: 'Squads' }
+const cluster = createSolanaMainnet(RPC_URL)
+const identity: AppIdentity = { name: APP_NAME }
 
 const queryClient = new QueryClient()
 

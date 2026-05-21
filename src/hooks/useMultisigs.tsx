@@ -1,22 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
 import { getStoredMultisigs } from '../lib/multisigStorage'
-
-export type MultisigListItem = {
-  name: string
-  address: string
-  threshold?: number
-  members?: string[]
-}
+import { MultisigListItem } from '../types'
 
 const useMultisigs = (address: string) => {
-  const { data: multisigs } = useQuery({
+  const { data: multisigs, isLoading: isMultisigsLoading } = useQuery({
     queryKey: ['multisigs', address],
     queryFn: async (): Promise<MultisigListItem[]> => {
       return getStoredMultisigs()
     },
+    enabled: !!address,
   })
 
-  return { data: multisigs }
+  return { multisigs, isMultisigsLoading }
 }
 
 export default useMultisigs

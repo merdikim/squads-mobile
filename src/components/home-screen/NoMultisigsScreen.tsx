@@ -1,15 +1,19 @@
-import type { GestureResponderEvent } from 'react-native'
 import { Image, Pressable, Text, View } from 'react-native'
 import { Plus, Upload } from 'lucide-react-native'
+import { useState } from 'react'
+import { ImportMultisigModal } from '../modals/ImportMultisigModal'
+import CreateMultisigModal from '../modals/CreateMultisigModal'
 
 type NoMultisigsScreenProps = {
   isBusy?: boolean
-  onCreate: (event: GestureResponderEvent) => void
-  onImport: (event: GestureResponderEvent) => void
 }
 
-export function NoMultisigsScreen({ isBusy, onCreate, onImport }: NoMultisigsScreenProps) {
+export function NoMultisigsScreen({ isBusy }: NoMultisigsScreenProps) {
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
+  const [isCreatingModalOpen, setIsCreatingModalOpen] = useState(false)
+  
   return (
+    <View className="flex-1">
     <View className="flex-1 px-5 pt-8">
       <View className="flex-1 justify-center">
         <View className="items-center">
@@ -25,7 +29,7 @@ export function NoMultisigsScreen({ isBusy, onCreate, onImport }: NoMultisigsScr
 
         <View className="mt-10 gap-3">
           <Pressable
-            onPress={onCreate}
+            onPress={() => setIsCreatingModalOpen(true)}
             disabled={isBusy}
             className="h-14 flex-row items-center justify-center rounded-lg bg-black px-5 active:bg-black/80"
           >
@@ -34,7 +38,7 @@ export function NoMultisigsScreen({ isBusy, onCreate, onImport }: NoMultisigsScr
           </Pressable>
 
           <Pressable
-            onPress={onImport}
+            onPress={() => setIsImportModalOpen(true)}
             disabled={isBusy}
             className="h-14 flex-row items-center justify-center rounded-lg border border-black/15 bg-white px-5 active:bg-black/5"
           >
@@ -43,6 +47,15 @@ export function NoMultisigsScreen({ isBusy, onCreate, onImport }: NoMultisigsScr
           </Pressable>
         </View>
       </View>
+    </View>
+    <ImportMultisigModal
+      visible={isImportModalOpen}
+      onClose={() => setIsImportModalOpen(false)}
+    />
+    <CreateMultisigModal
+      visible={isCreatingModalOpen}
+      onClose={() => setIsCreatingModalOpen(false)}
+    />
     </View>
   )
 }

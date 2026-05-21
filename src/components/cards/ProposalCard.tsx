@@ -5,19 +5,19 @@ type ProposalCardProps = {
   proposal: SquadsProposalSummary
   threshold: number
   isBusy?: boolean
-  onApproveProposal: (proposal: SquadsProposalSummary) => void
-  onExecuteProposal: (proposal: SquadsProposalSummary) => void
 }
 
 export function ProposalCard({
   proposal,
   threshold,
   isBusy,
-  onApproveProposal,
-  onExecuteProposal,
 }: ProposalCardProps) {
   const canApprove = proposal.status === 'Active' && !proposal.hasApproved
   const canExecute = proposal.status === 'Approved' || proposal.approvals >= threshold
+
+  const vote = () => {
+    Alert.alert('Vote', `You voted to approve proposal "${proposal.title}".`)
+  }
 
   return (
     <View className="my-2 rounded-lg border border-black/10 bg-white p-4">
@@ -41,7 +41,7 @@ export function ProposalCard({
 
       <View className="mt-4 flex-row gap-3">
         <Pressable
-          onPress={() => (canApprove ? onApproveProposal(proposal) : Alert.alert('Approval unavailable'))}
+          //onPress={() => (canApprove ? vote(proposal) : Alert.alert('Approval unavailable'))}
           disabled={isBusy || !canApprove}
           className={`h-11 flex-1 items-center justify-center rounded-lg border border-black/15 ${canApprove ? 'bg-white active:bg-black/5' : 'bg-black/5'}`}
         >
@@ -50,13 +50,13 @@ export function ProposalCard({
           </Text>
         </Pressable>
 
-        <Pressable
-          onPress={() => (canExecute ? onExecuteProposal(proposal) : Alert.alert('Not ready to execute'))}
-          disabled={isBusy || !canExecute}
-          className={`h-11 flex-1 items-center justify-center rounded-lg ${canExecute ? 'bg-black active:bg-black/80' : 'bg-black/10'}`}
-        >
-          <Text className={`text-sm font-bold ${canExecute ? 'text-white' : 'text-black/35'}`}>Execute</Text>
-        </Pressable>
+            {/* <Pressable
+              onPress={() => (canExecute ? onExecuteProposal(proposal) : Alert.alert('Not ready to execute'))}
+              disabled={isBusy || !canExecute}
+              className={`h-11 flex-1 items-center justify-center rounded-lg ${canExecute ? 'bg-black active:bg-black/80' : 'bg-black/10'}`}
+            >
+              <Text className={`text-sm font-bold ${canExecute ? 'text-white' : 'text-black/35'}`}>Execute</Text>
+            </Pressable> */}
       </View>
     </View>
   )

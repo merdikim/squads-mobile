@@ -1,0 +1,3 @@
+export const APP_NAME = 'Squads'
+export const RPC_URL = 'https://api.mainnet-beta.solana.com'
+export const EXPLORER_URL = 'https://explorer.solana.com/?cluster=devnet'

@@ -50,3 +50,7 @@ export async function saveMultisigToStorage(multisig: Omit<StoredMultisig, 'impo
 
   return nextMultisig
 }
+
+export async function clearMultisigsFromStorage() {
+  await AsyncStorage.removeItem(MULTISIGS_STORAGE_KEY)
+}

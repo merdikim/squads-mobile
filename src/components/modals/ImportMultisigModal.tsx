@@ -1,67 +1,47 @@
-import { isAddress } from '@solana/kit'
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, Text, TextInput, View } from 'react-native'
-import type { MultisigListItem } from '../../hooks/useMultisigs'
+import { ActivityIndicator, Modal, Pressable, Text, TextInput, View } from 'react-native'
+import useImportMultisig from '../../hooks/useImportMultisig'
+import { ImportableSquadsMultisig, MultisigListItem } from '../../types'
+import { Accessibility } from 'lucide-react-native'
 
 type ImportMultisigModalProps = {
   visible: boolean
-  existingAddresses: string[]
   onClose: () => void
-  onImport: (address: string) => Promise<MultisigListItem>
 }
 
-export function ImportMultisigModal({ visible, existingAddresses, onClose, onImport }: ImportMultisigModalProps) {
+export function ImportMultisigModal({ visible, onClose }: ImportMultisigModalProps) {
   const [address, setAddress] = useState('')
-  const [addressError, setAddressError] = useState('')
-  const [importedMultisig, setImportedMultisig] = useState<MultisigListItem>()
-  const [isImporting, setIsImporting] = useState(false)
+  const [importedMultisig, setImportedMultisig] = useState<ImportableSquadsMultisig | undefined>()
+  const { isImporting, setIsImporting, multisigError, setMultisigError, handleImportMultisig , handleSaveMultisig} = useImportMultisig(address)
 
   useEffect(() => {
     if (!visible) {
       setAddress('')
-      setAddressError('')
+      setMultisigError('')
       setImportedMultisig(undefined)
       setIsImporting(false)
     }
   }, [visible])
 
-  const validateAddress = (value: string) => {
-    const trimmedAddress = value.trim()
-
-    if (!trimmedAddress) {
-      return 'Solana address is required.'
-    }
-
-    if (!isAddress(trimmedAddress)) {
-      return 'Enter a valid Solana address.'
-    }
-
-    if (existingAddresses.includes(trimmedAddress)) {
-      return 'This multisig has already been imported.'
-    }
-
-    return ''
-  }
 
   const handleImport = async () => {
-    const nextAddressError = validateAddress(address)
-
-    setAddressError(nextAddressError)
-    setImportedMultisig(undefined)
-
-    if (nextAddressError) {
-      return
-    }
-
-    setIsImporting(true)
-
     try {
-      const multisig = await onImport(address.trim())
+      const multisig = await handleImportMultisig(address.trim())
       setImportedMultisig(multisig)
     } catch (error) {
-      setAddressError(error instanceof Error ? error.message : 'Unable to import this multisig.')
+      setMultisigError(error instanceof Error ? error.message : 'Unable to import this multisig.')
     } finally {
       setIsImporting(false)
+    }
+  }
+
+  const handleDone = async () => {
+    if (!importedMultisig) return
+    try {
+      await handleSaveMultisig(importedMultisig)
+      onClose()
+    } catch (error) {
+      setMultisigError(error instanceof Error ? error.message : 'Unable to save this multisig.')
     }
   }
 
@@ -81,9 +61,7 @@ export function ImportMultisigModal({ visible, existingAddresses, onClose, onImp
               onChangeText={(value) => {
                 setAddress(value)
                 setImportedMultisig(undefined)
-                if (addressError) {
-                  setAddressError(validateAddress(value))
-                }
+                setMultisigError('')
               }}
               autoCapitalize="none"
               autoCorrect={false}
@@ -91,7 +69,7 @@ export function ImportMultisigModal({ visible, existingAddresses, onClose, onImp
               placeholderTextColor="rgba(0,0,0,0.35)"
               className="mt-2 min-h-12 rounded-lg border border-black/15 px-3 text-sm text-black"
             />
-            {addressError ? <Text className="mt-2 text-xs font-bold text-red-600">{addressError}</Text> : null}
+            {multisigError ? <Text className="mt-2 text-xs font-bold text-red-600">{multisigError}</Text> : null}
           </View>
 
           {importedMultisig ? (
@@ -112,13 +90,17 @@ export function ImportMultisigModal({ visible, existingAddresses, onClose, onImp
               <Text className="text-base font-bold text-black">Cancel</Text>
             </Pressable>
             <Pressable
-              onPress={importedMultisig ? onClose : () => void handleImport()}
+              onPress={importedMultisig ? handleDone : () => void handleImport()}
               disabled={isImporting}
               className="h-12 flex-1 items-center justify-center rounded-lg bg-black active:bg-black/80"
             >
-              <Text className="text-base font-bold text-white">
-                {importedMultisig ? 'Done' : isImporting ? 'Importing...' : 'Import'}
-              </Text>
+              { isImporting ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text className="text-base font-bold text-white">
+                  {importedMultisig ? 'Done' : 'Import'}
+                </Text>
+              )}
             </Pressable>
           </View>
         </Pressable>
