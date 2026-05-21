@@ -1,9 +1,10 @@
-import { Alert, Image, Pressable, ScrollView, Text, View } from 'react-native'
-import { createSolTransferProposal, shortenAddress, type SquadsProposalSummary } from '../../lib/squads'
+import { ScrollView } from 'react-native'
+import type { SquadsProposalData } from '../../types'
+import { EmptyMenuState } from '../home-screen/EmptyMenuState'
 import { ProposalCard } from './ProposalCard'
 
 type ProposalsMenuProps = {
-  proposals: SquadsProposalSummary[]
+  proposals: SquadsProposalData[]
   threshold: number
   isBusy?: boolean
 }
@@ -15,15 +16,7 @@ export function ProposalsMenu({
   isBusy,
 }: ProposalsMenuProps) {
   if (proposals.length === 0) {
-    return (
-      <View className="mt-5 min-h-56 items-center justify-center">
-        <View className="flex-row items-center justify-center">
-          <Image source={require('../../assets/logo.png')} className="mr-4 h-6 w-6" />
-          <Text className="text-xl font-black text-black">No Proposals</Text>
-        </View>
-        <Text className="mt-2 text-center text-sm leading-6 text-black/60">No proposals for this multisig yet.</Text>
-      </View>
-    )
+    return <EmptyMenuState title="No Proposals" description="No proposals for this multisig yet." />
   }
 
   return (

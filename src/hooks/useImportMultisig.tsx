@@ -1,5 +1,5 @@
 import { isAddress } from '@solana/kit'
-import { useMobileWallet } from '@wallet-ui/react-native-kit'
+import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { useState } from 'react'
 import useMultisigs from './useMultisigs'
 import { useQueryClient } from '@tanstack/react-query'

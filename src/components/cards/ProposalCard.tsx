@@ -1,28 +1,21 @@
-import { Alert, Pressable, Text, View } from 'react-native'
-import type { SquadsProposalSummary } from '../../lib/squads'
+import { Pressable, Text, View } from 'react-native'
+import type { SquadsProposalData } from '../../types'
 
 type ProposalCardProps = {
-  proposal: SquadsProposalSummary
+  proposal: SquadsProposalData
   threshold: number
   isBusy?: boolean
 }
 
-export function ProposalCard({
-  proposal,
-  threshold,
-  isBusy,
-}: ProposalCardProps) {
+export function ProposalCard({ proposal, threshold, isBusy }: ProposalCardProps) {
   const canApprove = proposal.status === 'Active' && !proposal.hasApproved
-  const canExecute = proposal.status === 'Approved' || proposal.approvals >= threshold
-
-  const vote = () => {
-    Alert.alert('Vote', `You voted to approve proposal "${proposal.title}".`)
-  }
 
   return (
     <View className="my-2 rounded-lg border border-black/10 bg-white p-4">
       <View className="flex-row items-start justify-between gap-3">
-        <Text className="flex-1 text-base font-black leading-6 text-black">{proposal.title}</Text>
+        <Text className="flex-1 text-base font-black leading-6 text-black">
+          Vault transaction #{proposal.transactionIndex.toString()}
+        </Text>
         <View className="rounded-md bg-black px-2 py-1">
           <Text className="text-xs font-bold text-white">{proposal.status}</Text>
         </View>
@@ -41,7 +34,7 @@ export function ProposalCard({
 
       <View className="mt-4 flex-row gap-3">
         <Pressable
-          //onPress={() => (canApprove ? vote(proposal) : Alert.alert('Approval unavailable'))}
+          //onPress={() => canApprove && vote(proposal)}
           disabled={isBusy || !canApprove}
           className={`h-11 flex-1 items-center justify-center rounded-lg border border-black/15 ${canApprove ? 'bg-white active:bg-black/5' : 'bg-black/5'}`}
         >
@@ -50,8 +43,8 @@ export function ProposalCard({
           </Text>
         </Pressable>
 
-            {/* <Pressable
-              onPress={() => (canExecute ? onExecuteProposal(proposal) : Alert.alert('Not ready to execute'))}
+        {/* <Pressable
+              onPress={() => canExecute && onExecuteProposal(proposal)}
               disabled={isBusy || !canExecute}
               className={`h-11 flex-1 items-center justify-center rounded-lg ${canExecute ? 'bg-black active:bg-black/80' : 'bg-black/10'}`}
             >

@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar'
 import { useEffect, useRef } from 'react'
 import { Animated, Easing, Image, Pressable, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useMobileWallet } from '@wallet-ui/react-native-kit'
+import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { ArrowRight } from 'lucide-react-native'
 import { router } from 'expo-router'
 

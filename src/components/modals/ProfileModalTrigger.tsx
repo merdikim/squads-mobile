@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Modal, Pressable, Text } from 'react-native'
-import { useMobileWallet } from '@wallet-ui/react-native-kit'
+import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { UserCircle } from 'lucide-react-native'
 
 export function ProfileModalTrigger() {
