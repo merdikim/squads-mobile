@@ -116,8 +116,8 @@ export default function HomeScreen() {
         <View className="p-4 flex-1">
           <View className=" h-48 w-full rounded-xl px-3 shadow-2xl">
             <View className="absolute inset-0 overflow-hidden rounded-xl border border-black/10 bg-white">
-              <View className="absolute -right-16 -top-12 h-36 w-36 rounded-full bg-black/2" />
-              <View className="absolute -bottom-2 -left-12 h-24 w-24 rounded-full bg-black/3" />
+              <View className="absolute -right-16 -top-12 h-36 w-36 rounded-xl bg-black/2" />
+              <View className="absolute -bottom-2 -left-12 h-24 w-24 rounded-xl bg-black/3" />
             </View>
 
             <View className="z-10 flex-row items-start justify-between">
@@ -131,7 +131,7 @@ export default function HomeScreen() {
                 button={<ImportMultisigButton onImport={importMultisig} />}
               />
 
-              <View className="h-10 flex-row items-center gap-1 rounded-md">
+              <View className="h-10 flex-row items-center gap-1 rounded-xl">
                 <UsersRound color="#090A0F" size={16} strokeWidth={2.4} />
                 {isMultisigLoading ? (
                   <MultisigDataSkeleton className="h-4 w-5" />
@@ -232,7 +232,7 @@ function ImportMultisigButton({ isBusy, onImport }: AddMultisigButtonProps) {
       {/* <Pressable
         onPress={onCreate}
         disabled={isBusy}
-        className="h-11 flex-row items-center justify-center rounded-md bg-black active:bg-black/80"
+        className="h-11 flex-row items-center justify-center rounded-xl bg-black active:bg-black/80"
       >
         <Plus color="#FFFFFF" size={16} strokeWidth={2} />
         <Text className="ml-2 text-sm font-black text-white">{isBusy ? 'Working...' : 'Create Multisig'}</Text>
@@ -241,7 +241,7 @@ function ImportMultisigButton({ isBusy, onImport }: AddMultisigButtonProps) {
       <Pressable
         onPress={onImport}
         disabled={isBusy}
-        className="h-11 flex-row items-center justify-center rounded-md border border-black/15 bg-white active:bg-black/5"
+        className="h-11 flex-row items-center justify-center rounded-xl border border-black/15 bg-white active:bg-black/5"
       >
         <Plus color="#FFFFFF" size={16} strokeWidth={2} />
         <Text className="text-sm font-black text-black">Import Multisig</Text>

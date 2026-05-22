@@ -103,7 +103,7 @@ export default function NoMultisigs() {
         <View className="flex-[0.75] justify-center gap-3">
           <Pressable
             onPress={() => setIsCreatingModalOpen(true)}
-            className="h-14 flex-row items-center justify-center rounded-lg bg-black px-5 active:bg-black/80"
+            className="h-14 flex-row items-center justify-center rounded-xl bg-black px-5 active:bg-black/80"
           >
             <Plus color="#FFFFFF" size={18} strokeWidth={2.4} />
             <Text className="ml-2 text-base font-black text-white">Create Multisig</Text>
@@ -111,7 +111,7 @@ export default function NoMultisigs() {
 
           <Pressable
             onPress={() => setIsImportModalOpen(true)}
-            className="h-14 flex-row items-center justify-center rounded-lg border border-black/15 bg-white px-5 active:bg-black/5"
+            className="h-14 flex-row items-center justify-center rounded-xl border border-black/15 bg-white px-5 active:bg-black/5"
           >
             <Upload color="#090A0F" size={18} strokeWidth={2.4} />
             <Text className="ml-2 text-base font-black text-black">Import Multisig</Text>

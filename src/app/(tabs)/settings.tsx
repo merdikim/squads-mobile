@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { LogOut, ShieldCheck, Trash2, WalletCards } from 'lucide-react-native'
+import { LogIn, LogOut, Trash2, WalletCards } from 'lucide-react-native'
 import { Toast } from 'toastify-react-native'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
@@ -17,7 +17,7 @@ import {
 import { shortenAddress } from '../../utils'
 
 export default function SettingsScreen() {
-  const { account, disconnect } = useMobileWallet()
+  const { account, connect, disconnect } = useMobileWallet()
   const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
   const { multisigs = [] } = useMultisigs(walletAddress)
@@ -37,12 +37,15 @@ export default function SettingsScreen() {
     Toast.success('Stored multisigs cleared.', 'bottom')
   }
 
-  const disconnectWallet = () => {
+  const handleWalletPress = () => {
+    if (!account) {
+      connect()
+      return
+    }
+
     disconnect()
     Toast.success('Wallet disconnected.', 'bottom')
   }
-
-  console.log(account)
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -94,7 +97,7 @@ export default function SettingsScreen() {
             </Text>
             <Pressable
               onPress={clearStoredMultisigs}
-              className="mt-4 h-12 flex-row items-center justify-center rounded-md border border-red-500/25 bg-red-50 active:bg-red-100"
+              className="mt-4 h-12 flex-row items-center justify-center rounded-xl border border-red-500/25 bg-red-50 active:bg-red-100"
             >
               <Trash2 color="#DC2626" size={16} strokeWidth={2.4} />
               <Text className="ml-2 text-sm font-black text-red-600">Clear Stored Multisigs</Text>
@@ -103,12 +106,17 @@ export default function SettingsScreen() {
 
           <View>
             <Pressable
-              onPress={disconnectWallet}
-              disabled={!account}
-              className="mt-20 h-12 flex-row items-center justify-center rounded-md bg-black active:bg-black/80 disabled:opacity-40"
+              onPress={handleWalletPress}
+              className="mt-20 h-12 flex-row items-center justify-center rounded-xl bg-black active:bg-black/80"
             >
-              <LogOut color="#FFFFFF" size={16} strokeWidth={2.4} />
-              <Text className="ml-2 text-sm font-black text-white">Disconnect Wallet</Text>
+              {account ? (
+                <LogOut color="#F87171" size={16} strokeWidth={2.4} />
+              ) : (
+                <LogIn color="#FFFFFF" size={16} strokeWidth={2.4} />
+              )}
+              <Text className={`ml-2 text-sm font-black ${account ? 'text-red-400' : 'text-white'}`}>
+                {account ? 'Disconnect Wallet' : 'Connect Wallet'}
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -146,7 +154,7 @@ function SettingsValueRow({
         <CopyText
           text={value}
           accessibilityLabel={copyLabel}
-          className="h-9 w-9 items-center justify-center rounded-md bg-white disabled:opacity-40"
+          className="h-9 w-9 items-center justify-center rounded-xl bg-white disabled:opacity-40"
         />
       ) : null}
     </View>

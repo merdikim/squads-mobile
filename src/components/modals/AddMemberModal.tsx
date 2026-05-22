@@ -79,7 +79,7 @@ export function AddMemberModal({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <Pressable className="flex-1 justify-end bg-black/30 px-4 pb-6" onPress={handleClose}>
-        <Pressable className="rounded-lg bg-white p-5" onPress={(event) => event.stopPropagation()}>
+        <Pressable className="rounded-xl bg-white p-5" onPress={(event) => event.stopPropagation()}>
           <View className="flex-row items-start justify-between gap-4">
             <View className="flex-1">
               <Text className="text-xl font-black text-black">Add Member</Text>
@@ -87,7 +87,7 @@ export function AddMemberModal({
             </View>
             <Pressable
               onPress={handleClose}
-              className="h-10 w-10 items-center justify-center rounded-md border border-black/10 active:bg-black/5"
+              className="h-10 w-10 items-center justify-center rounded-xl border border-black/10 active:bg-black/5"
             >
               <X color="#090A0F" size={17} strokeWidth={2.4} />
             </Pressable>
@@ -105,7 +105,7 @@ export function AddMemberModal({
               autoCorrect={false}
               placeholder="Enter member wallet address"
               placeholderTextColor="rgba(0,0,0,0.35)"
-              className="mt-2 min-h-12 rounded-lg border border-black/15 px-3 text-sm text-black"
+              className="mt-2 min-h-12 rounded-xl border border-black/15 px-3 text-sm text-black"
             />
             {error ? <Text className="mt-2 text-xs font-bold text-red-600">{error}</Text> : null}
           </View>
@@ -113,13 +113,13 @@ export function AddMemberModal({
           <View className="mt-6 flex-row gap-3">
             <Pressable
               onPress={handleClose}
-              className="h-12 flex-1 items-center justify-center rounded-lg border border-black/15 active:bg-black/5"
+              className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
             >
               <Text className="text-base font-bold text-black">Cancel</Text>
             </Pressable>
             <Pressable
               onPress={handleAddMember}
-              className="h-12 flex-1 items-center justify-center rounded-lg bg-black active:bg-black/80"
+              className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
             >
               { isAdding ? 
                 (

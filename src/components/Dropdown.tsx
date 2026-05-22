@@ -38,7 +38,7 @@ export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuM
 
       {isOpen ? (
         <View
-          className="absolute left-0 top-11 w-56 rounded-md border border-black/10 bg-white px-3 py-2 shadow-lg"
+          className="absolute left-0 top-11 w-56 rounded-xl border border-black/10 bg-white px-3 py-2 shadow-lg"
           style={menuMaxHeight ? { maxHeight: menuMaxHeight } : undefined}
         >
           <ScrollView showsVerticalScrollIndicator={false}>
@@ -46,7 +46,7 @@ export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuM
               <Pressable
                 key={item.key}
                 onPress={(event) => handleSelect(event, item.key)}
-                className="rounded-md px-2 py-2 active:bg-black/5"
+                className="rounded-xl px-2 py-2 active:bg-black/5"
               >
                 <Text className={`text-sm font-bold ${selectedKey === item.key ? 'text-black' : 'text-black/60'}`}>
                   {item.label}

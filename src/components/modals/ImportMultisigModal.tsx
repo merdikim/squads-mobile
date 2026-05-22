@@ -48,7 +48,7 @@ export function ImportMultisigModal({ visible, onClose }: ImportMultisigModalPro
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable className="flex-1 justify-end bg-black/30 px-4 pb-6" onPress={onClose}>
-        <Pressable className="rounded-lg bg-white p-5" onPress={(event) => event.stopPropagation()}>
+        <Pressable className="rounded-xl bg-white p-5" onPress={(event) => event.stopPropagation()}>
           <Text className="text-xl font-black text-black">Import Multisig</Text>
           <Text className="mt-2 text-sm leading-6 text-black/60">
             Enter the Squads multisig account. We will fetch the account before saving it.
@@ -67,13 +67,13 @@ export function ImportMultisigModal({ visible, onClose }: ImportMultisigModalPro
               autoCorrect={false}
               placeholder="Enter multisig"
               placeholderTextColor="rgba(0,0,0,0.35)"
-              className="mt-2 min-h-12 rounded-lg border border-black/15 px-3 text-sm text-black"
+              className="mt-2 min-h-12 rounded-xl border border-black/15 px-3 text-sm text-black"
             />
             {multisigError ? <Text className="mt-2 text-xs font-bold text-red-600">{multisigError}</Text> : null}
           </View>
 
           {importedMultisig ? (
-            <View className="mt-4 rounded-lg border border-black/10 bg-black/5 p-3">
+            <View className="mt-4 rounded-xl border border-black/10 bg-black/5 p-3">
               <Text className="text-xs font-bold uppercase text-black/45">Imported</Text>
               <Text className="mt-1 text-base font-black text-black">{importedMultisig.name}</Text>
               <Text className="mt-1 text-sm text-black/55">
@@ -85,14 +85,14 @@ export function ImportMultisigModal({ visible, onClose }: ImportMultisigModalPro
           <View className="mt-6 flex-row gap-3">
             <Pressable
               onPress={onClose}
-              className="h-12 flex-1 items-center justify-center rounded-lg border border-black/15 active:bg-black/5"
+              className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
             >
               <Text className="text-base font-bold text-black">Cancel</Text>
             </Pressable>
             <Pressable
               onPress={importedMultisig ? handleDone : () => void handleImport()}
               disabled={isImporting}
-              className="h-12 flex-1 items-center justify-center rounded-lg bg-black active:bg-black/80"
+              className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
             >
               { isImporting ? (
                 <ActivityIndicator size="small" color="#fff" />

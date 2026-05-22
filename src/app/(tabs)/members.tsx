@@ -53,7 +53,7 @@ export default function MembersScreen() {
             <View className="flex-row items-center gap-3">
               <Pressable
                 onPress={() => setIsAddMemberModalOpen(true)}
-                className="h-10 w-10 items-center justify-center rounded-md bg-black active:bg-black/80"
+                className="h-10 w-10 items-center justify-center rounded-xl bg-black active:bg-black/80"
               >
                 <Plus color="#FFFFFF" size={17} strokeWidth={2.4} />
               </Pressable>
@@ -111,7 +111,7 @@ function MembersLoadingSkeleton() {
   return (
     <View className="mt-4 gap-3">
       {memberRows.map((_, index) => (
-        <View key={index} className="flex-row items-center gap-3 rounded-md border border-black/10 bg-white p-3">
+        <View key={index} className="flex-row items-center gap-3 rounded-xl border border-black/10 bg-white p-3">
           <MultisigDataSkeleton className="h-10 w-10" />
           <View className="flex-1">
             <MultisigDataSkeleton className="h-4 w-24" />
@@ -166,7 +166,7 @@ function MemberCard({
   }
 
   return (
-    <View className="overflow-hidden rounded-md">
+    <View className="overflow-hidden rounded-xl">
       <View className="absolute inset-y-0 right-0 w-18 items-center justify-center">
         <Pressable
           onPress={handleDelete}

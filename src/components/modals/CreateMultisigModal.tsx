@@ -58,7 +58,7 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable className="flex-1 justify-end bg-black/30 px-4 pb-6" onPress={onClose}>
-        <Pressable className="rounded-lg bg-white p-5" onPress={(event) => event.stopPropagation()}>
+        <Pressable className="rounded-xl bg-white p-5" onPress={(event) => event.stopPropagation()}>
           <View className="flex-row items-start justify-between gap-4">
             <View className="flex-1">
               <Text className="text-xl font-black text-black">Create Multisig</Text>
@@ -72,7 +72,7 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
             {step === 'members' ? (
               <Pressable
                 onPress={() => setStep('details')}
-                className="h-10 w-10 items-center justify-center rounded-md border border-black/10 active:bg-black/5"
+                className="h-10 w-10 items-center justify-center rounded-xl border border-black/10 active:bg-black/5"
               >
                 <ArrowLeft color="#090A0F" size={17} strokeWidth={2.4} />
               </Pressable>
@@ -89,14 +89,14 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
                   autoCapitalize="words"
                   placeholder="Enter multisig name"
                   placeholderTextColor="rgba(0,0,0,0.35)"
-                  className="mt-2 min-h-12 rounded-lg border border-black/15 px-3 text-sm text-black"
+                  className="mt-2 min-h-12 rounded-xl border border-black/15 px-3 text-sm text-black"
                 />
               </View>
 
               <View>
                 <Text className="text-sm font-bold text-black">Image</Text>
                 <View className="mt-2 flex-row items-center gap-3">
-                  <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-lg border border-black/10 bg-black/5">
+                  <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-xl border border-black/10 bg-black/5">
                     {imageUri.trim() ? (
                       <Image source={{ uri: imageUri.trim() }} className="h-full w-full" resizeMode="cover" />
                     ) : (
@@ -110,7 +110,7 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
                     autoCorrect={false}
                     placeholder="Enter image URL"
                     placeholderTextColor="rgba(0,0,0,0.35)"
-                    className="min-h-12 flex-1 rounded-lg border border-black/15 px-3 text-sm text-black"
+                    className="min-h-12 flex-1 rounded-xl border border-black/15 px-3 text-sm text-black"
                   />
                 </View>
               </View>
@@ -126,11 +126,11 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
                     autoCorrect={false}
                     placeholder="Enter member address"
                     placeholderTextColor="rgba(0,0,0,0.35)"
-                    className="min-h-12 flex-1 rounded-lg border border-black/15 px-3 text-sm text-black"
+                    className="min-h-12 flex-1 rounded-xl border border-black/15 px-3 text-sm text-black"
                   />
                   <Pressable
                     onPress={() => removeMember(index)}
-                    className="h-12 w-12 items-center justify-center rounded-lg border border-black/10 active:bg-black/5"
+                    className="h-12 w-12 items-center justify-center rounded-xl border border-black/10 active:bg-black/5"
                   >
                     <X color="#090A0F" size={17} strokeWidth={2.4} />
                   </Pressable>
@@ -139,7 +139,7 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
 
               <Pressable
                 onPress={addMember}
-                className="h-12 flex-row items-center justify-center rounded-lg border border-black/15 active:bg-black/5"
+                className="h-12 flex-row items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
               >
                 <Plus color="#090A0F" size={17} strokeWidth={2.4} />
                 <Text className="ml-2 text-sm font-black text-black">Add Member</Text>
@@ -150,14 +150,14 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
           <View className="mt-6 flex-row gap-3">
             <Pressable
               onPress={onClose}
-              className="h-12 flex-1 items-center justify-center rounded-lg border border-black/15 active:bg-black/5"
+              className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
             >
               <Text className="text-base font-bold text-black">Cancel</Text>
             </Pressable>
             <Pressable
               onPress={step === 'details' ? () => setStep('members') : handleCreate}
               disabled={step === 'details' && !canGoNext}
-              className={`h-12 flex-1 items-center justify-center rounded-lg ${
+              className={`h-12 flex-1 items-center justify-center rounded-xl ${
                 step === 'details' && !canGoNext ? 'bg-black/25' : 'bg-black active:bg-black/80'
               }`}
             >

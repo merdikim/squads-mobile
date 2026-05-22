@@ -15,7 +15,7 @@ type CopyTextProps = {
 export function CopyText({
   text,
   accessibilityLabel = 'Copy text',
-  className = 'h-8 w-8 items-center justify-center rounded-md disabled:opacity-40',
+  className = 'h-8 w-8 items-center justify-center rounded-xl disabled:opacity-40',
   iconColor = 'rgba(0,0,0,0.45)',
   iconSize = 14,
   successDurationMs = 2000,
