@@ -13,10 +13,9 @@ type ProposalsMenuProps = {
 export function ProposalsMenu({
   proposals,
   threshold,
-  isBusy,
 }: ProposalsMenuProps) {
   if (proposals.length === 0) {
-    return <EmptyMenuState title="No Proposals" description="No proposals for this multisig yet." />
+    return <EmptyMenuState title="No active proposals" />
   }
 
   return (
@@ -26,7 +25,6 @@ export function ProposalsMenu({
           key={proposal.address}
           proposal={proposal}
           threshold={threshold}
-          isBusy={isBusy}
         />
       ))}
     </ScrollView>

@@ -10,6 +10,7 @@ import useMultisig from '../../hooks/useMultisig'
 import useMultisigs from '../../hooks/useMultisigs'
 import { getSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 import { shortenAddress } from '../../utils'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const DELETE_REVEAL_WIDTH = 72
 
@@ -37,6 +38,7 @@ export default function MembersScreen() {
   }
 
   return (
+    <SafeAreaView style={{ flex:1 }}>
     <ScrollView style={{ flex: 1 }}>
       <View className="flex-1 px-6 py-8">
           <View className="flex-row items-center justify-between gap-3">
@@ -90,6 +92,7 @@ export default function MembersScreen() {
         }}
       />
     </ScrollView>
+    </SafeAreaView>
   )
 }
 

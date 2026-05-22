@@ -1,13 +1,13 @@
 import { Text, View } from 'react-native'
 import { EmptyMenuState } from './EmptyMenuState'
 
-type AssetsMenuProps = {
+type CoinsMenuProps = {
   assets?: unknown[]
 }
 
-export function AssetsMenu({ assets = [] }: AssetsMenuProps) {
+export function CoinsMenu({ assets = [] }: CoinsMenuProps) {
   if (assets.length === 0) {
-    return <EmptyMenuState title="No Assets" description="No assets for this multisig yet." />
+    return <EmptyMenuState title="No coins found" />
   }
 
   return (

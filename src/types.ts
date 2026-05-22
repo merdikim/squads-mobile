@@ -6,7 +6,7 @@ export type AddMultisigButtonProps = {
   onImport: (event: GestureResponderEvent) => void
 }
 
-export type MenuItem = 'Proposals' | 'Assets' | 'NFTs'
+export type MenuItem = 'Proposals' | 'Coins' | 'NFTs'
 
 export type MultisigListItem = {
   name: string

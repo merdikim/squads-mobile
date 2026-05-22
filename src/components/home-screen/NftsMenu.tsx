@@ -7,7 +7,7 @@ type NftsMenuProps = {
 
 export function NftsMenu({ nfts = [] }: NftsMenuProps) {
   if (nfts.length === 0) {
-    return <EmptyMenuState title="No NFTs" description="No NFTs for this multisig yet." />
+    return <EmptyMenuState title="No NFTs found" />
   }
 
   return (

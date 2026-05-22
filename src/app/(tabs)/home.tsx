@@ -1,14 +1,14 @@
 import { StatusBar } from 'expo-status-bar'
-import * as Clipboard from 'expo-clipboard'
 import { useEffect, useState } from 'react'
 import { GestureResponderEvent, Pressable, Text, View } from 'react-native'
-import { Copy, RefreshCw, Trash2, UsersRound, Plus } from 'lucide-react-native'
+import { RefreshCw, Trash2, UsersRound, Plus } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Toast } from 'toastify-react-native'
+import { CopyText } from '../../components/CopyText'
 import { Dropdown } from '../../components/Dropdown'
 import { ProposalsMenu } from '../../components/cards/ProposalsMenu'
-import { AssetsMenu } from '../../components/home-screen/AssetsMenu'
+import { CoinsMenu } from '../../components/home-screen/CoinsMenu'
 import { NftsMenu } from '../../components/home-screen/NftsMenu'
 import { MultisigDataSkeleton, MultisigMenuSkeleton } from '../../components/home-screen/MultisigDataSkeleton'
 import { ImportMultisigModal } from '../../components/modals/ImportMultisigModal'
@@ -22,27 +22,25 @@ import useMultisigs from '../../hooks/useMultisigs'
 import { AddMultisigButtonProps, MenuItem, SquadsMultisigData } from '../../types'
 import useMultisig from '../../hooks/useMultisig'
 import { formatSol, shortenAddress } from '../../utils'
-import NoMultisigs from '../../components/home-screen/NoMultisigs'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
-const menuItems: MenuItem[] = ['Proposals', 'Assets', 'NFTs']
+const menuItems: MenuItem[] = ['Proposals', 'Coins', 'NFTs']
 
 function MenuContent({
   selectedMenuItem,
   multisigData,
-  isBusy,
   isLoading,
 }: {
   selectedMenuItem: MenuItem
   multisigData?: SquadsMultisigData | null
-  isBusy?: boolean
   isLoading?: boolean
 }) {
   if (isLoading) {
     return <MultisigMenuSkeleton />
   }
 
-  if (selectedMenuItem === 'Assets') {
-    return <AssetsMenu />
+  if (selectedMenuItem === 'Coins') {
+    return <CoinsMenu />
   }
 
   if (selectedMenuItem === 'NFTs') {
@@ -50,7 +48,7 @@ function MenuContent({
   }
 
   return (
-    <ProposalsMenu proposals={multisigData?.proposals ?? []} threshold={multisigData?.threshold ?? 1} isBusy={isBusy} />
+    <ProposalsMenu proposals={multisigData?.proposals ?? []} threshold={multisigData?.threshold ?? 1}/>
   )
 }
 
@@ -68,7 +66,6 @@ export default function HomeScreen() {
   })
   const [selectedMultisigKey, setSelectedMultisigKey] = useState('')
   const { multisigData, isMultisigLoading, refetchMultisigData } = useMultisig(selectedMultisigKey, walletAddress)
-  const isBusy = false
   const selectedMultisig = multisigs.find((multisig) => multisig.address === selectedMultisigKey)
   const multisigDropdownItems = multisigs.map((multisig) => ({
     key: multisig.address,
@@ -103,18 +100,7 @@ export default function HomeScreen() {
     setIsImportModalOpen(true)
   }
 
-  const copyAddress = async (address: string, label: string, event: GestureResponderEvent) => {
-    event.stopPropagation()
-
-    if (!address) {
-      return
-    }
-
-    await Clipboard.setStringAsync(address)
-    Toast.success(`${label} copied to clipboard.`, 'top')
-  }
-
-  const clearStoredMultisigs = async() => {
+  const clearStoredMultisigs = async () => {
     setIsDropdownOpen(false)
     await clearMultisigsFromStorage()
     await clearSelectedMultisigAddress()
@@ -124,18 +110,14 @@ export default function HomeScreen() {
     Toast.success('Stored multisigs cleared.', 'bottom')
   }
 
-  if (!isMultisigsLoading && multisigs.length === 0) {
-    return <NoMultisigs/>
-  }
-
   return (
-    <>
+    <SafeAreaView style={{ flex: 1 }}>
       <Pressable className="flex-1" onPress={() => setIsDropdownOpen(false)}>
-        <View className="p-4">
-          <View className="mt-4 h-48 w-full rounded-xl px-3 shadow-2xl">
-            <View className="absolute inset-0 overflow-hidden rounded-xl border border-black/20 bg-white">
-              <View className="absolute -right-16 -top-12 h-40 w-40 rounded-full bg-black/3" />
-              <View className="absolute -bottom-20 -left-12 h-48 w-48 rounded-full bg-black/3" />
+        <View className="p-4 flex-1">
+          <View className=" h-48 w-full rounded-xl px-3 shadow-2xl">
+            <View className="absolute inset-0 overflow-hidden rounded-xl border border-black/10 bg-white">
+              <View className="absolute -right-16 -top-12 h-36 w-36 rounded-full bg-black/2" />
+              <View className="absolute -bottom-2 -left-12 h-24 w-24 rounded-full bg-black/3" />
             </View>
 
             <View className="z-10 flex-row items-start justify-between">
@@ -146,7 +128,7 @@ export default function HomeScreen() {
                 onToggle={() => setIsDropdownOpen((value) => !value)}
                 onSelect={selectMultisig}
                 menuMaxHeight={260}
-                button={<ImportMultisigButton isBusy={isBusy} onImport={importMultisig} />}
+                button={<ImportMultisigButton onImport={importMultisig} />}
               />
 
               <View className="h-10 flex-row items-center gap-1 rounded-md">
@@ -168,21 +150,19 @@ export default function HomeScreen() {
                 </View>
               ) : (
                 <>
-                  <Text className="text-sm font-bold uppercase text-black/45">Assets balance</Text>
+                  <Text className="text-xs font-semibold text-black/45">Total Balance</Text>
                   <Text className="mt-3 text-center text-4xl font-black text-black">{selectedBalance}</Text>
                   {multisigData ? (
-                    <View className="mt-2 flex-row items-center justify-center gap-2">
+                    <View className="mt-2 flex-row items-center justify-center">
                       <Text className="text-xs font-bold text-black/45">
                         Vault {shortenAddress(multisigData.vaultAddress)}
                       </Text>
-                      <Pressable
-                        onPress={(event) => copyAddress(multisigData.vaultAddress, 'Vault address', event)}
-                        className="h-7 w-7 items-center justify-center rounded-md border border-black/10 active:bg-black/5"
-                        accessibilityRole="button"
+                      <CopyText
+                        text={multisigData.vaultAddress}
                         accessibilityLabel="Copy vault address"
-                      >
-                        <Copy color="rgba(0,0,0,0.45)" size={13} strokeWidth={2.4} />
-                      </Pressable>
+                        className="h-7 w-7 items-center justify-center disabled:opacity-40"
+                        iconSize={13}
+                      />
                     </View>
                   ) : null}
                 </>
@@ -190,42 +170,31 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          <View className="mt-4 flex-row items-center justify-between gap-3">
+          <View className="mt-4 flex-row items-center justify-between gap-3 px-2">
             {isMultisigLoading ? (
               <MultisigDataSkeleton className="h-4 flex-1" />
             ) : (
-              <View className="flex-1 flex-row items-center gap-2">
+              <View className="flex-1 flex-row items-center">
                 <Text className="shrink text-xs font-bold text-black/45" numberOfLines={2}>
                   {`Account ${shortenAddress(selectedMultisigKey)}`}
                 </Text>
-                <Pressable
-                  onPress={(event) => copyAddress(selectedMultisigKey, 'Account address', event)}
-                  disabled={!selectedMultisigKey}
-                  className="h-8 w-8 items-center justify-center rounded-md border border-black/10 active:bg-black/5 disabled:opacity-40"
-                  accessibilityRole="button"
-                  accessibilityLabel="Copy account address"
-                >
-                  <Copy color="rgba(0,0,0,0.45)" size={14} strokeWidth={2.4} />
-                </Pressable>
+                <CopyText text={selectedMultisigKey} accessibilityLabel="Copy account address" />
               </View>
             )}
             <Pressable
               onPress={() => void refetchMultisigData()}
-              disabled={isBusy || !selectedMultisigKey}
-              className="h-10 w-10 items-center justify-center rounded-md border border-black/10 active:bg-black/5"
+              disabled={!selectedMultisigKey}
             >
               <RefreshCw color="#090A0F" size={16} strokeWidth={2.4} />
             </Pressable>
-            <Pressable
+            {/* <Pressable
               onPress={clearStoredMultisigs}
-              disabled={isBusy}
-              className="h-10 w-10 items-center justify-center rounded-md border border-red-500/25 bg-red-50 active:bg-red-100"
             >
               <Trash2 color="#DC2626" size={16} strokeWidth={2.4} />
-            </Pressable>
+            </Pressable> */}
           </View>
 
-          <View className="mt-5 flex-row rounded-lg border border-black/10 bg-white p-1">
+          <View className="mt-4 flex-row p-1 gap-4">
             {menuItems.map((item) => {
               const isSelected = selectedMenuItem === item
 
@@ -233,9 +202,16 @@ export default function HomeScreen() {
                 <Pressable
                   key={item}
                   onPress={() => setSelectedMenuItem(item)}
-                  className={`h-11 flex-1 items-center justify-center rounded-md ${isSelected ? 'bg-black' : 'bg-white active:bg-black/5'}`}
+                  className="h-11 flex-1 items-center justify-end"
                 >
-                  <Text className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-black/60'}`}>{item}</Text>
+                  <Text className={`mb-2 text-sm font-semibold ${isSelected ? 'text-black font-extrabold' : 'text-black/60'}`}>{item}</Text>
+                  <View
+                    className="w-full"
+                    style={{
+                      height: isSelected ? 4 : 2,
+                      backgroundColor: isSelected ? '#000000' : 'rgba(0, 0, 0, 0.1)',
+                    }}
+                  />
                 </Pressable>
               )
             })}
@@ -244,7 +220,6 @@ export default function HomeScreen() {
           <MenuContent
             selectedMenuItem={selectedMenuItem}
             multisigData={multisigData}
-            isBusy={isBusy}
             isLoading={isMultisigLoading}
           />
         </View>
@@ -252,7 +227,7 @@ export default function HomeScreen() {
         <StatusBar style="dark" />
       </Pressable>
       <ImportMultisigModal visible={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} />
-    </>
+    </SafeAreaView>
   )
 }
 
