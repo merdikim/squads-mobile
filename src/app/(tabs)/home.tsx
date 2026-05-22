@@ -4,7 +4,7 @@ import { GestureResponderEvent, Pressable, Text, View } from 'react-native'
 import { RefreshCw, UsersRound, Plus } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Toast } from 'toastify-react-native'
+import { router } from 'expo-router'
 import { CopyText } from '../../components/CopyText'
 import { Dropdown } from '../../components/Dropdown'
 import { ProposalsMenu } from '../../components/cards/ProposalsMenu'
@@ -12,9 +12,7 @@ import { CoinsMenu } from '../../components/home-screen/CoinsMenu'
 import { NftsMenu } from '../../components/home-screen/NftsMenu'
 import { MultisigDataSkeleton, MultisigMenuSkeleton } from '../../components/home-screen/MultisigDataSkeleton'
 import { ImportMultisigModal } from '../../components/modals/ImportMultisigModal'
-import { clearMultisigsFromStorage } from '../../lib/multisigStorage'
 import {
-  clearSelectedMultisigAddress,
   getSelectedMultisigAddress,
   saveSelectedMultisigAddress,
 } from '../../lib/selectedMultisigStorage'
@@ -56,7 +54,7 @@ export default function HomeScreen() {
   const { account } = useMobileWallet()
   const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
-  const { multisigs = [] } = useMultisigs(walletAddress)
+  const { multisigs = [], isMultisigsLoading } = useMultisigs()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>('Proposals')
@@ -75,7 +73,27 @@ export default function HomeScreen() {
   const selectedParticipants = multisigData?.members.length ?? 0
 
   useEffect(() => {
-    if (!isSelectedMultisigFetched || selectedMultisigKey || multisigs.length === 0) {
+    if (!isMultisigsLoading && multisigs.length === 0) {
+      router.replace('/')
+    }
+  }, [isMultisigsLoading, multisigs.length])
+
+  useEffect(() => {
+    if (!isSelectedMultisigFetched) {
+      return
+    }
+
+    if (multisigs.length === 0) {
+      if (selectedMultisigKey) {
+        setSelectedMultisigKey('')
+      }
+
+      return
+    }
+
+    const selectedMultisigExists = multisigs.some((multisig) => multisig.address === selectedMultisigKey)
+
+    if (selectedMultisigKey && selectedMultisigExists) {
       return
     }
 
@@ -83,8 +101,11 @@ export default function HomeScreen() {
     const nextSelection = storedSelection?.address ?? multisigs[0].address
 
     setSelectedMultisigKey(nextSelection)
-    queryClient.setQueryData(['selectedMultisigAddress'], nextSelection)
-    void saveSelectedMultisigAddress(nextSelection)
+
+    if (storedSelectedMultisigKey !== nextSelection) {
+      queryClient.setQueryData(['selectedMultisigAddress'], nextSelection)
+      void saveSelectedMultisigAddress(nextSelection)
+    }
   }, [isSelectedMultisigFetched, multisigs, queryClient, selectedMultisigKey, storedSelectedMultisigKey])
 
   const selectMultisig = (publicKey: string) => {
@@ -98,16 +119,6 @@ export default function HomeScreen() {
     event.stopPropagation()
     setIsDropdownOpen(false)
     setIsImportModalOpen(true)
-  }
-
-  const clearStoredMultisigs = async () => {
-    setIsDropdownOpen(false)
-    await clearMultisigsFromStorage()
-    await clearSelectedMultisigAddress()
-    setSelectedMultisigKey('')
-    queryClient.setQueryData(['selectedMultisigAddress'], '')
-    await queryClient.invalidateQueries({ queryKey: ['multisigs', walletAddress] })
-    Toast.success('Stored multisigs cleared.', 'bottom')
   }
 
   return (

@@ -2,13 +2,12 @@ import { StatusBar } from 'expo-status-bar'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { LogIn, LogOut, Trash2, WalletCards } from 'lucide-react-native'
-import { Toast } from 'toastify-react-native'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { CopyText } from '../../components/CopyText'
 import { MultisigDataSkeleton } from '../../components/home-screen/MultisigDataSkeleton'
 import useMultisig from '../../hooks/useMultisig'
-import useMultisigs from '../../hooks/useMultisigs'
+import useMultisigs, { multisigsQueryKey } from '../../hooks/useMultisigs'
 import { clearMultisigsFromStorage } from '../../lib/multisigStorage'
 import {
   clearSelectedMultisigAddress,
@@ -20,7 +19,7 @@ export default function SettingsScreen() {
   const { account, connect, disconnect } = useMobileWallet()
   const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
-  const { multisigs = [] } = useMultisigs(walletAddress)
+  const { multisigs = [] } = useMultisigs()
   const { data: storedSelectedMultisigKey = '' } = useQuery({
     queryKey: ['selectedMultisigAddress'],
     queryFn: getSelectedMultisigAddress,
@@ -33,8 +32,7 @@ export default function SettingsScreen() {
     await clearMultisigsFromStorage()
     await clearSelectedMultisigAddress()
     queryClient.setQueryData(['selectedMultisigAddress'], '')
-    await queryClient.invalidateQueries({ queryKey: ['multisigs', walletAddress] })
-    Toast.success('Stored multisigs cleared.', 'bottom')
+    await queryClient.invalidateQueries({ queryKey: multisigsQueryKey })
   }
 
   const handleWalletPress = () => {
@@ -44,7 +42,6 @@ export default function SettingsScreen() {
     }
 
     disconnect()
-    Toast.success('Wallet disconnected.', 'bottom')
   }
 
   return (

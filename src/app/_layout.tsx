@@ -5,7 +5,6 @@ import { useFonts } from 'expo-font'
 import { AppIdentity, MobileWalletProvider } from '@wallet-ui/react-native-web3js'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import ToastManager from 'toastify-react-native'
 import { APP_NAME, RPC_URL } from '../constants'
 import { applyManropeFontDefaults, manropeFonts } from '../lib/fonts'
 
@@ -27,7 +26,6 @@ export default function Layout() {
       <SafeAreaProvider style={{ flex: 1 }}>
         <QueryClientProvider client={queryClient}>
           <Slot />
-          <ToastManager position="bottom" bottomOffset={72} duration={2600} useModal={false} showCloseIcon={false} />
         </QueryClientProvider>
       </SafeAreaProvider>
     </MobileWalletProvider>

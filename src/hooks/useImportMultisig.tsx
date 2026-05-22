@@ -1,16 +1,13 @@
 import { isAddress } from '@solana/kit'
-import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { useState } from 'react'
-import useMultisigs from './useMultisigs'
+import useMultisigs, { multisigsQueryKey } from './useMultisigs'
 import { useQueryClient } from '@tanstack/react-query'
 import { fetchImportableMultisig } from '../lib/squads'
 import { saveMultisigToStorage } from '../lib/multisigStorage'
 import { ImportableSquadsMultisig } from '../types'
 
 const useImportMultisig = (multisigAddress:string) => {
-    const { account } = useMobileWallet()
-    const address = account?.address.toString() ?? ''
-    const { multisigs = [] } = useMultisigs(address)
+    const { multisigs = [] } = useMultisigs()
     const [isImporting, setIsImporting] = useState(false)
     const [multisigError, setMultisigError] = useState('')
     const queryClient = useQueryClient()
@@ -47,7 +44,7 @@ const useImportMultisig = (multisigAddress:string) => {
     const handleSaveMultisig = async (multisig:ImportableSquadsMultisig) => {
         try {
             await saveMultisigToStorage({name: multisig.name, address: multisig.address})
-            await queryClient.invalidateQueries({ queryKey: ['multisigs', address] })
+            await queryClient.invalidateQueries({ queryKey: multisigsQueryKey })
         } catch (error) {
             setMultisigError(error instanceof Error ? error.message : 'Unable to import this multisig.')
         }

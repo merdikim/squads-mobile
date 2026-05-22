@@ -20,7 +20,7 @@ export default function MembersScreen() {
   const walletAddress = account?.address.toString()
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false)
   const [memberToDelete, setMemberToDelete] = useState('')
-  const { multisigs = [] } = useMultisigs(walletAddress ?? '')
+  const { multisigs = [] } = useMultisigs()
   const { data: storedSelectedMultisigKey = '' } = useQuery({
     queryKey: ['selectedMultisigAddress'],
     queryFn: getSelectedMultisigAddress,
