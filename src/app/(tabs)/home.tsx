@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
 import { GestureResponderEvent, Pressable, Text, View } from 'react-native'
-import { RefreshCw, Trash2, UsersRound, Plus } from 'lucide-react-native'
+import { RefreshCw, UsersRound, Plus } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Toast } from 'toastify-react-native'
@@ -48,7 +48,7 @@ function MenuContent({
   }
 
   return (
-    <ProposalsMenu proposals={multisigData?.proposals ?? []} threshold={multisigData?.threshold ?? 1}/>
+    <ProposalsMenu proposals={multisigData?.proposals ?? []} threshold={multisigData?.threshold ?? 1} />
   )
 }
 
@@ -56,7 +56,7 @@ export default function HomeScreen() {
   const { account } = useMobileWallet()
   const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
-  const { multisigs = [], isMultisigsLoading } = useMultisigs(walletAddress)
+  const { multisigs = [] } = useMultisigs(walletAddress)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>('Proposals')
@@ -187,11 +187,6 @@ export default function HomeScreen() {
             >
               <RefreshCw color="#090A0F" size={16} strokeWidth={2.4} />
             </Pressable>
-            {/* <Pressable
-              onPress={clearStoredMultisigs}
-            >
-              <Trash2 color="#DC2626" size={16} strokeWidth={2.4} />
-            </Pressable> */}
           </View>
 
           <View className="mt-4 flex-row p-1 gap-4">

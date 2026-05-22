@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router'
-import { CheckCircle2, Home, UsersRound } from 'lucide-react-native'
+import { Home, Settings, UsersRound } from 'lucide-react-native'
 import { View } from 'react-native'
 
 export default function TabsLayout() {
@@ -40,10 +40,10 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="proposals"
+        name="settings"
         options={{
-          title: 'Proposals',
-          tabBarIcon: ({ color, size }) => <CheckCircle2 color={color} size={size} strokeWidth={2.4} />,
+          title: 'Settings',
+          tabBarIcon: ({ color, size }) => <Settings color={color} size={size} strokeWidth={2.4} />,
         }}
       />
     </Tabs>

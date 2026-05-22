@@ -1,9 +1,10 @@
 import { StatusBar } from 'expo-status-bar'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Animated, PanResponder, Pressable, ScrollView, Text, View } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
-import { CheckCircle2, Plus, ShieldCheck, Trash2, UsersRound } from 'lucide-react-native'
+import { CheckCircle2, Plus, Trash2, UsersRound } from 'lucide-react-native'
+import { MultisigDataSkeleton } from '../../components/home-screen/MultisigDataSkeleton'
 import { AddMemberModal } from '../../components/modals/AddMemberModal'
 import { DeleteMemberModal } from '../../components/modals/DeleteMemberModal'
 import useMultisig from '../../hooks/useMultisig'
@@ -31,7 +32,6 @@ export default function MembersScreen() {
   const members = useMemo(() => {
     return multisigData?.members ?? []
   }, [multisigData])
-  const threshold = multisigData?.threshold ?? 0
 
   if (!selectedMultisigAddress) {
     return <NoMembersScreen />
@@ -42,7 +42,14 @@ export default function MembersScreen() {
     <ScrollView style={{ flex: 1 }}>
       <View className="flex-1 px-6 py-8">
           <View className="flex-row items-center justify-between gap-3">
-            <Text className="text-base font-black text-black">Members ({isMultisigLoading ? '...' : `${members.length}`})</Text>
+            <View className="flex-row items-center gap-2">
+              <Text className="text-base font-black text-black">Members</Text>
+              {isMultisigLoading ? (
+                <MultisigDataSkeleton className="h-5 w-6" />
+              ) : (
+                <Text className="text-base font-black text-black">({members.length})</Text>
+              )}
+            </View>
             <View className="flex-row items-center gap-3">
               <Pressable
                 onPress={() => setIsAddMemberModalOpen(true)}
@@ -53,7 +60,9 @@ export default function MembersScreen() {
             </View>
           </View>
 
-          {members.length > 0 ? (
+          {isMultisigLoading ? (
+            <MembersLoadingSkeleton />
+          ) : members.length > 0 ? (
             <View className="mt-4 gap-3">
               {members.map((member, index) => {
                 const isConnectedWallet = member === walletAddress
@@ -71,7 +80,7 @@ export default function MembersScreen() {
             </View>
           ) : (
             <Text className="mt-3 text-sm leading-6 text-black/65">
-              {isMultisigLoading ? 'Loading members for this multisig.' : 'Members will appear here after a multisig is selected.'}
+              Members will appear here after a multisig is selected.
             </Text>
           )}
         </View>
@@ -93,6 +102,25 @@ export default function MembersScreen() {
       />
     </ScrollView>
     </SafeAreaView>
+  )
+}
+
+function MembersLoadingSkeleton() {
+  const memberRows = Array.from({ length: 4 })
+
+  return (
+    <View className="mt-4 gap-3">
+      {memberRows.map((_, index) => (
+        <View key={index} className="flex-row items-center gap-3 rounded-md border border-black/10 bg-white p-3">
+          <MultisigDataSkeleton className="h-10 w-10" />
+          <View className="flex-1">
+            <MultisigDataSkeleton className="h-4 w-24" />
+            <MultisigDataSkeleton className="mt-2 h-3 w-36" />
+          </View>
+          <MultisigDataSkeleton className="h-7 w-14" />
+        </View>
+      ))}
+    </View>
   )
 }
 
