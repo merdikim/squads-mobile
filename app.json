@@ -3,9 +3,6 @@
     "scheme": "acme",
     "userInterfaceStyle": "automatic",
     "orientation": "default",
-    "web": {
-      "output": "static"
-    },
     "name": "Squads",
     "slug": "squads-mobile",
     "android": {
@@ -16,6 +13,7 @@
     ],
     "ios": {
       "bundleIdentifier": "com.anonymous.kit-expo-uniwind"
-    }
+    },
+    "platforms": ["ios", "android"]
   }
 }

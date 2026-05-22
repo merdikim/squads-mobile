@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { LogIn, LogOut, Trash2, WalletCards } from 'lucide-react-native'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -46,7 +46,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 32 }}>
+      <View style={{ flex: 1 }}>
         <View className="flex-1 px-6 py-8">
           <View className="flex-row items-center justify-between gap-3">
             <Text className="text-base font-black text-black">Settings</Text>
@@ -117,7 +117,7 @@ export default function SettingsScreen() {
             </Pressable>
           </View>
         </View>
-      </ScrollView>
+      </View>
 
       <StatusBar style="dark" />
     </SafeAreaView>

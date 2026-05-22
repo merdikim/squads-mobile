@@ -127,8 +127,8 @@ export default function HomeScreen() {
         <View className="p-4 flex-1">
           <View className=" h-48 w-full rounded-xl px-3 shadow-2xl">
             <View className="absolute inset-0 overflow-hidden rounded-xl border border-black/10 bg-white">
-              <View className="absolute -right-16 -top-12 h-36 w-36 rounded-xl bg-black/2" />
-              <View className="absolute -bottom-2 -left-12 h-24 w-24 rounded-xl bg-black/3" />
+              <View className="absolute -right-16 -top-12 h-36 w-36 rounded-full bg-black/2" />
+              <View className="absolute -bottom-2 -left-12 h-24 w-24 rounded-full bg-black/3" />
             </View>
 
             <View className="z-10 flex-row items-start justify-between">
