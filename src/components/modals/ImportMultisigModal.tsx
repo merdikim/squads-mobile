@@ -51,11 +51,11 @@ export function ImportMultisigModal({ visible, onClose }: ImportMultisigModalPro
         <Pressable className="rounded-lg bg-white p-5" onPress={(event) => event.stopPropagation()}>
           <Text className="text-xl font-black text-black">Import Multisig</Text>
           <Text className="mt-2 text-sm leading-6 text-black/60">
-            Enter the Squads multisig account address. We will fetch the account before saving it.
+            Enter the Squads multisig account. We will fetch the account before saving it.
           </Text>
 
           <View className="mt-5">
-            <Text className="text-sm font-bold text-black">Multisig account address</Text>
+            <Text className="text-sm font-bold text-black">Multisig account</Text>
             <TextInput
               value={address}
               onChangeText={(value) => {
@@ -65,7 +65,7 @@ export function ImportMultisigModal({ visible, onClose }: ImportMultisigModalPro
               }}
               autoCapitalize="none"
               autoCorrect={false}
-              placeholder="Enter multisig address"
+              placeholder="Enter multisig"
               placeholderTextColor="rgba(0,0,0,0.35)"
               className="mt-2 min-h-12 rounded-lg border border-black/15 px-3 text-sm text-black"
             />

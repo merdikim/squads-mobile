@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@expo-google-fonts/manrope':
+        specifier: ^0.4.2
+        version: 0.4.2
       '@expo/metro-runtime':
         specifier: ~55.0.6
         version: 55.0.6(@expo/dom-webview@55.0.3)(expo@55.0.23)(react-dom@19.2.0(react@19.2.0))(react-native@0.83.6(@babel/core@7.28.6)(@types/react@19.2.14)(bufferutil@4.1.0)(react@19.2.0)(utf-8-validate@5.0.10))(react@19.2.0)
@@ -50,6 +53,9 @@ importers:
       expo-dev-client:
         specifier: ^55.0.18
         version: 55.0.18(expo@55.0.23)(typescript@5.9.3)
+      expo-font:
+        specifier: ~55.0.7
+        version: 55.0.7(expo@55.0.23)(react-native@0.83.6(@babel/core@7.28.6)(@types/react@19.2.14)(bufferutil@4.1.0)(react@19.2.0)(utf-8-validate@5.0.10))(react@19.2.0)
       expo-linking:
         specifier: ~55.0.8
         version: 55.0.8(expo@55.0.23)(react-native@0.83.6(@babel/core@7.28.6)(@types/react@19.2.14)(bufferutil@4.1.0)(react@19.2.0)(utf-8-validate@5.0.10))(react@19.2.0)(typescript@5.9.3)
@@ -668,6 +674,9 @@ packages:
   '@eslint/plugin-kit@0.4.1':
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@expo-google-fonts/manrope@0.4.2':
+    resolution: {integrity: sha512-BZsKe8d9BJrVnIQIZcTS7/Kac0TbXnqs/+8EBSiQxrmK6GoCO6eTkmr50D1weIk/EoF20pTmAkpWICnovATr/g==}
 
   '@expo-google-fonts/material-symbols@0.4.27':
     resolution: {integrity: sha512-cnb3DZnWUWpezGFkJ8y4MT5f/lw6FcgDzeJzic+T+vpQHLHG1cg3SC3i1w1i8Bk4xKR4HPY3t9iIRNvtr5ml8A==}
@@ -6167,6 +6176,8 @@ snapshots:
     dependencies:
       '@eslint/core': 0.17.0
       levn: 0.4.1
+
+  '@expo-google-fonts/manrope@0.4.2': {}
 
   '@expo-google-fonts/material-symbols@0.4.27': {}
 

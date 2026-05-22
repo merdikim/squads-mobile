@@ -10,7 +10,6 @@ import { Dropdown } from '../../components/Dropdown'
 import { ProposalsMenu } from '../../components/cards/ProposalsMenu'
 import { AssetsMenu } from '../../components/home-screen/AssetsMenu'
 import { NftsMenu } from '../../components/home-screen/NftsMenu'
-import { NoMultisigsScreen } from '../../components/home-screen/NoMultisigsScreen'
 import { MultisigDataSkeleton, MultisigMenuSkeleton } from '../../components/home-screen/MultisigDataSkeleton'
 import { ImportMultisigModal } from '../../components/modals/ImportMultisigModal'
 import { clearMultisigsFromStorage } from '../../lib/multisigStorage'
@@ -23,6 +22,7 @@ import useMultisigs from '../../hooks/useMultisigs'
 import { AddMultisigButtonProps, MenuItem, SquadsMultisigData } from '../../types'
 import useMultisig from '../../hooks/useMultisig'
 import { formatSol, shortenAddress } from '../../utils'
+import NoMultisigs from '../../components/home-screen/NoMultisigs'
 
 const menuItems: MenuItem[] = ['Proposals', 'Assets', 'NFTs']
 
@@ -114,31 +114,18 @@ export default function HomeScreen() {
     Toast.success(`${label} copied to clipboard.`, 'top')
   }
 
-  const clearStoredMultisigs = () => {
+  const clearStoredMultisigs = async() => {
     setIsDropdownOpen(false)
-
-    Toast.show({
-      type: 'warn',
-      text1: 'Clear stored multisigs?',
-      text2: 'Tap this toast to confirm.',
-      position: 'bottom',
-      visibilityTime: 5000,
-      onPress: () => {
-        Toast.hide()
-        void (async () => {
-          await clearMultisigsFromStorage()
-          await clearSelectedMultisigAddress()
-          setSelectedMultisigKey('')
-          queryClient.setQueryData(['selectedMultisigAddress'], '')
-          await queryClient.invalidateQueries({ queryKey: ['multisigs', walletAddress] })
-          Toast.success('Stored multisigs cleared.', 'bottom')
-        })()
-      },
-    })
+    await clearMultisigsFromStorage()
+    await clearSelectedMultisigAddress()
+    setSelectedMultisigKey('')
+    queryClient.setQueryData(['selectedMultisigAddress'], '')
+    await queryClient.invalidateQueries({ queryKey: ['multisigs', walletAddress] })
+    Toast.success('Stored multisigs cleared.', 'bottom')
   }
 
   if (!isMultisigsLoading && multisigs.length === 0) {
-    return <NoMultisigsScreen isBusy={isBusy} />
+    return <NoMultisigs/>
   }
 
   return (

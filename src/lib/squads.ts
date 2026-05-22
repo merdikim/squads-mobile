@@ -29,7 +29,7 @@ export async function fetchImportableMultisig(address: string): Promise<Importab
 
     return {
       address: multisigPda.toBase58(),
-      name: `Multisig ${shortenAddress(multisigPda.toBase58())}`,
+      name: shortenAddress(multisigPda.toBase58()),
       threshold: account.threshold,
       members: account.members.map((member) => member.key.toBase58()),
     }
