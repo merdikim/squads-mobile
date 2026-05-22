@@ -136,16 +136,21 @@ function MemberCard({
   onDelete: () => void
 }) {
   const translateX = useRef(new Animated.Value(0)).current
+  const translateXOffset = useRef(0)
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gestureState) =>
-        gestureState.dx < -8 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy),
+        Math.abs(gestureState.dx) > 8 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy),
       onPanResponderMove: (_, gestureState) => {
-        translateX.setValue(Math.max(-DELETE_REVEAL_WIDTH, Math.min(0, gestureState.dx)))
+        translateX.setValue(Math.max(-DELETE_REVEAL_WIDTH, Math.min(0, translateXOffset.current + gestureState.dx)))
       },
       onPanResponderRelease: (_, gestureState) => {
+        const nextTranslateX = translateXOffset.current + gestureState.dx
+        const shouldRevealDelete = nextTranslateX < -DELETE_REVEAL_WIDTH / 2
+        translateXOffset.current = shouldRevealDelete ? -DELETE_REVEAL_WIDTH : 0
+
         Animated.spring(translateX, {
-          toValue: gestureState.dx < -DELETE_REVEAL_WIDTH / 2 ? -DELETE_REVEAL_WIDTH : 0,
+          toValue: translateXOffset.current,
           useNativeDriver: true,
         }).start()
       },
@@ -153,6 +158,7 @@ function MemberCard({
   ).current
 
   const handleDelete = () => {
+    translateXOffset.current = 0
     Animated.spring(translateX, {
       toValue: 0,
       useNativeDriver: true,
@@ -161,18 +167,18 @@ function MemberCard({
 
   return (
     <View className="overflow-hidden rounded-md">
-      <View className="absolute inset-y-0 right-0 w-18 items-center justify-center rounded-md bg-red-50">
+      <View className="absolute inset-y-0 right-0 w-18 items-center justify-center">
         <Pressable
           onPress={handleDelete}
-          className="h-10 w-10 items-center justify-center rounded-md border border-red-500/25 bg-white active:bg-red-100"
+          className="h-10 w-10 items-center justify-center rounded-xl border border-red-500/25 bg-white active:bg-red-100"
         >
           <Trash2 color="#DC2626" size={17} strokeWidth={2.4} />
         </Pressable>
       </View>
 
       <Animated.View style={{ transform: [{ translateX }] }} {...panResponder.panHandlers}>
-        <View className="flex-row items-center gap-3 rounded-md border border-black/10 bg-white p-3">
-          <View className="h-10 w-10 items-center justify-center rounded-md bg-black/5">
+        <View className="flex-row items-center gap-3 rounded-xl border border-black/10 bg-white p-3">
+          <View className="h-10 w-10 items-center justify-center rounded-xl bg-black/5">
             <Text className="text-sm font-black text-black">{index + 1}</Text>
           </View>
           <View className="flex-1">
@@ -182,7 +188,7 @@ function MemberCard({
             </View>
             <Text className="mt-1 text-sm font-bold text-black/45">{shortenAddress(member)}</Text>
           </View>
-          <View className="rounded-md bg-black/5 px-2 py-1">
+          <View className="rounded-xl bg-black/5 px-2 py-1">
             <Text className="text-xs font-bold text-black/60">
               {isConnectedWallet ? 'You' : 'Signer'}
             </Text>
