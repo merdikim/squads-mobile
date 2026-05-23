@@ -5,7 +5,7 @@ import { isAddress } from '@solana/kit'
 export const multisigsQueryKey = ['multisigs'] as const
 
 const useMultisigs = (address?: string) => {
-  const { data: multisigs, isLoading: isMultisigsLoading } = useQuery({
+  const { data: multisigs, isLoading: isMultisigsLoading, refetch:refetchMultisig, isRefetching: isRefetchingMultisig } = useQuery({
     queryKey: [...multisigsQueryKey, address],
     queryFn: async (): Promise<Multisig[]> => {
       if (!address || !isAddress(address)) {
@@ -35,7 +35,7 @@ const useMultisigs = (address?: string) => {
     enabled: !!address,
   })
 
-  return { multisigs, isMultisigsLoading }
+  return { multisigs, isMultisigsLoading, refetchMultisig, isRefetchingMultisig  }
 }
 
 export default useMultisigs

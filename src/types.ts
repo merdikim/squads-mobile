@@ -44,6 +44,7 @@ export type SquadsProposalData = {
   rejects: string[]
   cancellations: string[]
   timestamp?: number
+  memberAddress?: string
   hasApproved: boolean
 }
 
@@ -63,6 +64,7 @@ export type SquadsApiProposal = {
 
 export type SquadsApiTransactionAction = {
   type: string
+  newMember?: SquadsApiMultisigMember
   [key: string]: unknown
 }
 

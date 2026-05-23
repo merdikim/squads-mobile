@@ -31,7 +31,7 @@ export default function SettingsScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>
         <View className="flex-1 px-6 py-8">
           <View className="flex-row items-center justify-between gap-3">

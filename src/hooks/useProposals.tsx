@@ -2,6 +2,7 @@ import { isAddress } from '@solana/kit'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import type { SquadsApiProposalRow, SquadsApiProposalsResponse, SquadsProposalData } from '../types'
+import { multisigsQueryKey } from './useMultisigs'
 
 const PROPOSALS_DATA_STALE_TIME = 180 * 1000
 const PROPOSALS_DATA_GC_TIME = 10 * 60 * 1000
@@ -9,16 +10,19 @@ const PROPOSALS_PAGE_SIZE = 10
 
 const configTypes: Record<string, string> = {
   AddMember: 'Add Member',
+  RemoveMember: 'Remove Member',
 }
 
-export const multisigProposalsQueryKey = 'multisig-proposals'
+export const multisigProposalsQueryKey = [...multisigsQueryKey, 'proposals']
 
 const normalizeProposalRow = (row: SquadsApiProposalRow): SquadsProposalData => {
   const { proposal, transaction, category } = row
   const firstAction = transaction.account.actions[0]
   const memo = transaction.metadata.info.memo?.trim()
-  const actionType = firstAction?.type ?? transaction.type
+  const actionType = firstAction?.type //?? transaction.type
   const title = configTypes[actionType] ?? actionType
+
+  console.log(firstAction)
 
   return {
     address: transaction.address,
@@ -30,6 +34,7 @@ const normalizeProposalRow = (row: SquadsApiProposalRow): SquadsProposalData => 
     approvals: proposal.approved,
     rejects: proposal.rejected,
     cancellations: proposal.cancelled,
+    memberAddress: actionType === 'AddMember' ? firstAction?.newMember?.key : actionType === 'RemoveMember' ? firstAction?.oldMember as string : undefined,
     timestamp: proposal.status.timestamp,
     hasApproved: false,
   }
@@ -49,7 +54,7 @@ const useProposals = (multisigAddress: string) => {
     isLoading: isProposalsLoading,
     isFetching: isProposalsFetching,
   } = useQuery({
-    queryKey: [multisigProposalsQueryKey, selectedMultisigAddress, page],
+    queryKey: [...multisigProposalsQueryKey, selectedMultisigAddress, page],
     queryFn: async () => {
       if (!selectedMultisigAddress || !isAddress(selectedMultisigAddress)) {
         return {

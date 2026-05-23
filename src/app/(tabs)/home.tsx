@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
-import { useEffect, useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { Animated, Easing, Pressable, Text, View } from 'react-native'
 import { RefreshCw, UsersRound } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -50,7 +50,7 @@ export default function HomeScreen() {
   const { account } = useMobileWallet()
   const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
-  const { multisigs = [], isMultisigsLoading } = useMultisigs(walletAddress)
+  const { multisigs = [], isMultisigsLoading, isRefetchingMultisig, refetchMultisig } = useMultisigs(walletAddress)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>('Proposals')
   const { data: storedSelectedMultisigKey = '', isFetched: isSelectedMultisigFetched } = useQuery({
@@ -68,6 +68,35 @@ export default function HomeScreen() {
   const selectedBalance = formatSol(selectedMultisig?.balanceLamports || 0)
   const selectedParticipants = selectedMultisig?.members.length ?? 0
   const selectedVaultAddress = selectedMultisig?.vaultAddress
+  const refetchSpinValue = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    if (!isRefetchingMultisig) {
+      refetchSpinValue.stopAnimation()
+      refetchSpinValue.setValue(0)
+      return
+    }
+
+    const animation = Animated.loop(
+      Animated.timing(refetchSpinValue, {
+        toValue: 1,
+        duration: 800,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    )
+
+    animation.start()
+
+    return () => {
+      animation.stop()
+    }
+  }, [isRefetchingMultisig, refetchSpinValue])
+
+  const refetchSpin = refetchSpinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  })
 
   useEffect(() => {
     if (!isMultisigsLoading && multisigs.length === 0) {
@@ -113,7 +142,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       <Pressable className="flex-1" onPress={() => setIsDropdownOpen(false)}>
         <View className="p-4 flex-1">
           <View className=" h-48 w-full rounded-xl px-3 shadow-2xl">
@@ -185,10 +214,12 @@ export default function HomeScreen() {
               </View>
             )}
             <Pressable
-              //onPress={() => void refetchMultisigData()}
-              disabled={!selectedMultisigKey}
+              onPress={() => void refetchMultisig()}
+              disabled={!selectedMultisigKey || isRefetchingMultisig}
             >
-              <RefreshCw color="#090A0F" size={16} strokeWidth={2.4} />
+              <Animated.View style={{ transform: [{ rotate: refetchSpin }] }}>
+                <RefreshCw color="#090A0F" size={16} strokeWidth={2.4} />
+              </Animated.View>
             </Pressable>
           </View>
 

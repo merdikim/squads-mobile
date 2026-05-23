@@ -8,6 +8,8 @@ import * as multisig from '@sqds/multisig'
 import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import { buildProposalIx } from '../../lib/squads'
 import { toPublicKey } from '../../utils'
+import { multisigProposalsQueryKey } from '../../hooks/useProposals'
+import { QueryClient } from '@tanstack/react-query'
 
 const { Permissions } = multisig.types
 
@@ -25,6 +27,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
   const { account, connect, connection, signAndSendTransactions } = useMobileWallet()
   const connectedWalletAddress = account?.address.toString() ?? ''
   const isConnectedWalletMember = members.includes(connectedWalletAddress)
+  const queryClient = new QueryClient()
 
   useEffect(() => {
     if (!visible) {
@@ -109,7 +112,9 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
 
       await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
 
-      console.log(`Signed transaction: ${signature}!`)
+      queryClient.invalidateQueries({
+        queryKey: [...multisigProposalsQueryKey, multisigAddress]
+      })
 
       handleClose()
     } catch (err) {
@@ -165,6 +170,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
             <View className="mt-6 flex-row gap-3">
               <Pressable
                 onPress={handleClose}
+                disabled={isAdding}
                 className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
               >
                 <Text className="text-base font-bold text-black">Cancel</Text>

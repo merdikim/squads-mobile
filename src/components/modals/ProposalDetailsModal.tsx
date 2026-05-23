@@ -2,7 +2,9 @@ import { Modal, Pressable, ScrollView, Text, View } from 'react-native'
 import { Check, X } from 'lucide-react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import type { SquadsProposalData } from '../../types'
-import { formatTimeAgo, shortenAddress } from '../../utils'
+import { formatTimeAgo, shortenAddress, toPublicKey } from '../../utils'
+import { useMobileWallet } from '@wallet-ui/react-native-web3js'
+import * as multisig from '@sqds/multisig'
 
 type ProposalDetailsModalProps = {
   proposal: SquadsProposalData | null
@@ -28,9 +30,16 @@ export function ProposalDetailsModal({
   onApprove,
   onReject,
 }: ProposalDetailsModalProps) {
+  const { account, connect, connection, signAndSendTransactions } = useMobileWallet()
+  
   const visible = !!proposal
   const timeAgo = formatTimeAgo(proposal?.timestamp)
-  const canVote = proposal?.status === 'Active' && !proposal.hasApproved
+  const connectedWalletAddress = account?.address.toString() ?? ''
+  const canVote = !proposal?.approvals.includes(connectedWalletAddress) || !proposal?.rejects.includes(connectedWalletAddress)
+
+  const vote = async() => {
+   
+  }
 
   const handleApprove = () => {
     if (!proposal || !canVote) return
@@ -66,10 +75,9 @@ export function ProposalDetailsModal({
 
                 <ScrollView className="mt-5" showsVerticalScrollIndicator={false}>
                   <View className="rounded-xl border border-black/10 px-4">
+                    <DetailRow label="Member address" value={shortenAddress(proposal.memberAddress|| '...', 8)} />
                     <DetailRow label="Status" value={proposal.status} />
                     <DetailRow label="Created" value={timeAgo || 'Unavailable'} />
-                    <DetailRow label="Transaction" value={`#${proposal.transactionIndex.toString()}`} />
-                    <DetailRow label="Address" value={shortenAddress(proposal.address, 8)} />
                     <DetailRow label="Approvals" value={`${proposal.approvals.length} of ${threshold}`} />
                     <DetailRow label="Rejected" value={String(proposal.rejects.length)} />
                     <DetailRow label="Cancelled" value={String(proposal.cancellations.length)} />

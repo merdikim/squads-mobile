@@ -31,7 +31,7 @@ export function ProposalCard({ proposal, threshold }: ProposalCardProps) {
         </View>
         <View className="mt-4 w-full flex-row items-center justify-between">
           <Text className="text-sm leading-6 text-black/60">
-            {shortenAddress(proposal.address, 8)}
+            {shortenAddress(proposal.memberAddress?? '', 8)}
           </Text>
           {timeAgo ? (
             <View className="flex-row items-center gap-1">

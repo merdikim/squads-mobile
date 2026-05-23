@@ -36,7 +36,7 @@ export default function MembersScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex:1 }}>
+    <SafeAreaView edges={['top']} style={{ flex:1 }}>
     <ScrollView style={{ flex: 1 }}>
       <View className="flex-1 px-6 py-8">
           <View className="flex-row items-center justify-between gap-3">
@@ -93,11 +93,8 @@ export default function MembersScreen() {
       <DeleteMemberModal
         member={memberToDelete}
         members={members}
+        multisigAddress={selectedMultisigAddress}
         onClose={() => setMemberToDelete('')}
-        onDeleteMember={(member) => {
-          // setDeletedMembers((currentMembers) => [...currentMembers, member])
-          // setAddedMembers((currentMembers) => currentMembers.filter((addedMember) => addedMember !== member))
-        }}
       />
     </ScrollView>
     </SafeAreaView>
@@ -136,10 +133,11 @@ function MemberCard({
 }) {
   const translateX = useRef(new Animated.Value(0)).current
   const translateXOffset = useRef(0)
+  const canDelete = !isConnectedWallet
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gestureState) =>
-        Math.abs(gestureState.dx) > 8 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy),
+        canDelete && Math.abs(gestureState.dx) > 8 && Math.abs(gestureState.dx) > Math.abs(gestureState.dy),
       onPanResponderMove: (_, gestureState) => {
         translateX.setValue(Math.max(-DELETE_REVEAL_WIDTH, Math.min(0, translateXOffset.current + gestureState.dx)))
       },
@@ -166,16 +164,18 @@ function MemberCard({
 
   return (
     <View className="overflow-hidden rounded-xl">
-      <View className="absolute inset-y-0 right-0 w-18 items-center justify-center">
-        <Pressable
-          onPress={handleDelete}
-          className="h-10 w-10 items-center justify-center rounded-xl border border-red-500/25 bg-white active:bg-red-100"
-        >
-          <Trash2 color="#DC2626" size={17} strokeWidth={2.4} />
-        </Pressable>
-      </View>
+      {canDelete ? (
+        <View className="absolute inset-y-0 right-0 w-18 items-center justify-center">
+          <Pressable
+            onPress={handleDelete}
+            className="h-10 w-10 items-center justify-center rounded-xl border border-red-500/25 bg-white active:bg-red-100"
+          >
+            <Trash2 color="#DC2626" size={17} strokeWidth={2.4} />
+          </Pressable>
+        </View>
+      ) : null}
 
-      <Animated.View style={{ transform: [{ translateX }] }} {...panResponder.panHandlers}>
+      <Animated.View style={{ transform: [{ translateX }] }} {...(canDelete ? panResponder.panHandlers : {})}>
         <View className="flex-row items-center gap-3 rounded-xl border border-black/10 bg-white p-3">
           <View className="h-10 w-10 items-center justify-center rounded-xl bg-black/5">
             <Text className="text-sm font-black text-black">{index + 1}</Text>
