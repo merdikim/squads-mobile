@@ -33,6 +33,44 @@ export type SquadsApiMultisig = {
 
 export type SquadsApiMultisigsResponse = SquadsApiMultisig[]
 
+export type SquadsApiBalance = {
+  amount: number
+  pricePerUnit: number
+  uiAmount: number
+  uiPrice: number
+  source: string
+  mint: string
+  symbol: string
+  decimals: number
+  wrapped: boolean
+  logoUri?: string
+  name: string
+}
+
+export type SquadsApiStakingBalances = {
+  stakingAccountsCount: number
+  totalStakingBalanceSol: number
+  totalStakingBalanceUsd: number
+}
+
+export type SquadsApiBalancesResponse = {
+  balances: SquadsApiBalance[]
+  staking: SquadsApiStakingBalances
+}
+
+export type SquadsBalanceData = {
+  amount: number
+  uiAmount: number
+  uiPrice: number
+  pricePerUnit: number
+  source: string
+  mint: string
+  symbol: string
+  decimals: number
+  logoUri?: string
+  name: string
+}
+
 export type SquadsProposalData = {
   address: string
   multisigAddress: string

@@ -14,13 +14,22 @@ import {
   getSelectedMultisigAddress,
   saveSelectedMultisigAddress,
 } from '../../lib/selectedMultisigStorage'
+import useBalances from '../../hooks/useBalances'
 import useMultisigs from '../../hooks/useMultisigs'
 import { MenuItem, SquadsMultisigData } from '../../types'
-import { formatSol, shortenAddress } from '../../utils'
+import { shortenAddress } from '../../utils'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { CardSkeleton } from '../../components/skeletons/CardSkeleton'
 
 const menuItems: MenuItem[] = ['Proposals', 'Coins', 'NFTs']
+
+const formatUsd = (amount: number) => {
+  return amount.toLocaleString(undefined, {
+    style: 'currency',
+    currency: 'USD',
+    maximumFractionDigits: amount < 1 ? 4 : 2,
+  })
+}
 
 function MenuContent({
   selectedMenuItem,
@@ -51,6 +60,7 @@ export default function HomeScreen() {
   const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
   const { multisigs = [], isMultisigsLoading, isRefetchingMultisig, refetchMultisig } = useMultisigs(walletAddress)
+  const { totalUsd, isBalancesLoading } = useBalances()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>('Proposals')
   const { data: storedSelectedMultisigKey = '', isFetched: isSelectedMultisigFetched } = useQuery({
@@ -65,7 +75,7 @@ export default function HomeScreen() {
     subtitle: `${multisig.threshold} of ${multisig.members.length} - ${shortenAddress(multisig.address)}`,
     imageUri: multisig.imageUri,
   }))
-  const selectedBalance = formatSol(selectedMultisig?.balanceLamports || 0)
+  const selectedBalance = formatUsd(totalUsd)
   const selectedParticipants = selectedMultisig?.members.length ?? 0
   const selectedVaultAddress = selectedMultisig?.vaultAddress
   const refetchSpinValue = useRef(new Animated.Value(0)).current
@@ -172,7 +182,7 @@ export default function HomeScreen() {
             </View>
 
             <View className="z-0 flex-1 items-center justify-center">
-              {isMultisigsLoading ? (
+              {isMultisigsLoading || isBalancesLoading ? (
                 <View className="items-center">
                   <CardSkeleton className="h-4 w-28" />
                   <CardSkeleton className="mt-4 h-10 w-36" />
