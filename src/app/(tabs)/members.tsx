@@ -94,6 +94,7 @@ export default function MembersScreen() {
       />
       <DeleteMemberModal
         member={memberToDelete}
+        members={members}
         onClose={() => setMemberToDelete('')}
         onDeleteMember={(member) => {
           // setDeletedMembers((currentMembers) => [...currentMembers, member])

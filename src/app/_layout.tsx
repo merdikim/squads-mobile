@@ -5,10 +5,11 @@ import { useFonts } from 'expo-font'
 import { AppIdentity, MobileWalletProvider } from '@wallet-ui/react-native-web3js'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { APP_NAME, RPC_URL } from '../constants'
+import { APP_NAME } from '../constants'
 import { applyManropeFontDefaults, manropeFonts } from '../lib/fonts'
+import { clusterApiUrl } from '@solana/web3.js'
 
-const identity: AppIdentity = { name: APP_NAME }
+const identity: AppIdentity = { name: APP_NAME, icon: require('../assets/logo.png') }
 
 const queryClient = new QueryClient()
 
@@ -21,8 +22,10 @@ export default function Layout() {
     return null
   }
 
+  const endpoint = clusterApiUrl('mainnet-beta')
+
   return (
-    <MobileWalletProvider chain="mainnet-beta" endpoint={RPC_URL} identity={identity}>
+    <MobileWalletProvider chain="solana:mainnet" endpoint={endpoint} identity={identity}>
       <SafeAreaProvider style={{ flex: 1 }}>
         <QueryClientProvider client={queryClient}>
           <Slot />

@@ -17,8 +17,14 @@ export function MultisigMenuSkeleton() {
         <MultisigDataSkeleton className="mt-2 h-3 w-3/4" />
       </View>
       <View className="rounded-xl border border-black/10 bg-white p-4">
-        <MultisigDataSkeleton className="h-4 w-36" />
-        <MultisigDataSkeleton className="mt-3 h-3 w-5/6" />
+        <MultisigDataSkeleton className="h-4 w-28" />
+        <MultisigDataSkeleton className="mt-3 h-3 w-full" />
+        <MultisigDataSkeleton className="mt-2 h-3 w-3/4" />
+      </View>
+      <View className="rounded-xl border border-black/10 bg-white p-4">
+        <MultisigDataSkeleton className="h-4 w-28" />
+        <MultisigDataSkeleton className="mt-3 h-3 w-full" />
+        <MultisigDataSkeleton className="mt-2 h-3 w-3/4" />
       </View>
     </View>
   )

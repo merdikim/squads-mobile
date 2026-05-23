@@ -183,7 +183,9 @@ export default function HomeScreen() {
 
           <View className="mt-4 flex-row items-center justify-between gap-3 px-2">
             {isMultisigLoading ? (
-              <MultisigDataSkeleton className="h-4 flex-1" />
+              <View className='flex-1'>
+                <MultisigDataSkeleton className="h-4 w-32" />
+              </View>
             ) : (
               <View className="flex-1 flex-row items-center">
                 <Text className="shrink text-xs font-bold text-black/45" numberOfLines={2}>
