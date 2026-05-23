@@ -6,7 +6,7 @@ import { shortenAddress, toPublicKey } from '../../utils'
 import * as multisig from '@sqds/multisig'
 import { buildProposalIx } from '../../lib/squads'
 import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
-import { QueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { multisigProposalsQueryKey } from '../../hooks/useProposals'
 
 type DeleteMemberModalProps = {
@@ -22,7 +22,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
   const isConnectedWalletMember = members.includes(connectedWalletAddress)
   const [error, setError] = useState('')
   const [isRemoving, setIsRemoving] = useState(false)
-  const queryClient = new QueryClient()
+  const queryClient = useQueryClient()
   
 
   const handleClose = () => {
@@ -50,7 +50,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
       const creator = toPublicKey(account.address)
       const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(connection, multisigPda)
       const newTransactionIndex = BigInt(Number(multisigInfo.transactionIndex) + 1)
-      const addMemberIx = multisig.instructions.configTransactionCreate({
+      const removeMemberIx = multisig.instructions.configTransactionCreate({
         multisigPda,
         actions: [
           {
@@ -72,10 +72,16 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
       const message = new TransactionMessage({
         payerKey: creator,
         recentBlockhash: latestBlockhash.blockhash,
-        instructions: [addMemberIx, proposalIx],
+        instructions: [removeMemberIx, proposalIx],
       }).compileToV0Message()
 
       const transaction = new VersionedTransaction(message)
+      const simulation = await connection.simulateTransaction(transaction, { sigVerify: false })
+
+      if (simulation.value.err) {
+        console.log(simulation.value.logs)
+        throw new Error('Remove member simulation failed.')
+      }
 
       const signature = await signAndSendTransactions(transaction, minContextSlot)
 

@@ -22,10 +22,9 @@ const normalizeProposalRow = (row: SquadsApiProposalRow): SquadsProposalData => 
   const actionType = firstAction?.type //?? transaction.type
   const title = configTypes[actionType] ?? actionType
 
-  console.log(firstAction)
-
   return {
     address: transaction.address,
+    multisigAddress: proposal.multisig,
     title,
     category,
     memo,

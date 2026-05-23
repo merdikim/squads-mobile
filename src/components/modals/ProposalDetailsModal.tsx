@@ -1,10 +1,14 @@
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native'
+import { useState } from 'react'
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native'
 import { Check, X } from 'lucide-react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
+import { useQueryClient } from '@tanstack/react-query'
 import type { SquadsProposalData } from '../../types'
 import { formatTimeAgo, shortenAddress, toPublicKey } from '../../utils'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import * as multisig from '@sqds/multisig'
+import { multisigProposalsQueryKey } from '../../hooks/useProposals'
 
 type ProposalDetailsModalProps = {
   proposal: SquadsProposalData | null
@@ -31,24 +35,107 @@ export function ProposalDetailsModal({
   onReject,
 }: ProposalDetailsModalProps) {
   const { account, connect, connection, signAndSendTransactions } = useMobileWallet()
+  const queryClient = useQueryClient()
+  const [error, setError] = useState('')
+  const [voteAction, setVoteAction] = useState<'approve' | 'reject' | null>(null)
   
   const visible = !!proposal
   const timeAgo = formatTimeAgo(proposal?.timestamp)
   const connectedWalletAddress = account?.address.toString() ?? ''
-  const canVote = !proposal?.approvals.includes(connectedWalletAddress) || !proposal?.rejects.includes(connectedWalletAddress)
+  const hasVoted = !!proposal && (
+    proposal.approvals.includes(connectedWalletAddress)
+    || proposal.rejects.includes(connectedWalletAddress)
+    || proposal.cancellations.includes(connectedWalletAddress)
+  )
+  const canVote = !!proposal && proposal.status === 'Active' && !!account && !hasVoted && !voteAction
 
-  const vote = async() => {
-   
+  const handleConnectWallet = () => {
+    setError('')
+    connect()
+  }
+
+  const vote = async (action: 'approve' | 'reject') => {
+    setError('')
+
+    if (!proposal) {
+      return
+    }
+
+    if (!account) {
+      setError('Connect your wallet before voting.')
+      return
+    }
+
+    if (hasVoted) {
+      setError('This wallet has already voted on this proposal.')
+      return
+    }
+
+    try {
+      setVoteAction(action)
+
+      const multisigPda = toPublicKey(proposal.multisigAddress)
+      // @ts-expect-error wallet adapter address is compatible with PublicKey input here.
+      const member = toPublicKey(account.address)
+      const instruction = action === 'approve'
+        ? multisig.instructions.proposalApprove({
+          multisigPda,
+          transactionIndex: proposal.transactionIndex,
+          member,
+        })
+        : multisig.instructions.proposalReject({
+          multisigPda,
+          transactionIndex: proposal.transactionIndex,
+          member,
+        })
+
+      const {
+        context: { slot: minContextSlot },
+        value: latestBlockhash,
+      } = await connection.getLatestBlockhashAndContext()
+
+      const message = new TransactionMessage({
+        payerKey: member,
+        recentBlockhash: latestBlockhash.blockhash,
+        instructions: [instruction],
+      }).compileToV0Message()
+
+      const transaction = new VersionedTransaction(message)
+      const simulation = await connection.simulateTransaction(transaction, { sigVerify: false })
+
+      if (simulation.value.err) {
+        console.log(simulation.value.logs)
+        throw new Error('Proposal vote simulation failed.')
+      }
+
+      const signature = await signAndSendTransactions(transaction, minContextSlot)
+
+      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
+      await queryClient.invalidateQueries({ queryKey: multisigProposalsQueryKey })
+
+      if (action === 'approve') {
+        onApprove?.(proposal)
+      } else {
+        onReject?.(proposal)
+      }
+
+      onClose()
+    } catch (err) {
+      console.log(err)
+      setError(action === 'approve' ? 'Failed to approve proposal.' : 'Failed to reject proposal.')
+    } finally {
+      setVoteAction(null)
+    }
   }
 
   const handleApprove = () => {
     if (!proposal || !canVote) return
-    onApprove?.(proposal)
+    void vote('approve')
   }
 
   const handleReject = () => {
     if (!proposal || !canVote) return
-    onReject?.(proposal)
+    void vote('reject')
   }
 
   return (
@@ -97,27 +184,52 @@ export function ProposalDetailsModal({
                   ) : null}
                 </ScrollView>
 
+                {error ? <Text className="mt-4 text-xs font-bold text-red-600">{error}</Text> : null}
+
                 <View className="mt-6 flex-row gap-3">
-                  <Pressable
-                    onPress={handleReject}
-                    disabled={!canVote}
-                    className={`h-12 flex-1 flex-row items-center justify-center rounded-xl border border-black/15 ${canVote ? 'active:bg-black/5' : 'bg-black/5'}`}
-                  >
-                    <X color={canVote ? '#090A0F' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
-                    <Text className={`ml-2 text-base font-bold ${canVote ? 'text-black' : 'text-black/35'}`}>
-                      Reject
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={handleApprove}
-                    disabled={!canVote}
-                    className={`h-12 flex-1 flex-row items-center justify-center rounded-xl ${canVote ? 'bg-black active:bg-black/80' : 'bg-black/10'}`}
-                  >
-                    <Check color={canVote ? '#FFFFFF' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
-                    <Text className={`ml-2 text-base font-bold ${canVote ? 'text-white' : 'text-black/35'}`}>
-                      Approve
-                    </Text>
-                  </Pressable>
+                  {account ? (
+                    <>
+                      <Pressable
+                        onPress={handleReject}
+                        disabled={!canVote}
+                        className={`h-12 flex-1 flex-row items-center justify-center rounded-xl border border-black/15 ${canVote ? 'active:bg-black/5' : 'bg-black/5'}`}
+                      >
+                        {voteAction === 'reject' ? (
+                          <ActivityIndicator size="small" color="#090A0F" />
+                        ) : (
+                          <>
+                            <X color={canVote ? '#090A0F' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
+                            <Text className={`ml-2 text-base font-bold ${canVote ? 'text-black' : 'text-black/35'}`}>
+                              Reject
+                            </Text>
+                          </>
+                        )}
+                      </Pressable>
+                      <Pressable
+                        onPress={handleApprove}
+                        disabled={!canVote}
+                        className={`h-12 flex-1 flex-row items-center justify-center rounded-xl ${canVote ? 'bg-black active:bg-black/80' : 'bg-black/10'}`}
+                      >
+                        {voteAction === 'approve' ? (
+                          <ActivityIndicator size="small" color="#FFFFFF" />
+                        ) : (
+                          <>
+                            <Check color={canVote ? '#FFFFFF' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
+                            <Text className={`ml-2 text-base font-bold ${canVote ? 'text-white' : 'text-black/35'}`}>
+                              Approve
+                            </Text>
+                          </>
+                        )}
+                      </Pressable>
+                    </>
+                  ) : (
+                    <Pressable
+                      onPress={handleConnectWallet}
+                      className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
+                    >
+                      <Text className="text-base font-bold text-white">Connect Wallet</Text>
+                    </Pressable>
+                  )}
                 </View>
               </>
             ) : null}

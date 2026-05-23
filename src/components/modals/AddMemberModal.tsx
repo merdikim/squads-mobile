@@ -9,7 +9,7 @@ import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import { buildProposalIx } from '../../lib/squads'
 import { toPublicKey } from '../../utils'
 import { multisigProposalsQueryKey } from '../../hooks/useProposals'
-import { QueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 
 const { Permissions } = multisig.types
 
@@ -27,7 +27,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
   const { account, connect, connection, signAndSendTransactions } = useMobileWallet()
   const connectedWalletAddress = account?.address.toString() ?? ''
   const isConnectedWalletMember = members.includes(connectedWalletAddress)
-  const queryClient = new QueryClient()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (!visible) {
@@ -107,6 +107,12 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
       }).compileToV0Message()
 
       const transaction = new VersionedTransaction(message)
+      const simulation = await connection.simulateTransaction(transaction, { sigVerify: false })
+
+      if (simulation.value.err) {
+        console.log(simulation.value.logs)
+        throw new Error('Add member simulation failed.')
+      }
 
       const signature = await signAndSendTransactions(transaction, minContextSlot)
 

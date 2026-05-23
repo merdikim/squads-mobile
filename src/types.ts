@@ -35,6 +35,7 @@ export type SquadsApiMultisigsResponse = SquadsApiMultisig[]
 
 export type SquadsProposalData = {
   address: string
+  multisigAddress: string
   transactionIndex: bigint
   title: string
   memo?: string

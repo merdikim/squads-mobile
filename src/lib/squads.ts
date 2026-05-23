@@ -44,6 +44,7 @@ export async function fetchMultisigData({
 
       proposals.unshift({
         address: proposalPda.toBase58(),
+        multisigAddress: address,
         transactionIndex: index,
         title: `Vault transaction #${index.toString()}`,
         category: 'vault',
