@@ -37,13 +37,13 @@ export default function MembersScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={{ flex:1 }}>
-    <ScrollView style={{ flex: 1 }}>
+    <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
       <View className="flex-1 px-6 py-8">
           <View className="flex-row items-center justify-between gap-3">
             <View className="flex-row items-center gap-2">
               <Text className="text-base font-black text-black">Members</Text>
               {isMultisigsLoading ? (
-                <CardSkeleton className="h-5 w-6" />
+                <CardSkeleton className="h-5 w-6 rounded-md" />
               ) : (
                 <Text className="text-base font-black text-black">({members.length})</Text>
               )}
@@ -107,13 +107,13 @@ function MembersLoadingSkeleton() {
   return (
     <View className="mt-4 gap-3">
       {memberRows.map((_, index) => (
-        <View key={index} className="flex-row items-center gap-3 rounded-xl border border-black/10 bg-white p-3">
-          <CardSkeleton className="h-10 w-10" />
+        <View key={index} className="flex-row items-center gap-3 rounded-xl bg-[#F9F9F9] p-3">
+          <CardSkeleton className="h-10 w-10 rounded-xl" />
           <View className="flex-1">
-            <CardSkeleton className="h-4 w-24" />
-            <CardSkeleton className="mt-2 h-3 w-36" />
+            <CardSkeleton className="h-4 w-24 rounded-md" />
+            <CardSkeleton className="mt-2 h-4 w-28 rounded-md" />
           </View>
-          <CardSkeleton className="h-7 w-14" />
+          <CardSkeleton className="h-7 w-14 rounded-xl" />
         </View>
       ))}
     </View>
@@ -155,15 +155,16 @@ function MemberCard({
   ).current
 
   const handleDelete = () => {
+    onDelete()
     translateXOffset.current = 0
     Animated.spring(translateX, {
       toValue: 0,
       useNativeDriver: true,
-    }).start(onDelete)
+    }).start()
   }
 
   return (
-    <View className="overflow-hidden rounded-xl">
+    <View className="overflow-hidden rounded-xl bg-[#F9F9F9]">
       {canDelete ? (
         <View className="absolute inset-y-0 right-0 w-18 items-center justify-center">
           <Pressable
@@ -176,7 +177,7 @@ function MemberCard({
       ) : null}
 
       <Animated.View style={{ transform: [{ translateX }] }} {...(canDelete ? panResponder.panHandlers : {})}>
-        <View className="flex-row items-center gap-3 rounded-xl border border-black/10 bg-white p-3">
+        <View className="flex-row items-center gap-3 rounded-xl bg-[#F9F9F9] p-3">
           <View className="h-10 w-10 items-center justify-center rounded-xl bg-black/5">
             <Text className="text-sm font-black text-black">{index + 1}</Text>
           </View>

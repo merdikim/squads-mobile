@@ -38,7 +38,7 @@ function MenuContent({
   isLoading?: boolean
 }) {
   if (selectedMenuItem === 'Coins') {
-    return <CoinsMenu address={multisigData?.address ?? ''} />
+    return <CoinsMenu address={multisigData?.vaultAddress?? ''} />
   }
 
   if (selectedMenuItem === 'NFTs') {
@@ -71,10 +71,10 @@ export default function HomeScreen() {
     subtitle: `${multisig.threshold} of ${multisig.members.length} - ${shortenAddress(multisig.address)}`,
     imageUri: multisig.imageUri,
   }))
-  const { totalUsd, isBalancesLoading } = useBalances(selectedMultisig?.address ?? '')
-  const selectedBalance = formatUsd(totalUsd)
   const selectedParticipants = selectedMultisig?.members.length ?? 0
   const selectedVaultAddress = selectedMultisig?.vaultAddress
+  const { totalUsd, isBalancesLoading } = useBalances(selectedVaultAddress ?? '')
+  const selectedBalance = formatUsd(totalUsd)
   const refetchSpinValue = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
@@ -180,7 +180,7 @@ export default function HomeScreen() {
               <View className="h-10 flex-row items-center gap-1 rounded-xl">
                 <UsersRound color="#090A0F" size={16} strokeWidth={2.4} />
                 {isMultisigsLoading && !selectedMultisig ? (
-                  <CardSkeleton className="h-4 w-5" />
+                  <CardSkeleton className="h-4 w-5 rounded-md" />
                 ) : (
                   <Text className="text-sm font-bold text-black">{selectedParticipants}</Text>
                 )}
@@ -190,9 +190,9 @@ export default function HomeScreen() {
             <View className="z-0 flex-1 items-center justify-center">
               {isMultisigsLoading || isBalancesLoading ? (
                 <View className="items-center">
-                  <CardSkeleton className="h-4 w-28" />
-                  <CardSkeleton className="mt-4 h-10 w-36" />
-                  <CardSkeleton className="mt-3 h-3 w-24" />
+                  <CardSkeleton className="h-4 w-28 rounded-md" />
+                  <CardSkeleton className="mt-4 h-10 w-36 rounded-lg" />
+                  <CardSkeleton className="mt-3 h-3 w-24 rounded-md" />
                 </View>
               ) : (
                 <>
@@ -217,7 +217,7 @@ export default function HomeScreen() {
             {/* <View className="mt-4 flex-row items-center justify-between gap-3 px-2">
             {isMultisigsLoading ? (
               <View className='flex-1'>
-                <CardSkeleton className="h-4 w-32" />
+                <CardSkeleton className="h-4 w-32 rounded-md" />
               </View>
             ) : (
               <View className="flex-1 flex-row items-center">

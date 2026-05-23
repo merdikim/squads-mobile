@@ -106,10 +106,10 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
   }
 
   return (
-    <Modal visible={!!member} transparent animationType="slide" onRequestClose={handleClose}>
+    <Modal visible={!!member} transparent animationType="fade" onRequestClose={handleClose}>
       <SafeAreaView style={{ flex: 1 }}>
-        <Pressable className="flex-1 justify-end bg-black/30 px-4 pb-6" onPress={handleClose}>
-          <Pressable className="rounded-xl bg-white p-5" onPress={(event) => event.stopPropagation()}>
+        <Pressable className="flex-1 items-center justify-center bg-black/30 px-4 py-6" onPress={handleClose}>
+          <Pressable className="w-full rounded-xl bg-white p-5" onPress={(event) => event.stopPropagation()}>
             <Text className="text-xl font-black text-black">Delete Member</Text>
             <Text className="mt-2 text-sm leading-6 text-black/60">
               Remove {member ? shortenAddress(member) : 'this member'} from this multisig?

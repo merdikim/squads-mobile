@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { LogIn, LogOut, WalletCards } from 'lucide-react-native'
 import { useQuery } from '@tanstack/react-query'
@@ -32,19 +32,20 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1 }}>
-      <View style={{ flex: 1 }}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <View className="flex-1 px-6 py-8">
           <View className="flex-row items-center justify-between gap-3">
             <Text className="text-base font-black text-black">Settings</Text>
           </View>
 
-          <View className="mt-8 rounded-xl border border-black/10 bg-white p-4">
+          <View className="mt-4 rounded-xl bg-neutral-100/60 p-4 shadow-xs">
             <View className="flex-row items-center gap-3">
-              <View className="h-11 w-11 items-center justify-center rounded-xl bg-black/5">
+              <View className="h-10 w-10 items-center justify-center rounded-xl bg-black/5">
                 <WalletCards color="#090A0F" size={20} strokeWidth={2.4} />
               </View>
               <View className="flex-1">
-                <Text className="mt-1 text-xs font-bold text-black/45">
+                <Text className="text-xs font-bold uppercase text-black/45">Wallet</Text>
+                <Text className="mt-1 text-sm font-black text-black">
                   {walletAddress ? `Wallet ${shortenAddress(walletAddress)}` : 'No wallet connected'}
                 </Text>
               </View>
@@ -74,10 +75,12 @@ export default function SettingsScreen() {
             </View>
           </View>
 
-          <View>
+          <View className="mt-auto pt-8">
             <Pressable
               onPress={handleWalletPress}
-              className="mt-20 h-12 flex-row items-center justify-center rounded-xl bg-black active:bg-black/80"
+              className={`h-14 flex-row items-center justify-center rounded-xl px-5 active:bg-black/80 ${
+                account ? 'border border-red-500/25 bg-white' : 'bg-black'
+              }`}
             >
               {account ? (
                 <LogOut color="#F87171" size={16} strokeWidth={2.4} />
@@ -90,7 +93,7 @@ export default function SettingsScreen() {
             </Pressable>
           </View>
         </View>
-      </View>
+      </ScrollView>
 
       <StatusBar style="dark" />
     </SafeAreaView>
@@ -111,21 +114,25 @@ function SettingsValueRow({
   copyLabel?: string
 }) {
   return (
-    <View className="flex-row items-center justify-between gap-3 rounded-xl border border-black/10 px-3 py-3">
+    <View className="flex-row items-center justify-between gap-3 rounded-xl bg-white p-3">
       <View className="flex-1">
         <Text className="text-xs font-bold uppercase text-black/45">{label}</Text>
         {isLoading ? (
-          <CardSkeleton className="mt-2 h-4 w-28" />
+          <CardSkeleton className="mt-2 h-4 w-36 rounded-md" />
         ) : (
           <Text className="mt-1 text-sm font-black text-black">{displayValue}</Text>
         )}
       </View>
       {copyLabel ? (
-        <CopyText
-          text={value}
-          accessibilityLabel={copyLabel}
-          className="h-9 w-9 items-center justify-center rounded-xl bg-white disabled:opacity-40"
-        />
+        isLoading ? (
+          <CardSkeleton className="h-9 w-9 rounded-xl" />
+        ) : (
+          <CopyText
+            text={value}
+            accessibilityLabel={copyLabel}
+            className="h-9 w-9 items-center justify-center rounded-xl bg-black/5 disabled:opacity-40"
+          />
+        )
       ) : null}
     </View>
   )

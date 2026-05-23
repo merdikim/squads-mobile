@@ -3,23 +3,29 @@ import { CardSkeleton } from './CardSkeleton'
 
 
 export function ProposalsSkeleton() {
+  const proposalRows = Array.from({ length: 3 })
+
   return (
-    <View className="mt-5 gap-3">
-      <View className="rounded-xl border border-black/10 bg-white p-4">
-        <CardSkeleton className="h-4 w-28" />
-        <CardSkeleton className="mt-3 h-3 w-full" />
-        <CardSkeleton className="mt-2 h-3 w-3/4" />
-      </View>
-      <View className="rounded-xl border border-black/10 bg-white p-4">
-        <CardSkeleton className="h-4 w-28" />
-        <CardSkeleton className="mt-3 h-3 w-full" />
-        <CardSkeleton className="mt-2 h-3 w-3/4" />
-      </View>
-      <View className="rounded-xl border border-black/10 bg-white p-4">
-        <CardSkeleton className="h-4 w-28" />
-        <CardSkeleton className="mt-3 h-3 w-full" />
-        <CardSkeleton className="mt-2 h-3 w-3/4" />
-      </View>
+    <View className="mt-5">
+      {proposalRows.map((_, index) => (
+        <View key={index} className="my-2 rounded-xl bg-neutral-100/60 p-4 shadow-xs">
+          <View className="flex-row items-start justify-between gap-3">
+            <View className="flex-1">
+              <CardSkeleton className="h-5 w-4/5 rounded-md" />
+              <CardSkeleton className="mt-2 h-5 w-2/5 rounded-md" />
+            </View>
+            <CardSkeleton className="h-6 w-16 rounded-xl bg-black/10" />
+          </View>
+
+          <View className="mt-4 flex-row items-center justify-between">
+            <CardSkeleton className="h-3 w-24 rounded-md" />
+            <View className="flex-row items-center gap-1">
+              <CardSkeleton className="h-3.5 w-3.5 rounded-full" />
+              <CardSkeleton className="h-3 w-16 rounded-md" />
+            </View>
+          </View>
+        </View>
+      ))}
     </View>
   )
 }

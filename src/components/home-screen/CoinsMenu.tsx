@@ -36,16 +36,16 @@ export function CoinsMenu({address}:{address:string}) {
         {[0, 1, 2].map((item) => (
           <View
             key={item}
-            className="mb-3 flex-row items-center rounded-xl border border-black/10 bg-white p-4"
+            className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4"
           >
             <CardSkeleton className="h-10 w-10 rounded-full" />
             <View className="ml-3 flex-1">
-              <CardSkeleton className="h-4 w-28" />
-              <CardSkeleton className="mt-2 h-3 w-20" />
+              <CardSkeleton className="h-4 w-28 rounded-md" />
+              <CardSkeleton className="mt-2 h-3 w-20 rounded-md" />
             </View>
-            <View className="items-end">
-              <CardSkeleton className="h-4 w-16" />
-              <CardSkeleton className="mt-2 h-3 w-12" />
+            <View className="ml-3 items-end">
+              <CardSkeleton className="h-4 w-16 rounded-md" />
+              <CardSkeleton className="mt-2 h-3 w-12 rounded-md" />
             </View>
           </View>
         ))}
@@ -66,7 +66,7 @@ export function CoinsMenu({address}:{address:string}) {
       {sortedBalances.map((balance) => (
         <View
           key={`${balance.mint}-${balance.source}`}
-          className="mb-3 flex-row items-center rounded-xl border border-black/10 bg-white p-4"
+          className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4"
         >
           <Image
             source={balance.logoUri ? { uri: balance.logoUri } : require('../../assets/logo.png')}

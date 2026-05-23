@@ -28,7 +28,7 @@ export function ProfileModalTrigger() {
 
       <Modal visible={isProfileOpen} transparent animationType="slide" onRequestClose={closeProfile}>
         <SafeAreaView style={{ flex: 1 }}>
-          <Pressable className="flex-1 justify-end bg-black/30 px-6 pb-6" onPress={closeProfile}>
+          <Pressable className="flex-1 items-center justify-center bg-black/30 px-6 py-6" onPress={closeProfile}>
             <Pressable className="w-full rounded-xl bg-white p-4" onPress={(event) => event.stopPropagation()}>
               <Text className="text-lg font-black text-black">Profile</Text>
               <Text className="mt-2 text-sm leading-6 text-black/60">

@@ -15,11 +15,11 @@ export function NftsMenu({ address }: NftsMenuProps) {
     return (
       <View className="mt-5">
         {[0, 1, 2].map((item) => (
-          <View key={item} className="mb-3 flex-row items-center rounded-xl border border-black/10 bg-white p-4">
+          <View key={item} className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4">
             <CardSkeleton className="h-12 w-12 rounded-lg" />
             <View className="ml-3 flex-1">
-              <CardSkeleton className="h-4 w-32" />
-              <CardSkeleton className="mt-2 h-3 w-20" />
+              <CardSkeleton className="h-4 w-32 rounded-md" />
+              <CardSkeleton className="mt-2 h-3 w-20 rounded-md" />
             </View>
           </View>
         ))}
@@ -38,7 +38,7 @@ export function NftsMenu({ address }: NftsMenuProps) {
   return (
     <ScrollView className="mt-5" showsVerticalScrollIndicator={false}>
       {nfts.map((nft) => (
-        <View key={nft.id} className="mb-3 flex-row items-center rounded-xl border border-black/10 bg-white p-4">
+        <View key={nft.id} className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4">
           <Image
             source={nft.imageUri ? { uri: nft.imageUri } : require('../../assets/logo.png')}
             className="h-12 w-12 rounded-lg bg-black/5"

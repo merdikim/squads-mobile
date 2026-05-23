@@ -143,8 +143,8 @@ export function ProposalDetailsModal({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={{ flex: 1 }}>
-        <Pressable className="flex-1 justify-end bg-black/30 px-4 pb-6" onPress={onClose}>
-          <Pressable className="max-h-[86%] rounded-xl bg-white p-5" onPress={(event) => event.stopPropagation()}>
+        <Pressable className="flex-1 items-center justify-center bg-black/30 px-4 py-6" onPress={onClose}>
+          <Pressable className="max-h-[86%] w-full rounded-xl bg-white p-5" onPress={(event) => event.stopPropagation()}>
             {proposal ? (
               <>
                 <View className="flex-row items-start justify-between gap-4">
@@ -166,25 +166,14 @@ export function ProposalDetailsModal({
                   <View className="rounded-xl border border-black/10 px-4">
                     <DetailRow label={relatedAddressLabel} value={relatedAddress} />
                     <DetailRow label="Status" value={proposal.status} />
-                    <DetailRow label="Created" value={timeAgo || 'Unavailable'} />
                     <DetailRow label="Approvals" value={`${proposal.approvals.length} of ${threshold}`} />
                     <DetailRow label="Rejected" value={String(proposal.rejects.length)} />
                     <DetailRow label="Cancelled" value={String(proposal.cancellations.length)} />
                   </View>
-
-                  {proposal.approvals.length > 0 ? (
-                    <View className="mt-5">
-                      <Text className="text-xs font-bold uppercase text-black/40">Approved by</Text>
-                      <View className="mt-2 gap-2">
-                        {proposal.approvals.map((member) => (
-                          <Text key={member} className="text-sm font-bold text-black">
-                            {shortenAddress(member, 8)}
-                          </Text>
-                        ))}
-                      </View>
-                    </View>
-                  ) : null}
                 </ScrollView>
+                <View className='w-full flex-row justify-end my-5'>
+                  <Text>{timeAgo}</Text>
+                </View>
 
                 {error ? <Text className="mt-4 text-xs font-bold text-red-600">{error}</Text> : null}
 

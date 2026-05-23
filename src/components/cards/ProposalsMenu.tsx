@@ -44,7 +44,7 @@ export function ProposalsMenu({
   }
 
   return (
-    <ScrollView className="mt-5">
+    <ScrollView className="mt-5" showsVerticalScrollIndicator={false}>
       {totalPages > 1 ? (
         <View className="mb-2 flex-row items-center justify-between">
           <Text className="text-xs font-bold uppercase text-black/40">

@@ -1,5 +1,5 @@
-import { View } from "react-native";
+import { View } from 'react-native'
 
 export function CardSkeleton({ className = '' }: { className?: string }) {
-  return <View className={`rounded-xl bg-black/10 ${className}`} />
+  return <View className={`bg-black/5 ${className}`} />
 }

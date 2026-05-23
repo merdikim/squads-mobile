@@ -139,8 +139,8 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <SafeAreaView style={{ flex: 1 }}>
-        <Pressable className="flex-1 justify-end bg-black/30 px-4 pb-6" onPress={handleClose}>
-          <Pressable className="rounded-xl bg-white p-5" onPress={(event) => event.stopPropagation()}>
+        <Pressable className="flex-1 items-center justify-center bg-black/30 px-4 py-6" onPress={handleClose}>
+          <Pressable className="w-full rounded-xl bg-white p-5" onPress={(event) => event.stopPropagation()}>
             <View className="flex-row items-start justify-between gap-4">
               <View className="flex-1">
                 <Text className="text-xl font-black text-black">Add Member</Text>
