@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useRef, useState } from 'react'
 import { Animated, Easing, Pressable, Text, View } from 'react-native'
-import { RefreshCw, UsersRound } from 'lucide-react-native'
+import { Plus, RefreshCw, UsersRound } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { router } from 'expo-router'
@@ -10,10 +10,8 @@ import { Dropdown } from '../../components/Dropdown'
 import { ProposalsMenu } from '../../components/cards/ProposalsMenu'
 import { CoinsMenu } from '../../components/home-screen/CoinsMenu'
 import { NftsMenu } from '../../components/home-screen/NftsMenu'
-import {
-  getSelectedMultisigAddress,
-  saveSelectedMultisigAddress,
-} from '../../lib/selectedMultisigStorage'
+import CreateMultisigModal from '../../components/modals/CreateMultisigModal'
+import { getSelectedMultisigAddress, saveSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 import useBalances from '../../hooks/useBalances'
 import useMultisigs from '../../hooks/useMultisigs'
 import { MenuItem, SquadsMultisigData } from '../../types'
@@ -40,28 +38,23 @@ function MenuContent({
   isLoading?: boolean
 }) {
   if (selectedMenuItem === 'Coins') {
-    return <CoinsMenu />
+    return <CoinsMenu address={multisigData?.address ?? ''} />
   }
 
   if (selectedMenuItem === 'NFTs') {
     return <NftsMenu />
   }
 
-  return (
-    <ProposalsMenu
-      multisigAddress={multisigData?.address ?? ''}
-      threshold={multisigData?.threshold ?? 0}
-    />
-  )
+  return <ProposalsMenu multisigAddress={multisigData?.address ?? ''} threshold={multisigData?.threshold ?? 0} />
 }
 
 export default function HomeScreen() {
   const { account } = useMobileWallet()
   const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
-  const { multisigs = [], isMultisigsLoading, isRefetchingMultisig, refetchMultisig } = useMultisigs(walletAddress)
-  const { totalUsd, isBalancesLoading } = useBalances()
+  const { multisigs = [], isMultisigsLoading, isRefetchingMultisig } = useMultisigs(walletAddress)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isCreatingModalOpen, setIsCreatingModalOpen] = useState(false)
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>('Proposals')
   const { data: storedSelectedMultisigKey = '', isFetched: isSelectedMultisigFetched } = useQuery({
     queryKey: ['selectedMultisigAddress'],
@@ -71,10 +64,14 @@ export default function HomeScreen() {
   const selectedMultisig = multisigs.find((multisig) => multisig.address === selectedMultisigKey)
   const multisigDropdownItems = multisigs.map((multisig) => ({
     key: multisig.address,
-    label: typeof multisig.name === 'string' && multisig.name.trim() ? multisig.name.trim() : shortenAddress(multisig.address),
+    label:
+      typeof multisig.name === 'string' && multisig.name.trim()
+        ? multisig.name.trim()
+        : shortenAddress(multisig.address),
     subtitle: `${multisig.threshold} of ${multisig.members.length} - ${shortenAddress(multisig.address)}`,
     imageUri: multisig.imageUri,
   }))
+  const { totalUsd, isBalancesLoading } = useBalances(selectedMultisig?.address ?? '')
   const selectedBalance = formatUsd(totalUsd)
   const selectedParticipants = selectedMultisig?.members.length ?? 0
   const selectedVaultAddress = selectedMultisig?.vaultAddress
@@ -151,16 +148,16 @@ export default function HomeScreen() {
     setIsDropdownOpen(false)
   }
 
+  const openCreateMultisig = () => {
+    setIsDropdownOpen(false)
+    setIsCreatingModalOpen(true)
+  }
+
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       <Pressable className="flex-1" onPress={() => setIsDropdownOpen(false)}>
         <View className="p-4 flex-1">
-          <View className=" h-48 w-full rounded-xl px-3 shadow-2xl">
-            <View className="absolute inset-0 overflow-hidden rounded-xl border border-black/10 bg-white">
-              <View className="absolute -right-16 -top-12 h-36 w-36 rounded-full bg-black/2" />
-              <View className="absolute -bottom-2 -left-12 h-24 w-24 rounded-full bg-black/3" />
-            </View>
-
+          <View className="h-56 w-full px-3">
             <View className="z-10 flex-row items-start justify-between">
               <Dropdown
                 items={multisigDropdownItems}
@@ -169,6 +166,15 @@ export default function HomeScreen() {
                 onToggle={() => setIsDropdownOpen((value) => !value)}
                 onSelect={selectMultisig}
                 menuMaxHeight={260}
+                button={
+                  <Pressable
+                    onPress={openCreateMultisig}
+                    className="h-11 flex-row items-center justify-center rounded-xl bg-black active:bg-black/80"
+                  >
+                    <Plus color="#FFFFFF" size={16} strokeWidth={2.4} />
+                    <Text className="ml-2 text-sm font-black text-white">Create Multisig</Text>
+                  </Pressable>
+                }
               />
 
               <View className="h-10 flex-row items-center gap-1 rounded-xl">
@@ -208,9 +214,7 @@ export default function HomeScreen() {
                 </>
               )}
             </View>
-          </View>
-
-          <View className="mt-4 flex-row items-center justify-between gap-3 px-2">
+            {/* <View className="mt-4 flex-row items-center justify-between gap-3 px-2">
             {isMultisigsLoading ? (
               <View className='flex-1'>
                 <CardSkeleton className="h-4 w-32" />
@@ -231,9 +235,10 @@ export default function HomeScreen() {
                 <RefreshCw color="#090A0F" size={16} strokeWidth={2.4} />
               </Animated.View>
             </Pressable>
+          </View> */}
           </View>
 
-          <View className="mt-4 flex-row p-1 gap-4">
+          <View className="mt-3 flex-row p-1 gap-4">
             {menuItems.map((item) => {
               const isSelected = selectedMenuItem === item
 
@@ -243,7 +248,11 @@ export default function HomeScreen() {
                   onPress={() => setSelectedMenuItem(item)}
                   className="h-11 flex-1 items-center justify-end"
                 >
-                  <Text className={`mb-2 text-sm font-semibold ${isSelected ? 'text-black font-extrabold' : 'text-black/60'}`}>{item}</Text>
+                  <Text
+                    className={`mb-2 text-sm font-semibold ${isSelected ? 'text-black font-extrabold' : 'text-black/60'}`}
+                  >
+                    {item}
+                  </Text>
                   <View
                     className="w-full"
                     style={{
@@ -256,14 +265,13 @@ export default function HomeScreen() {
             })}
           </View>
 
-          <MenuContent
-            selectedMenuItem={selectedMenuItem}
-            multisigData={selectedMultisig}
-          />
+          <MenuContent selectedMenuItem={selectedMenuItem} multisigData={selectedMultisig} />
         </View>
 
         <StatusBar style="dark" />
       </Pressable>
+
+      <CreateMultisigModal visible={isCreatingModalOpen} onClose={() => setIsCreatingModalOpen(false)} />
     </SafeAreaView>
   )
 }

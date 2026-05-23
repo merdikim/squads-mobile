@@ -4,7 +4,6 @@ import type { SquadsApiBalancesResponse, SquadsBalanceData } from '../types'
 
 const BALANCES_DATA_STALE_TIME = 60 * 1000
 const BALANCES_DATA_GC_TIME = 10 * 60 * 1000
-const DEFAULT_BALANCES_ADDRESS = 'BKKZkyuNZPu6ACKjXJmazW5ZYQoC6JEgukDNQqJbQu1y'
 
 export const balancesQueryKey = ['balances'] as const
 
@@ -21,8 +20,8 @@ const normalizeBalance = (balance: SquadsBalanceData): SquadsBalanceData => ({
   name: balance.name,
 })
 
-const useBalances = (address = DEFAULT_BALANCES_ADDRESS) => {
-  const selectedAddress = address || DEFAULT_BALANCES_ADDRESS
+const useBalances = (address:string) => {
+  const selectedAddress = address
 
   const {
     data,

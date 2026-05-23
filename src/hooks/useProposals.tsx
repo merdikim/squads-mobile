@@ -15,12 +15,46 @@ const configTypes: Record<string, string> = {
 
 export const multisigProposalsQueryKey = [...multisigsQueryKey, 'proposals']
 
+const humanizeType = (value?: string) => {
+  if (!value) {
+    return ''
+  }
+
+  return value
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .trim()
+}
+
+const formatNativeTransferTitle = (lamports?: number, symbol = 'SOL') => {
+  if (typeof lamports !== 'number') {
+    return `${symbol} Transfer`
+  }
+
+  const amount = lamports / 1_000_000_000
+
+  return `Transfer ${amount.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${symbol}`
+}
+
 const normalizeProposalRow = (row: SquadsApiProposalRow): SquadsProposalData => {
   const { proposal, transaction, category } = row
-  const firstAction = transaction.account.actions[0]
+  const firstAction = transaction.account.actions?.[0]
+  const summary = transaction.metadata.summary
+  const summaryData = summary?.data
   const memo = transaction.metadata.info.memo?.trim()
-  const actionType = firstAction?.type //?? transaction.type
-  const title = configTypes[actionType] ?? actionType
+  const actionType = firstAction?.type
+  const summaryType = summary?.type
+  const transactionType = transaction.type
+  const title = actionType
+    ? configTypes[actionType] ?? humanizeType(actionType)
+    : summaryType === 'NativeTransfer'
+      ? formatNativeTransferTitle(summaryData?.lamports, summaryData?.metadata?.symbol)
+      : humanizeType(summaryType) || humanizeType(transactionType) || `${humanizeType(category)} Proposal`
+  const memberAddress = actionType === 'AddMember'
+    ? firstAction?.newMember?.key
+    : actionType === 'RemoveMember'
+      ? firstAction?.oldMember
+      : summaryData?.destination ?? transaction.account.creator
 
   return {
     address: transaction.address,
@@ -33,7 +67,12 @@ const normalizeProposalRow = (row: SquadsApiProposalRow): SquadsProposalData => 
     approvals: proposal.approved,
     rejects: proposal.rejected,
     cancellations: proposal.cancelled,
-    memberAddress: actionType === 'AddMember' ? firstAction?.newMember?.key : actionType === 'RemoveMember' ? firstAction?.oldMember as string : undefined,
+    memberAddress,
+    relatedAddressLabel: actionType === 'AddMember' || actionType === 'RemoveMember'
+      ? 'Member address'
+      : summaryData?.destination
+        ? 'Destination'
+        : 'Creator',
     timestamp: proposal.status.timestamp,
     hasApproved: false,
   }

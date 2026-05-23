@@ -48,6 +48,8 @@ export function ProposalDetailsModal({
     || proposal.cancellations.includes(connectedWalletAddress)
   )
   const canVote = !!proposal && proposal.status === 'Active' && !!account && !hasVoted && !voteAction
+  const relatedAddressLabel = proposal?.relatedAddressLabel ?? 'Related address'
+  const relatedAddress = proposal?.memberAddress ? shortenAddress(proposal.memberAddress, 8) : 'Unavailable'
 
   const handleConnectWallet = () => {
     setError('')
@@ -162,7 +164,7 @@ export function ProposalDetailsModal({
 
                 <ScrollView className="mt-5" showsVerticalScrollIndicator={false}>
                   <View className="rounded-xl border border-black/10 px-4">
-                    <DetailRow label="Member address" value={shortenAddress(proposal.memberAddress|| '...', 8)} />
+                    <DetailRow label={relatedAddressLabel} value={relatedAddress} />
                     <DetailRow label="Status" value={proposal.status} />
                     <DetailRow label="Created" value={timeAgo || 'Unavailable'} />
                     <DetailRow label="Approvals" value={`${proposal.approvals.length} of ${threshold}`} />

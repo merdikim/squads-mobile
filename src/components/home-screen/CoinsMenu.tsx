@@ -21,13 +21,13 @@ const formatUsd = (amount: number) => {
   })
 }
 
-export function CoinsMenu() {
+export function CoinsMenu({address}:{address:string}) {
   const {
     balances = [],
     balancesError,
     isBalancesLoading,
     totalUsd,
-  } = useBalances()
+  } = useBalances(address)
   const sortedBalances = [...balances].sort((a, b) => b.uiPrice - a.uiPrice)
 
   if (isBalancesLoading) {

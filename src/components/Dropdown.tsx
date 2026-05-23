@@ -35,8 +35,8 @@ export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuM
   return (
     <View className="relative z-20">
       <Pressable onPress={handleToggle} className="h-10 flex-row items-center gap-2">
-        <DropdownImage imageUri={selectedItem?.imageUri} label={selectedLabel} sizeClassName="h-7 w-7" />
-        <Text className="max-w-40 text-xs font-semibold text-black" numberOfLines={1}>
+        <DropdownImage imageUri={selectedItem?.imageUri} label={selectedLabel} sizeClassName="h-8 w-8" />
+        <Text className="max-w-40 text-sm font-semibold text-black" numberOfLines={1}>
           {selectedLabel}
         </Text>
         <ChevronDown color="#090A0F" size={16} strokeWidth={2.4} />

@@ -14,6 +14,7 @@ export function ProposalCard({ proposal, threshold }: ProposalCardProps) {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const title = proposal.title ?? `Proposal #${proposal.transactionIndex.toString()}`
   const timeAgo = formatTimeAgo(proposal.timestamp)
+  const relatedAddress = proposal.memberAddress ? shortenAddress(proposal.memberAddress, 8) : 'Unavailable'
 
   return (
     <>
@@ -31,7 +32,7 @@ export function ProposalCard({ proposal, threshold }: ProposalCardProps) {
         </View>
         <View className="mt-4 w-full flex-row items-center justify-between">
           <Text className="text-sm leading-6 text-black/60">
-            {shortenAddress(proposal.memberAddress?? '', 8)}
+            {relatedAddress}
           </Text>
           {timeAgo ? (
             <View className="flex-row items-center gap-1">

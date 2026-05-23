@@ -71,6 +71,44 @@ export type SquadsBalanceData = {
   name: string
 }
 
+export type SquadsApiNft = {
+  mint?: string
+  address?: string
+  name?: string
+  symbol?: string
+  image?: string
+  imageUri?: string
+  uri?: string
+  collection?: {
+    name?: string
+    address?: string
+  } | null
+  metadata?: {
+    name?: string
+    symbol?: string
+    image?: string
+    imageUri?: string
+    uri?: string
+    [key: string]: unknown
+  } | null
+  [key: string]: unknown
+}
+
+export type SquadsApiNftsResponse = {
+  next_cursor: string | null
+  prev_cursor: string | null
+  nfts: SquadsApiNft[]
+}
+
+export type SquadsNftData = {
+  id: string
+  name: string
+  symbol?: string
+  imageUri?: string
+  collectionName?: string
+  mint?: string
+}
+
 export type SquadsProposalData = {
   address: string
   multisigAddress: string
@@ -84,6 +122,7 @@ export type SquadsProposalData = {
   cancellations: string[]
   timestamp?: number
   memberAddress?: string
+  relatedAddressLabel?: string
   hasApproved: boolean
 }
 
@@ -104,14 +143,26 @@ export type SquadsApiProposal = {
 export type SquadsApiTransactionAction = {
   type: string
   newMember?: SquadsApiMultisigMember
+  oldMember?: string
   [key: string]: unknown
 }
 
+export type SquadsApiTransactionMessage = {
+  accountKeys?: string[]
+  addressTableLookups?: unknown[]
+  instructions?: unknown[]
+  numSigners?: number
+  numWritableNonSigners?: number
+  numWritableSigners?: number
+}
+
 export type SquadsApiTransactionAccount = {
-  actions: SquadsApiTransactionAction[]
+  actions?: SquadsApiTransactionAction[]
   creator: string
   index: number
+  message?: SquadsApiTransactionMessage
   multisig: string
+  subaccountIndex?: number
 }
 
 export type SquadsApiTransactionMetadataInfo = {
@@ -152,6 +203,22 @@ export type SquadsApiTransactionPrevConfig = {
 export type SquadsApiTransactionMetadata = {
   info: SquadsApiTransactionMetadataInfo
   prevConfig?: SquadsApiTransactionPrevConfig
+  summary?: {
+    data?: {
+      destination?: string
+      lamports?: number
+      metadata?: {
+        decimals?: number
+        logo_url?: string
+        mint?: string
+        name?: string
+        symbol?: string
+      }
+      operation?: string
+      source?: string
+    }
+    type?: string
+  }
   spendingLimitChanges: unknown[]
 }
 

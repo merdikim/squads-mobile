@@ -90,13 +90,3 @@ export function buildProposalIx(
 
 
 export { LAMPORTS_PER_SOL, Permission, Permissions }
-
-
-
-
-
-
-// get multisigs : https://v4-api.squads.so/multisigs/BKKZkyuNZPu6ACKjXJmazW5ZYQoC6JEgukDNQqJbQu1y?useProd=true
-// get nfts : https://v4-api.squads.so/nftsV2/BKKZkyuNZPu6ACKjXJmazW5ZYQoC6JEgukDNQqJbQu1y?useProd=true
-// get balances : https://balances-v4-api.squads.so/balancesDasV2Cached/BKKZkyuNZPu6ACKjXJmazW5ZYQoC6JEgukDNQqJbQu1y?sendAll=true&cacheBypass=false&useProd=true
-// get proposals : https://multisig-api.squads.xyz/transactions/multisig/CeFAdRbzPr4ufdVDK3rovijAtsYc4vhrkrffBfzcyC3u/active
