@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import type { SquadsProposalData } from '../../types'
-import { shortenAddress } from '../../utils'
-import { useState } from 'react'
+import { formatTimeAgo, shortenAddress } from '../../utils'
+import { Clock } from 'lucide-react-native'
+import { ProposalDetailsModal } from '../modals/ProposalDetailsModal'
 
 type ProposalCardProps = {
   proposal: SquadsProposalData
@@ -9,58 +11,42 @@ type ProposalCardProps = {
 }
 
 export function ProposalCard({ proposal, threshold }: ProposalCardProps) {
-  const canApprove = proposal.status === 'Active' && !proposal.hasApproved
-  const hasVoted = proposal.hasApproved
-  const canExecute = false
-  const [isVoting, setIsVoting] = useState(false)
-
-
-  const vote = (proposal:SquadsProposalData) => {
-  
-  }
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const title = proposal.title ?? `Proposal #${proposal.transactionIndex.toString()}`
+  const timeAgo = formatTimeAgo(proposal.timestamp)
 
   return (
-    <View className="my-2 rounded-xl border border-black/10 bg-white p-4">
-      <View className="flex-row items-start justify-between gap-3">
-        <Text className="flex-1 text-base font-black leading-6 text-black">
-          Add Member
-        </Text>
-        <View className="rounded-xl bg-black px-2 py-1">
-          <Text className="text-xs font-bold text-white">{proposal.status}</Text>
+    <>
+      <Pressable
+        onPress={() => setIsDetailsOpen(true)}
+        className="my-2 rounded-xl border border-black/10 bg-white p-4 active:bg-black/5"
+      >
+        <View className="flex-row items-start justify-between gap-3">
+          <Text className="flex-1 text-base font-black leading-6 text-black">
+            {title}
+          </Text>
+          <View className="rounded-xl bg-black px-2 py-1">
+            <Text className="text-xs font-bold text-white">{proposal.status}</Text>
+          </View>
         </View>
-      </View>
-
-      <Text className="mt-2 text-sm leading-6 text-black/60">
-        { shortenAddress(proposal.address, 8)}
-      </Text>
-
-      <View className="mt-4 flex-row items-center justify-between border-t border-black/10 pt-3">
-        <Text className="text-xs font-bold uppercase text-black/40">Approvals</Text>
-        <Text className="text-sm font-black text-black">
-          {proposal.approvals} of {threshold}
-        </Text>
-      </View>
-
-      <View className="mt-4 flex-row gap-3">
-        <Pressable
-          onPress={() => canApprove && vote(proposal)}
-          disabled={hasVoted}
-          className={`h-11 flex-1 items-center justify-center rounded-xl border border-black/15 ${canApprove ? 'bg-white active:bg-black/5' : 'bg-black/5'}`}
-        >
-          <Text className={`text-sm font-bold ${canApprove ? 'text-black' : 'text-black/35'}`}>
-            Reject
+        <View className="mt-4 w-full flex-row items-center justify-between">
+          <Text className="text-sm leading-6 text-black/60">
+            {shortenAddress(proposal.address, 8)}
           </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => canApprove && vote(proposal)}
-          disabled={hasVoted}
-          className={`h-11 flex-1 items-center justify-center rounded-xl border border-black/15 ${canApprove ? 'bg-white active:bg-black/5' : 'bg-black/5'}`}
-        >
-          <Text className={`text-sm font-bold ${canApprove ? 'text-black' : 'text-black/35'}`}>
-            Approve
-          </Text>
-        </Pressable>
-      </View>
-    </View>
+          {timeAgo ? (
+            <View className="flex-row items-center gap-1">
+              <Clock size={14}/>
+              <Text className="text-xs">{timeAgo}</Text>
+            </View>
+          ) : null}
+        </View>
+      </Pressable>
+
+      <ProposalDetailsModal
+        proposal={isDetailsOpen ? proposal : null}
+        threshold={threshold}
+        onClose={() => setIsDetailsOpen(false)}
+      />
+    </>
   )
 }

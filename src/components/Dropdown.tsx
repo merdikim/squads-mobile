@@ -1,10 +1,12 @@
-import { GestureResponderEvent, Pressable, ScrollView, Text, View } from 'react-native'
+import { GestureResponderEvent, Image, Pressable, ScrollView, Text, View } from 'react-native'
 import { ChevronDown } from 'lucide-react-native'
 import type { ReactNode } from 'react'
 
 export type DropdownItem = {
   key: string
-  label: string
+  label: unknown
+  subtitle?: unknown
+  imageUri?: string
 }
 
 type DropdownProps = {
@@ -19,6 +21,7 @@ type DropdownProps = {
 
 export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuMaxHeight, button }: DropdownProps) {
   const selectedItem = items.find((item) => item.key === selectedKey)
+  const selectedLabel = getDisplayText(selectedItem?.label, 'Select multisig')
   const handleToggle = (event: GestureResponderEvent) => {
     event.stopPropagation()
     onToggle()
@@ -31,8 +34,11 @@ export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuM
 
   return (
     <View className="relative z-20">
-      <Pressable onPress={handleToggle} className="h-10 flex-row items-center">
-        <Text className="text-xs font-semibold text-black">{selectedItem?.label ?? 'Select multisig'}</Text>
+      <Pressable onPress={handleToggle} className="h-10 flex-row items-center gap-2">
+        <DropdownImage imageUri={selectedItem?.imageUri} label={selectedLabel} sizeClassName="h-7 w-7" />
+        <Text className="max-w-40 text-xs font-semibold text-black" numberOfLines={1}>
+          {selectedLabel}
+        </Text>
         <ChevronDown color="#090A0F" size={16} strokeWidth={2.4} />
       </Pressable>
 
@@ -42,22 +48,76 @@ export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuM
           style={menuMaxHeight ? { maxHeight: menuMaxHeight } : undefined}
         >
           <ScrollView showsVerticalScrollIndicator={false}>
-            {items.map((item) => (
-              <Pressable
-                key={item.key}
-                onPress={(event) => handleSelect(event, item.key)}
-                className="rounded-xl px-2 py-2 active:bg-black/5"
-              >
-                <Text className={`text-sm font-bold ${selectedKey === item.key ? 'text-black' : 'text-black/60'}`}>
-                  {item.label}
-                </Text>
-              </Pressable>
-            ))}
+            {items.map((item) => {
+              const label = getDisplayText(item.label, item.key)
+              const subtitle = getDisplayText(item.subtitle)
+
+              return (
+                <Pressable
+                  key={item.key}
+                  onPress={(event) => handleSelect(event, item.key)}
+                  className="flex-row items-center gap-3 rounded-xl px-2 py-2 active:bg-black/5"
+                >
+                  <DropdownImage imageUri={item.imageUri} label={label} sizeClassName="h-9 w-9" />
+                  <View className="flex-1">
+                    <Text
+                      className={`text-sm font-bold ${selectedKey === item.key ? 'text-black' : 'text-black/60'}`}
+                      numberOfLines={1}
+                    >
+                      {label}
+                    </Text>
+                    {subtitle ? (
+                      <Text className="mt-0.5 text-xs font-semibold text-black/40" numberOfLines={1}>
+                        {subtitle}
+                      </Text>
+                    ) : null}
+                  </View>
+                </Pressable>
+              )
+            })}
           </ScrollView>
 
           {button ? <View className="mt-2 border-t border-black/10 pt-2">{button}</View> : null}
         </View>
       ) : null}
+    </View>
+  )
+}
+
+function getDisplayText(value: unknown, fallback = '') {
+  if (typeof value === 'string') {
+    return value
+  }
+
+  if (typeof value === 'number' || typeof value === 'bigint') {
+    return value.toString()
+  }
+
+  return fallback
+}
+
+function DropdownImage({
+  imageUri,
+  label,
+  sizeClassName,
+}: {
+  imageUri?: string
+  label: string
+  sizeClassName: string
+}) {
+  if (imageUri) {
+    return (
+      <Image
+        source={{ uri: imageUri }}
+        className={`${sizeClassName} rounded-xl bg-black/5`}
+        resizeMode="cover"
+      />
+    )
+  }
+
+  return (
+    <View className={`${sizeClassName} items-center justify-center rounded-xl bg-black/5`}>
+      <Text className="text-xs font-black text-black/50">{label.slice(0, 1).toUpperCase()}</Text>
     </View>
   )
 }

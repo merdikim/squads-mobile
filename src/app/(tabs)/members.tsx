@@ -4,10 +4,9 @@ import { Animated, PanResponder, Pressable, ScrollView, Text, View } from 'react
 import { useQuery } from '@tanstack/react-query'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { CheckCircle2, Plus, Trash2, UsersRound } from 'lucide-react-native'
-import { MultisigDataSkeleton } from '../../components/home-screen/MultisigDataSkeleton'
+import { CardSkeleton } from '../../components/skeletons/CardSkeleton'
 import { AddMemberModal } from '../../components/modals/AddMemberModal'
 import { DeleteMemberModal } from '../../components/modals/DeleteMemberModal'
-import useMultisig from '../../hooks/useMultisig'
 import useMultisigs from '../../hooks/useMultisigs'
 import { getSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 import { shortenAddress } from '../../utils'
@@ -20,7 +19,7 @@ export default function MembersScreen() {
   const walletAddress = account?.address.toString()
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false)
   const [memberToDelete, setMemberToDelete] = useState('')
-  const { multisigs = [] } = useMultisigs()
+  const { multisigs = [], isMultisigsLoading } = useMultisigs(walletAddress)
   const { data: storedSelectedMultisigKey = '' } = useQuery({
     queryKey: ['selectedMultisigAddress'],
     queryFn: getSelectedMultisigAddress,
@@ -28,10 +27,9 @@ export default function MembersScreen() {
   const selectedMultisig =
     multisigs.find((multisig) => multisig.address === storedSelectedMultisigKey)
   const selectedMultisigAddress = selectedMultisig?.address ?? storedSelectedMultisigKey
-  const { multisigData, isMultisigLoading } = useMultisig(selectedMultisigAddress, walletAddress)
   const members = useMemo(() => {
-    return multisigData?.members ?? []
-  }, [multisigData])
+    return selectedMultisig?.members ?? []
+  }, [selectedMultisig])
 
   if (!selectedMultisigAddress) {
     return <NoMembersScreen />
@@ -44,8 +42,8 @@ export default function MembersScreen() {
           <View className="flex-row items-center justify-between gap-3">
             <View className="flex-row items-center gap-2">
               <Text className="text-base font-black text-black">Members</Text>
-              {isMultisigLoading ? (
-                <MultisigDataSkeleton className="h-5 w-6" />
+              {isMultisigsLoading ? (
+                <CardSkeleton className="h-5 w-6" />
               ) : (
                 <Text className="text-base font-black text-black">({members.length})</Text>
               )}
@@ -60,7 +58,7 @@ export default function MembersScreen() {
             </View>
           </View>
 
-          {isMultisigLoading ? (
+          {isMultisigsLoading ? (
             <MembersLoadingSkeleton />
           ) : members.length > 0 ? (
             <View className="mt-4 gap-3">
@@ -113,12 +111,12 @@ function MembersLoadingSkeleton() {
     <View className="mt-4 gap-3">
       {memberRows.map((_, index) => (
         <View key={index} className="flex-row items-center gap-3 rounded-xl border border-black/10 bg-white p-3">
-          <MultisigDataSkeleton className="h-10 w-10" />
+          <CardSkeleton className="h-10 w-10" />
           <View className="flex-1">
-            <MultisigDataSkeleton className="h-4 w-24" />
-            <MultisigDataSkeleton className="mt-2 h-3 w-36" />
+            <CardSkeleton className="h-4 w-24" />
+            <CardSkeleton className="mt-2 h-3 w-36" />
           </View>
-          <MultisigDataSkeleton className="h-7 w-14" />
+          <CardSkeleton className="h-7 w-14" />
         </View>
       ))}
     </View>

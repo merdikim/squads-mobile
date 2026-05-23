@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
-import { GestureResponderEvent, Pressable, Text, View } from 'react-native'
-import { RefreshCw, UsersRound, Plus } from 'lucide-react-native'
+import { Pressable, Text, View } from 'react-native'
+import { RefreshCw, UsersRound } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { router } from 'expo-router'
@@ -10,33 +10,26 @@ import { Dropdown } from '../../components/Dropdown'
 import { ProposalsMenu } from '../../components/cards/ProposalsMenu'
 import { CoinsMenu } from '../../components/home-screen/CoinsMenu'
 import { NftsMenu } from '../../components/home-screen/NftsMenu'
-import { MultisigDataSkeleton, MultisigMenuSkeleton } from '../../components/home-screen/MultisigDataSkeleton'
-import { ImportMultisigModal } from '../../components/modals/ImportMultisigModal'
 import {
   getSelectedMultisigAddress,
   saveSelectedMultisigAddress,
 } from '../../lib/selectedMultisigStorage'
 import useMultisigs from '../../hooks/useMultisigs'
-import { AddMultisigButtonProps, MenuItem, SquadsMultisigData } from '../../types'
-import useMultisig from '../../hooks/useMultisig'
+import { MenuItem, SquadsMultisigData } from '../../types'
 import { formatSol, shortenAddress } from '../../utils'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { CardSkeleton } from '../../components/skeletons/CardSkeleton'
 
 const menuItems: MenuItem[] = ['Proposals', 'Coins', 'NFTs']
 
 function MenuContent({
   selectedMenuItem,
   multisigData,
-  isLoading,
 }: {
   selectedMenuItem: MenuItem
   multisigData?: SquadsMultisigData | null
   isLoading?: boolean
 }) {
-  if (isLoading) {
-    return <MultisigMenuSkeleton />
-  }
-
   if (selectedMenuItem === 'Coins') {
     return <CoinsMenu />
   }
@@ -46,7 +39,10 @@ function MenuContent({
   }
 
   return (
-    <ProposalsMenu proposals={multisigData?.proposals ?? []} threshold={multisigData?.threshold ?? 1} />
+    <ProposalsMenu
+      multisigAddress={multisigData?.address ?? ''}
+      threshold={multisigData?.threshold ?? 0}
+    />
   )
 }
 
@@ -54,23 +50,24 @@ export default function HomeScreen() {
   const { account } = useMobileWallet()
   const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
-  const { multisigs = [], isMultisigsLoading } = useMultisigs()
+  const { multisigs = [], isMultisigsLoading } = useMultisigs(walletAddress)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>('Proposals')
   const { data: storedSelectedMultisigKey = '', isFetched: isSelectedMultisigFetched } = useQuery({
     queryKey: ['selectedMultisigAddress'],
     queryFn: getSelectedMultisigAddress,
   })
   const [selectedMultisigKey, setSelectedMultisigKey] = useState('')
-  const { multisigData, isMultisigLoading, refetchMultisigData } = useMultisig(selectedMultisigKey, walletAddress)
   const selectedMultisig = multisigs.find((multisig) => multisig.address === selectedMultisigKey)
   const multisigDropdownItems = multisigs.map((multisig) => ({
     key: multisig.address,
-    label: multisig.name,
+    label: typeof multisig.name === 'string' && multisig.name.trim() ? multisig.name.trim() : shortenAddress(multisig.address),
+    subtitle: `${multisig.threshold} of ${multisig.members.length} - ${shortenAddress(multisig.address)}`,
+    imageUri: multisig.imageUri,
   }))
-  const selectedBalance = multisigData ? formatSol(multisigData.balanceLamports) : '0'
-  const selectedParticipants = multisigData?.members.length ?? 0
+  const selectedBalance = formatSol(selectedMultisig?.balanceLamports || 0)
+  const selectedParticipants = selectedMultisig?.members.length ?? 0
+  const selectedVaultAddress = selectedMultisig?.vaultAddress
 
   useEffect(() => {
     if (!isMultisigsLoading && multisigs.length === 0) {
@@ -108,17 +105,11 @@ export default function HomeScreen() {
     }
   }, [isSelectedMultisigFetched, multisigs, queryClient, selectedMultisigKey, storedSelectedMultisigKey])
 
-  const selectMultisig = (publicKey: string) => {
-    setSelectedMultisigKey(publicKey)
-    queryClient.setQueryData(['selectedMultisigAddress'], publicKey)
-    void saveSelectedMultisigAddress(publicKey)
+  const selectMultisig = (address: string) => {
+    setSelectedMultisigKey(address)
+    queryClient.setQueryData(['selectedMultisigAddress'], address)
+    void saveSelectedMultisigAddress(address)
     setIsDropdownOpen(false)
-  }
-
-  const importMultisig = (event: GestureResponderEvent) => {
-    event.stopPropagation()
-    setIsDropdownOpen(false)
-    setIsImportModalOpen(true)
   }
 
   return (
@@ -139,13 +130,12 @@ export default function HomeScreen() {
                 onToggle={() => setIsDropdownOpen((value) => !value)}
                 onSelect={selectMultisig}
                 menuMaxHeight={260}
-                button={<ImportMultisigButton onImport={importMultisig} />}
               />
 
               <View className="h-10 flex-row items-center gap-1 rounded-xl">
                 <UsersRound color="#090A0F" size={16} strokeWidth={2.4} />
-                {isMultisigLoading ? (
-                  <MultisigDataSkeleton className="h-4 w-5" />
+                {isMultisigsLoading && !selectedMultisig ? (
+                  <CardSkeleton className="h-4 w-5" />
                 ) : (
                   <Text className="text-sm font-bold text-black">{selectedParticipants}</Text>
                 )}
@@ -153,23 +143,23 @@ export default function HomeScreen() {
             </View>
 
             <View className="z-0 flex-1 items-center justify-center">
-              {isMultisigLoading ? (
+              {isMultisigsLoading ? (
                 <View className="items-center">
-                  <MultisigDataSkeleton className="h-4 w-28" />
-                  <MultisigDataSkeleton className="mt-4 h-10 w-36" />
-                  <MultisigDataSkeleton className="mt-3 h-3 w-24" />
+                  <CardSkeleton className="h-4 w-28" />
+                  <CardSkeleton className="mt-4 h-10 w-36" />
+                  <CardSkeleton className="mt-3 h-3 w-24" />
                 </View>
               ) : (
                 <>
                   <Text className="text-xs font-semibold text-black/45">Total Balance</Text>
                   <Text className="mt-3 text-center text-4xl font-black text-black">{selectedBalance}</Text>
-                  {multisigData ? (
+                  {selectedVaultAddress ? (
                     <View className="mt-2 flex-row items-center justify-center">
                       <Text className="text-xs font-bold text-black/45">
-                        Vault {shortenAddress(multisigData.vaultAddress)}
+                        Vault {shortenAddress(selectedVaultAddress)}
                       </Text>
                       <CopyText
-                        text={multisigData.vaultAddress}
+                        text={selectedVaultAddress}
                         accessibilityLabel="Copy vault address"
                         className="h-7 w-7 items-center justify-center disabled:opacity-40"
                         iconSize={13}
@@ -182,9 +172,9 @@ export default function HomeScreen() {
           </View>
 
           <View className="mt-4 flex-row items-center justify-between gap-3 px-2">
-            {isMultisigLoading ? (
+            {isMultisigsLoading ? (
               <View className='flex-1'>
-                <MultisigDataSkeleton className="h-4 w-32" />
+                <CardSkeleton className="h-4 w-32" />
               </View>
             ) : (
               <View className="flex-1 flex-row items-center">
@@ -195,7 +185,7 @@ export default function HomeScreen() {
               </View>
             )}
             <Pressable
-              onPress={() => void refetchMultisigData()}
+              //onPress={() => void refetchMultisigData()}
               disabled={!selectedMultisigKey}
             >
               <RefreshCw color="#090A0F" size={16} strokeWidth={2.4} />
@@ -227,38 +217,12 @@ export default function HomeScreen() {
 
           <MenuContent
             selectedMenuItem={selectedMenuItem}
-            multisigData={multisigData}
-            isLoading={isMultisigLoading}
+            multisigData={selectedMultisig}
           />
         </View>
 
         <StatusBar style="dark" />
       </Pressable>
-      <ImportMultisigModal visible={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} />
     </SafeAreaView>
-  )
-}
-
-function ImportMultisigButton({ isBusy, onImport }: AddMultisigButtonProps) {
-  return (
-    <View className="gap-2">
-      {/* <Pressable
-        onPress={onCreate}
-        disabled={isBusy}
-        className="h-11 flex-row items-center justify-center rounded-xl bg-black active:bg-black/80"
-      >
-        <Plus color="#FFFFFF" size={16} strokeWidth={2} />
-        <Text className="ml-2 text-sm font-black text-white">{isBusy ? 'Working...' : 'Create Multisig'}</Text>
-      </Pressable> */}
-
-      <Pressable
-        onPress={onImport}
-        disabled={isBusy}
-        className="h-11 flex-row items-center justify-center rounded-xl border border-black/15 bg-white active:bg-black/5"
-      >
-        <Plus color="#FFFFFF" size={16} strokeWidth={2} />
-        <Text className="text-sm font-black text-black">Import Multisig</Text>
-      </Pressable>
-    </View>
   )
 }

@@ -5,33 +5,15 @@ import {
   PublicKey,
   TransactionInstruction,
 } from '@solana/web3.js'
-import { ImportableSquadsMultisig, SquadsMultisigData, SquadsProposalData } from '../types'
+import { SquadsMultisigData, SquadsProposalData } from '../types'
 import { RPC_URL } from '../constants'
-import { shortenAddress, toPublicKey } from '../utils'
+import { toPublicKey } from '../utils'
 
 
 const { Permission, Permissions } = multisig.types
 
 export function createSquadsConnection() {
   return new Connection(RPC_URL, 'confirmed')
-}
-
-export async function fetchImportableMultisig(address: string): Promise<ImportableSquadsMultisig> {
-  try {
-    const connection = createSquadsConnection()
-    const multisigPda = toPublicKey(address)
-    const account = await multisig.accounts.Multisig.fromAccountAddress(connection, multisigPda)
-
-    return {
-      address: multisigPda.toBase58(),
-      name: shortenAddress(multisigPda.toBase58()),
-      threshold: account.threshold,
-      members: account.members.map((member) => member.key.toBase58()),
-    }
-  } catch (error) {
-    console.error('Error fetching importable multisig:', error)
-    throw new Error('Enter a valid Squads multisig account address.')
-  }
 }
 
 export async function fetchMultisigData({
@@ -63,11 +45,12 @@ export async function fetchMultisigData({
       proposals.unshift({
         address: proposalPda.toBase58(),
         transactionIndex: index,
-        //title: `Vault transaction #${index.toString()}`,
+        title: `Vault transaction #${index.toString()}`,
+        category: 'vault',
         status: proposal.status.__kind,
-        approvals: proposal.approved.length,
-        rejects: proposal.rejected.length,
-        cancellations: proposal.cancelled.length,
+        approvals: proposal.approved.map((approvedMember) => approvedMember.toBase58()),
+        rejects: proposal.rejected.map((rejectedMember) => rejectedMember.toBase58()),
+        cancellations: proposal.cancelled.map((cancelledMember) => cancelledMember.toBase58()),
         //timestamp: proposal.status.timestamp,
         hasApproved: currentMember
           ? proposal.approved.some((approvedMember) => approvedMember.equals(currentMember))
@@ -115,3 +98,4 @@ export { LAMPORTS_PER_SOL, Permission, Permissions }
 // get multisigs : https://v4-api.squads.so/multisigs/BKKZkyuNZPu6ACKjXJmazW5ZYQoC6JEgukDNQqJbQu1y?useProd=true
 // get nfts : https://v4-api.squads.so/nftsV2/BKKZkyuNZPu6ACKjXJmazW5ZYQoC6JEgukDNQqJbQu1y?useProd=true
 // get balances : https://balances-v4-api.squads.so/balancesDasV2Cached/BKKZkyuNZPu6ACKjXJmazW5ZYQoC6JEgukDNQqJbQu1y?sendAll=true&cacheBypass=false&useProd=true
+// get proposals : https://multisig-api.squads.xyz/transactions/multisig/CeFAdRbzPr4ufdVDK3rovijAtsYc4vhrkrffBfzcyC3u/active
