@@ -3,18 +3,44 @@ import NoMultisigs from '../components/home-screen/NoMultisigs'
 import { StatusBar } from 'expo-status-bar'
 import { router } from 'expo-router'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
-import { WalletCards } from 'lucide-react-native'
+import { CheckCircle, HandshakeIcon, Network, ShieldCheck, Users, WalletCards } from 'lucide-react-native'
 import { Animated, Easing, Image, Pressable, Text, View } from 'react-native'
-import { useEffect, useRef } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useEffect, useRef, useState } from 'react'
+
+const introWordDuration = 2000
+
+const introWords = [
+    {
+        icon: ShieldCheck,
+        text: 'Secure'
+    },
+    {
+        icon: Network,
+        text: 'Coordinate'
+    },
+    {
+        icon: CheckCircle,
+        text: 'Execute'
+    },
+    {
+        icon: Users,
+        text: 'Govern'
+    },
+    {
+        icon: HandshakeIcon,
+        text: 'Consensus'
+    }
+]
+
+const getIntroWordIndex = (index: number) => {
+    return (index + introWords.length) % introWords.length
+}
 
 const App = () => {
     const { account, connect } = useMobileWallet()
     const walletAddress = account?.address.toString() ?? ''
     const { multisigs = [], isMultisigsLoading } = useMultisigs(walletAddress)
-    const spinValue = useRef(new Animated.Value(0)).current
-    const fadeValue = useRef(new Animated.Value(0)).current
-    const liftValue = useRef(new Animated.Value(20)).current
+    const loadingSpinValue = useRef(new Animated.Value(0)).current
 
     useEffect(() => {
         if (walletAddress && !isMultisigsLoading && multisigs.length > 0) {
@@ -24,13 +50,13 @@ const App = () => {
 
     useEffect(() => {
         if (!isMultisigsLoading) {
-            spinValue.stopAnimation()
-            spinValue.setValue(0)
+            loadingSpinValue.stopAnimation()
+            loadingSpinValue.setValue(0)
             return
         }
 
         const animation = Animated.loop(
-            Animated.timing(spinValue, {
+            Animated.timing(loadingSpinValue, {
                 toValue: 1,
                 duration: 900,
                 easing: Easing.linear,
@@ -43,30 +69,9 @@ const App = () => {
         return () => {
             animation.stop()
         }
-    }, [isMultisigsLoading, spinValue])
+    }, [isMultisigsLoading, loadingSpinValue])
 
-    useEffect(() => {
-        if (isMultisigsLoading) {
-            return
-        }
-
-        Animated.parallel([
-            Animated.timing(fadeValue, {
-                toValue: 1,
-                duration: 450,
-                easing: Easing.out(Easing.cubic),
-                useNativeDriver: true,
-            }),
-            Animated.timing(liftValue, {
-                toValue: 0,
-                duration: 450,
-                easing: Easing.out(Easing.cubic),
-                useNativeDriver: true,
-            }),
-        ]).start()
-    }, [fadeValue, isMultisigsLoading, liftValue])
-
-    const spin = spinValue.interpolate({
+    const loadingSpin = loadingSpinValue.interpolate({
         inputRange: [0, 1],
         outputRange: ['0deg', '360deg'],
     })
@@ -74,68 +79,156 @@ const App = () => {
     if(isMultisigsLoading) {
         return (
             <View className='flex-1 justify-center items-center'>
-                <Animated.View style={{ transform: [{ rotate: spin }] }}>
+                <Animated.View style={{ transform: [{ rotate: loadingSpin }] }}>
                     <Image source={require('../assets/logo.png')} className="h-12 w-12" resizeMode="contain" />
                 </Animated.View>
             </View>
         )
     }
 
-    if (account && multisigs.length === 0) {
+    if (account && !isMultisigsLoading && multisigs.length === 0) {
         return <NoMultisigs />
     }
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
-            <View className="flex-1 px-6 pt-10 text-black">
-                <Animated.View
-                    className="flex-1 items-center justify-center rounded-xl bg-neutral-100 shadow"
-                    style={{
-                        opacity: fadeValue,
-                        transform: [{ translateY: liftValue }],
-                    }}
-                >
-                    <Animated.View style={{ transform: [{ rotate: spin }] }}>
-                        <Image source={require('../assets/logo.png')} className="h-14 w-14" resizeMode="contain" />
-                    </Animated.View>
-
-                    <Text className="mt-6 text-center text-3xl font-extrabold tracking-normal text-black">
-                        SQUADS
-                    </Text>
-                </Animated.View>
-
-                <View className="flex-[1.25] items-center justify-center">
-                    <View className="mb-6 h-14 w-14 items-center justify-center rounded-xl bg-black/5">
-                        <WalletCards color="#090A0F" size={24} strokeWidth={2.4} />
-                    </View>
-
-                    <Text className="text-center text-3xl font-black leading-tight">
-                        Connect your wallet
-                    </Text>
-
-                    <Text className="mt-5 text-center text-sm leading-7 text-black/70">
-                        Use your Solana wallet to access your multisigs, manage members, and approve treasury activity.
-                    </Text>
+        <>
+            <View className="flex-1 overflow-hidden bg-white">
+                <View pointerEvents="none" className="absolute inset-0">
+                    <View
+                        className="absolute rounded-[36px] bg-[#D8E7EF]/40"
+                        style={{
+                            top: 250,
+                            left: -98,
+                            height: 250,
+                            width: 240,
+                            opacity: 0.58,
+                            transform: [{ rotate: '12deg' }],
+                        }}
+                    />
+                    <View
+                        className="absolute rounded-[42px] bg-[#F0E1BE]/60"
+                        style={{
+                            right: -80,
+                            bottom: 96,
+                            height: 240,
+                            width: 250,
+                            opacity: 0.46,
+                            transform: [{ rotate: '18deg' }],
+                        }}
+                    />
                 </View>
 
-                <View className="flex-[0.75] justify-center gap-3">
-                    <Pressable
-                        onPress={connect}
-                        disabled={!!account}
-                        className={`h-14 flex-row items-center justify-center rounded-xl px-5 ${
-                            account ? 'bg-black/70' : 'bg-black active:bg-black/80'
-                        }`}
-                    >
-                        <WalletCards color="#FFFFFF" size={18} strokeWidth={2.4} />
-                        <Text className="ml-2 text-base font-black text-white">
-                            {account ? 'Wallet Connected' : 'Connect Wallet'}
+                <View className="flex-1 px-6 pt-10 text-black">
+                    <IntroWordsCarousel />
+
+                    <View className="flex-[1.25] items-center justify-center">
+                        <Text className="text-center text-3xl font-black leading-tight">
+                            The coordination layer for onchain assets
                         </Text>
-                    </Pressable>
+                        <View className="mt-7 flex-row items-center justify-center">
+                            <Image source={require('../assets/logo.png')} className="h-8 w-8" resizeMode="contain" />
+                        </View>
+                    </View>
+
+                    <View className="flex-[0.75] justify-center gap-3 pb-10">
+                        <Pressable
+                            onPress={connect}
+                            disabled={!!account}
+                            className={`h-14 flex-row items-center justify-center rounded-xl px-5 ${
+                                account ? 'bg-black/70' : 'bg-black active:bg-black/80'
+                            }`}
+                        >
+                            <WalletCards color="#FFFFFF" size={18} strokeWidth={2.4} />
+                            <Text className="ml-2 text-base font-black text-white">
+                                {account ? 'Wallet Connected' : 'Connect Wallet'}
+                            </Text>
+                        </Pressable>
+                    </View>
                 </View>
             </View>
 
             <StatusBar style="dark" />
-        </SafeAreaView>
+        </>
+    )
+}
+
+function IntroWordsCarousel() {
+    const [activeIndex, setActiveIndex] = useState(0)
+    const transitionValue = useRef(new Animated.Value(1)).current
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            transitionValue.setValue(0)
+            setActiveIndex((currentIndex) => getIntroWordIndex(currentIndex + 1))
+
+            Animated.timing(transitionValue, {
+                toValue: 1,
+                duration: 260,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: true,
+            }).start()
+        }, introWordDuration)
+
+        return () => {
+            clearInterval(interval)
+            transitionValue.stopAnimation()
+        }
+    }, [transitionValue])
+
+    const previousWord = introWords[getIntroWordIndex(activeIndex - 1)]
+    const currentWord = introWords[activeIndex]
+    const nextWord = introWords[getIntroWordIndex(activeIndex + 1)]
+    const CurrentIcon = currentWord.icon
+
+    return (
+        <View className="flex-1 items-center justify-center overflow-hidden">
+            <View className="h-36 w-full items-center justify-center overflow-hidden">
+                <Animated.View
+                    className="absolute w-36 items-center justify-center"
+                    style={{
+                        left: -10,
+                        opacity: 0.32,
+                    }}
+                >
+                    <Text className="text-center text-xl font-light text-black" numberOfLines={1}>
+                        {nextWord.text}
+                    </Text>
+                </Animated.View>
+
+                <Animated.View
+                    className="items-center justify-center"
+                    style={{
+                        transform: [
+                            {
+                                scale: transitionValue.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [0.98, 1],
+                                }),
+                            },
+                        ],
+                    }}
+                >
+                    <View className="h-16 w-16 items-center justify-center">
+                        <CurrentIcon color="#090A0F" size={30} strokeWidth={2} />
+                    </View>
+                    <Text className="mt-4 text-center text-3xl font-extrabold text-black" numberOfLines={1}>
+                        {currentWord.text}
+                    </Text>
+                </Animated.View>
+
+                <Animated.View
+                    className="absolute w-36 items-center justify-center"
+                    style={{
+                        right: -10,
+                        opacity: 0.32,
+                    }}
+                >
+                    <Text className="text-center text-xl font-light text-black" numberOfLines={1}>
+                        {previousWord.text}
+                    </Text>
+                </Animated.View>
+            </View>
+        </View>
     )
 }
 

@@ -38,7 +38,7 @@ export default function SettingsScreen() {
             <Text className="text-base font-black text-black">Settings</Text>
           </View>
 
-          <View className="mt-4 rounded-xl bg-neutral-100/60 p-4 shadow-xs">
+          <View className="mt-4 rounded-xl p-4 shadow-xs">
             <View className="flex-row items-center gap-3">
               <View className="h-10 w-10 items-center justify-center rounded-xl bg-black/5">
                 <WalletCards color="#090A0F" size={20} strokeWidth={2.4} />
