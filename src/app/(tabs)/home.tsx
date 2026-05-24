@@ -18,6 +18,7 @@ import { MenuItem, SquadsMultisigData } from '../../types'
 import { shortenAddress } from '../../utils'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { CardSkeleton } from '../../components/skeletons/CardSkeleton'
+import { APP_BACKGROUND_COLOR } from '../../constants'
 
 const menuItems: MenuItem[] = ['Proposals', 'Coins', 'NFTs']
 
@@ -38,7 +39,7 @@ function MenuContent({
   isLoading?: boolean
 }) {
   if (selectedMenuItem === 'Coins') {
-    return <CoinsMenu address={multisigData?.vaultAddress?? ''} />
+    return <CoinsMenu address={multisigData?.vaultAddress ?? ''} />
   }
 
   if (selectedMenuItem === 'NFTs') {
@@ -68,7 +69,7 @@ export default function HomeScreen() {
       typeof multisig.name === 'string' && multisig.name.trim()
         ? multisig.name.trim()
         : shortenAddress(multisig.address),
-    subtitle:  shortenAddress(multisig.address, 6),
+    subtitle: shortenAddress(multisig.address, 6),
     imageUri: multisig.imageUri,
   }))
   const selectedParticipants = selectedMultisig?.members.length ?? 0
@@ -154,7 +155,7 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1 }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: APP_BACKGROUND_COLOR }}>
       <Pressable className="flex-1" onPress={() => setIsDropdownOpen(false)}>
         <View className="p-4 flex-1">
           <View className="h-56 w-full px-3">

@@ -7,6 +7,7 @@ import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { CopyText } from '../../components/CopyText'
 import { CardSkeleton } from '../../components/skeletons/CardSkeleton'
 import useMultisigs from '../../hooks/useMultisigs'
+import { APP_BACKGROUND_COLOR } from '../../constants'
 import { getSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 import { shortenAddress } from '../../utils'
 
@@ -34,7 +35,7 @@ export default function SettingsScreen() {
   }
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex: 1 }}>
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: APP_BACKGROUND_COLOR }}>
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <View className="flex-1 px-6 py-8">
           <View className="flex-row items-center justify-between gap-3">
@@ -146,7 +147,7 @@ function SettingsValueRow({
 }) {
   if (!copyLabel) {
     return (
-      <View className="flex-row items-center justify-between gap-3 rounded-xl bg-[#F9F9F9] p-5">
+      <View className="flex-row items-center justify-between gap-3 rounded-xl bg-neutral-100/60 p-5 shadow-xs">
         <Text className="flex-1 text-xs font-bold uppercase text-black/45">{label}</Text>
         {isLoading ? (
           <CardSkeleton className="h-4 w-20 rounded-md" />
@@ -158,7 +159,7 @@ function SettingsValueRow({
   }
 
   return (
-    <View className="flex-row items-center bg-[#F9F9F9] justify-between gap-3 rounded-xl p-3">
+    <View className="flex-row items-center justify-between gap-3 rounded-xl bg-neutral-100/60 p-3 shadow-xs">
       <View className="flex-1">
         <Text className="text-xs font-bold uppercase text-black/45">{label}</Text>
         {isLoading ? (

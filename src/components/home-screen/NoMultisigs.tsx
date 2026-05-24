@@ -7,6 +7,7 @@ import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { Plus } from 'lucide-react-native'
 import CreateMultisigModal from '../modals/CreateMultisigModal'
 import useMultisigs from '../../hooks/useMultisigs'
+import { APP_BACKGROUND_COLOR } from '../../constants'
 
 const squadsLetters = ['S', 'Q', 'U', 'A', 'D', 'S']
 const introDuration = 1000
@@ -58,15 +59,12 @@ export default function NoMultisigs() {
     outputRange: ['0deg', `${squadsLetters.length * 45}deg`],
   })
 
-
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: APP_BACKGROUND_COLOR }}>
       <View className="flex-1 px-6 pt-10 text-black">
-        <View className='flex-1 items-center justify-center bg-neutral-100 shadow rounded-xl'>
+        <View className="flex-1 items-center justify-center bg-neutral-100 shadow rounded-xl">
           <View className="flex-row items-center justify-center">
-            <Animated.View
-              style={{ transform: [{ rotate: spin }] }}
-            >
+            <Animated.View style={{ transform: [{ rotate: spin }] }}>
               <Image source={require('../../assets/logo.png')} className="h-12 w-12" resizeMode="contain" />
             </Animated.View>
 
@@ -101,9 +99,7 @@ export default function NoMultisigs() {
         </View>
 
         <View className="flex-[1.25] items-center justify-center">
-          <Text className="text-center text-3xl font-black leading-tight">
-            The safest way to manage funds together
-          </Text>
+          <Text className="text-center text-3xl font-black leading-tight">The safest way to manage funds together</Text>
 
           <Text className="mt-5 text-center text-sm leading-7 text-black/70">
             Built for teams that move assets together. Secure every transaction with collective approval
@@ -121,10 +117,7 @@ export default function NoMultisigs() {
         </View>
       </View>
 
-      <CreateMultisigModal
-        visible={isCreatingModalOpen}
-        onClose={() => setIsCreatingModalOpen(false)}
-      />
+      <CreateMultisigModal visible={isCreatingModalOpen} onClose={() => setIsCreatingModalOpen(false)} />
 
       <StatusBar style="light" />
     </SafeAreaView>

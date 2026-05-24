@@ -11,6 +11,7 @@ import useMultisigs from '../../hooks/useMultisigs'
 import { getSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 import { shortenAddress } from '../../utils'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { APP_BACKGROUND_COLOR } from '../../constants'
 
 const DELETE_REVEAL_WIDTH = 72
 
@@ -24,8 +25,7 @@ export default function MembersScreen() {
     queryKey: ['selectedMultisigAddress'],
     queryFn: getSelectedMultisigAddress,
   })
-  const selectedMultisig =
-    multisigs.find((multisig) => multisig.address === storedSelectedMultisigKey)
+  const selectedMultisig = multisigs.find((multisig) => multisig.address === storedSelectedMultisigKey)
   const selectedMultisigAddress = selectedMultisig?.address ?? storedSelectedMultisigKey
   const members = useMemo(() => {
     return selectedMultisig?.members ?? []
@@ -36,9 +36,9 @@ export default function MembersScreen() {
   }
 
   return (
-    <SafeAreaView edges={['top']} style={{ flex:1 }}>
-    <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-      <View className="flex-1 px-6 py-8">
+    <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: APP_BACKGROUND_COLOR }}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        <View className="flex-1 px-6 py-8">
           <View className="flex-row items-center justify-between gap-3">
             <View className="flex-row items-center gap-2">
               <Text className="text-base font-black text-black">Members</Text>
@@ -83,20 +83,20 @@ export default function MembersScreen() {
           )}
         </View>
 
-      <StatusBar style="dark" />
-      <AddMemberModal
-        visible={isAddMemberModalOpen}
-        members={members}
-        multisigAddress={selectedMultisigAddress}
-        onClose={() => setIsAddMemberModalOpen(false)}
-      />
-      <DeleteMemberModal
-        member={memberToDelete}
-        members={members}
-        multisigAddress={selectedMultisigAddress}
-        onClose={() => setMemberToDelete('')}
-      />
-    </ScrollView>
+        <StatusBar style="dark" />
+        <AddMemberModal
+          visible={isAddMemberModalOpen}
+          members={members}
+          multisigAddress={selectedMultisigAddress}
+          onClose={() => setIsAddMemberModalOpen(false)}
+        />
+        <DeleteMemberModal
+          member={memberToDelete}
+          members={members}
+          multisigAddress={selectedMultisigAddress}
+          onClose={() => setMemberToDelete('')}
+        />
+      </ScrollView>
     </SafeAreaView>
   )
 }
@@ -107,7 +107,7 @@ function MembersLoadingSkeleton() {
   return (
     <View className="mt-4 gap-3">
       {memberRows.map((_, index) => (
-        <View key={index} className="flex-row items-center gap-3 rounded-xl bg-[#F9F9F9] p-3">
+        <View key={index} className="flex-row items-center gap-3 rounded-xl bg-neutral-100/60 p-3 shadow-xs">
           <CardSkeleton className="h-10 w-10 rounded-xl" />
           <View className="flex-1">
             <CardSkeleton className="h-4 w-24 rounded-md" />
@@ -162,22 +162,30 @@ function MemberCard({
       useNativeDriver: true,
     }).start()
   }
+  const deleteOpacity = translateX.interpolate({
+    inputRange: [-DELETE_REVEAL_WIDTH, -12, 0],
+    outputRange: [1, 0, 0],
+    extrapolate: 'clamp',
+  })
 
   return (
-    <View className="overflow-hidden rounded-xl bg-[#F9F9F9]">
+    <View className="overflow-hidden rounded-xl bg-neutral-100/60 shadow-xs">
       {canDelete ? (
-        <View className="absolute inset-y-0 right-0 w-18 items-center justify-center">
+        <Animated.View
+          className="absolute inset-y-0 right-0 w-18 items-center justify-center"
+          style={{ opacity: deleteOpacity }}
+        >
           <Pressable
             onPress={handleDelete}
             className="h-10 w-10 items-center justify-center rounded-xl border border-red-500/25 bg-white active:bg-red-100"
           >
             <Trash2 color="#DC2626" size={17} strokeWidth={2.4} />
           </Pressable>
-        </View>
+        </Animated.View>
       ) : null}
 
       <Animated.View style={{ transform: [{ translateX }] }} {...(canDelete ? panResponder.panHandlers : {})}>
-        <View className="flex-row items-center gap-3 rounded-xl bg-[#F9F9F9] p-3">
+        <View className="flex-row items-center gap-3 rounded-xl bg-neutral-100/60 p-3">
           <View className="h-10 w-10 items-center justify-center rounded-xl bg-black/5">
             <Text className="text-sm font-black text-black">{index + 1}</Text>
           </View>
@@ -189,9 +197,7 @@ function MemberCard({
             <Text className="mt-1 text-sm font-bold text-black/45">{shortenAddress(member)}</Text>
           </View>
           <View className="rounded-xl bg-black/5 px-2 py-1">
-            <Text className="text-xs font-bold text-black/60">
-              {isConnectedWallet ? 'You' : 'Signer'}
-            </Text>
+            <Text className="text-xs font-bold text-black/60">{isConnectedWallet ? 'You' : 'Signer'}</Text>
           </View>
         </View>
       </Animated.View>
@@ -201,10 +207,12 @@ function MemberCard({
 
 function NoMembersScreen() {
   return (
-    <View className="flex-1 items-center justify-center gap-3 px-6">
+    <View className="flex-1 items-center justify-center gap-3 px-6" style={{ backgroundColor: APP_BACKGROUND_COLOR }}>
       <UsersRound color="#090A0F" size={48} strokeWidth={1.5} />
       <Text className="text-center text-lg font-bold text-black">No Members</Text>
-      <Text className="text-center text-sm text-black/65">Select a multisig from the home screen to view its members.</Text>
+      <Text className="text-center text-sm text-black/65">
+        Select a multisig from the home screen to view its members.
+      </Text>
       <StatusBar style="dark" />
     </View>
   )
