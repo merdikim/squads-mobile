@@ -1,7 +1,7 @@
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { ChevronLeft, ChevronRight } from 'lucide-react-native'
 import { EmptyMenuState } from '../home-screen/EmptyMenuState'
-import { ProposalCard } from './ProposalCard'
+import { ProposalCard } from '../cards/ProposalCard'
 import useProposals from '../../hooks/useProposals'
 import { ProposalsSkeleton } from '../skeletons/ProposalsSkeleton'
 
@@ -36,11 +36,11 @@ export function ProposalsMenu({
   }
 
   if (proposalsError) {
-    return <EmptyMenuState title={proposalsError.message} />
+    return <EmptyMenuState title='Api Error' description={proposalsError.message} />
   }
 
   if (!isProposalsLoading && proposals.length === 0) {
-    return <EmptyMenuState title="No active proposals" />
+    return <EmptyMenuState title='No Proposals' description="No active proposals found" />
   }
 
   return (

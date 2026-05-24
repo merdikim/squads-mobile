@@ -6,7 +6,7 @@ import { multisigsQueryKey } from './useMultisigs'
 
 const PROPOSALS_DATA_STALE_TIME = 180 * 1000
 const PROPOSALS_DATA_GC_TIME = 10 * 60 * 1000
-const PROPOSALS_PAGE_SIZE = 10
+const PROPOSALS_PAGE_SIZE = 20
 
 const configTypes: Record<string, string> = {
   AddMember: 'Add Member',

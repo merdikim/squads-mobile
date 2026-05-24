@@ -54,11 +54,11 @@ export function CoinsMenu({address}:{address:string}) {
   }
 
   if (balancesError) {
-    return <EmptyMenuState title={balancesError.message} />
+    return <EmptyMenuState title='Api Error' description={balancesError.message} />
   }
 
   if (sortedBalances.length === 0) {
-    return <EmptyMenuState title="No coins found" />
+    return <EmptyMenuState title="No coins found" description='No coins found in custody of this account' />
   }
 
   return (
