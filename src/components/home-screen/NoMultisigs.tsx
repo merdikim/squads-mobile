@@ -102,11 +102,11 @@ export default function NoMultisigs() {
 
         <View className="flex-[1.25] items-center justify-center">
           <Text className="text-center text-3xl font-black leading-tight">
-            Secure and manage Solana assets 
+            The safest way to manage funds together
           </Text>
 
           <Text className="mt-5 text-center text-sm leading-7 text-black/70">
-            Built for teams, DAOs, treasuries, and on-chain organizations
+            Built for teams that move assets together. Secure every transaction with collective approval
           </Text>
         </View>
 
