@@ -96,7 +96,7 @@ const App = () => {
       <View className="flex-1 overflow-hidden" style={{ backgroundColor: APP_BACKGROUND_COLOR }}>
         <View pointerEvents="none" className="absolute inset-0">
           <View
-            className="absolute rounded-[36px] bg-[#D8E7EF]/40"
+            className="absolute rounded-[36px] bg-[#D8E7EF]/80"
             style={{
               top: 250,
               left: -98,
@@ -107,7 +107,7 @@ const App = () => {
             }}
           />
           <View
-            className="absolute rounded-[42px] bg-[#F0E1BE]/60"
+            className="absolute rounded-[42px] bg-[#F0E1BE]/80"
             style={{
               right: -80,
               bottom: 96,

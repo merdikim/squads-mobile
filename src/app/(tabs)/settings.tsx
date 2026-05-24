@@ -2,17 +2,18 @@ import { StatusBar } from 'expo-status-bar'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { LogIn, LogOut } from 'lucide-react-native'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { CopyText } from '../../components/CopyText'
 import { CardSkeleton } from '../../components/skeletons/CardSkeleton'
 import useMultisigs from '../../hooks/useMultisigs'
 import { APP_BACKGROUND_COLOR } from '../../constants'
-import { getSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
+import { clearSelectedMultisigAddress, getSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 import { shortenAddress } from '../../utils'
 
 export default function SettingsScreen() {
   const { account, connect, disconnect } = useMobileWallet()
+  const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
   const { multisigs = [], isMultisigsLoading } = useMultisigs(walletAddress)
   const { data: storedSelectedMultisigKey = '' } = useQuery({
@@ -32,6 +33,8 @@ export default function SettingsScreen() {
     }
 
     disconnect()
+    queryClient.setQueryData(['selectedMultisigAddress'], '')
+    void clearSelectedMultisigAddress()
   }
 
   return (

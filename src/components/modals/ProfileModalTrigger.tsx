@@ -1,17 +1,22 @@
 import { useState } from 'react'
 import { Pressable, Text } from 'react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
+import { useQueryClient } from '@tanstack/react-query'
 import { UserCircle } from 'lucide-react-native'
 import { SmoothModal } from './SmoothModal'
+import { clearSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 
 export function ProfileModalTrigger() {
   const { account, connect, disconnect } = useMobileWallet()
+  const queryClient = useQueryClient()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
 
   const closeProfile = () => setIsProfileOpen(false)
 
   const handleDisconnect = () => {
     disconnect()
+    queryClient.setQueryData(['selectedMultisigAddress'], '')
+    void clearSelectedMultisigAddress()
     closeProfile()
   }
 

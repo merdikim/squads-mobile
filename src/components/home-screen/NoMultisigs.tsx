@@ -4,17 +4,20 @@ import { Animated, Easing, Image, Pressable, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
-import { Plus } from 'lucide-react-native'
+import { useQueryClient } from '@tanstack/react-query'
+import { LogOut, Plus } from 'lucide-react-native'
 import CreateMultisigModal from '../modals/CreateMultisigModal'
 import useMultisigs from '../../hooks/useMultisigs'
 import { APP_BACKGROUND_COLOR } from '../../constants'
+import { clearSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 
 const squadsLetters = ['S', 'Q', 'U', 'A', 'D', 'S']
 const introDuration = 1000
 const letterDuration = introDuration / squadsLetters.length
 
 export default function NoMultisigs() {
-  const { account } = useMobileWallet()
+  const { account, disconnect } = useMobileWallet()
+  const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
   const { multisigs = [], isMultisigsLoading } = useMultisigs(walletAddress)
   const spinValue = useRef(new Animated.Value(0)).current
@@ -58,6 +61,13 @@ export default function NoMultisigs() {
     inputRange: [0, squadsLetters.length],
     outputRange: ['0deg', `${squadsLetters.length * 45}deg`],
   })
+
+  const logout = () => {
+    disconnect()
+    queryClient.setQueryData(['selectedMultisigAddress'], '')
+    void clearSelectedMultisigAddress()
+    router.replace('/')
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: APP_BACKGROUND_COLOR }}>
@@ -113,6 +123,13 @@ export default function NoMultisigs() {
           >
             <Plus color="#FFFFFF" size={18} strokeWidth={2.4} />
             <Text className="ml-2 text-base font-black text-white">Create Multisig</Text>
+          </Pressable>
+          <Pressable
+            onPress={logout}
+            className="mt-3 h-11 flex-row items-center justify-center rounded-xl border border-black/10 bg-neutral-100/60 px-5 active:bg-black/5"
+          >
+            <LogOut color="rgba(9, 10, 15, 0.55)" size={15} strokeWidth={2.4} />
+            <Text className="ml-2 text-sm font-bold text-black/55">Log out</Text>
           </Pressable>
         </View>
       </View>
