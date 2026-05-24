@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { shortenAddress, toPublicKey } from '../../utils'
 import * as multisig from '@sqds/multisig'
@@ -8,12 +7,13 @@ import { buildProposalIx } from '../../lib/squads'
 import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
 import { multisigProposalsQueryKey } from '../../hooks/useProposals'
+import { SmoothModal } from './SmoothModal'
 
 type DeleteMemberModalProps = {
   member: string
   members: string[]
   onClose: () => void
-  multisigAddress:string
+  multisigAddress: string
 }
 
 export function DeleteMemberModal({ multisigAddress, member, members, onClose }: DeleteMemberModalProps) {
@@ -23,14 +23,13 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
   const [error, setError] = useState('')
   const [isRemoving, setIsRemoving] = useState(false)
   const queryClient = useQueryClient()
-  
 
   const handleClose = () => {
     setError('')
     onClose()
   }
 
-  const handleDeleteMember = async() => {
+  const handleDeleteMember = async () => {
     if (!member) return
 
     if (!account) {
@@ -55,7 +54,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
         actions: [
           {
             __kind: 'RemoveMember',
-            oldMember: toPublicKey(member)
+            oldMember: toPublicKey(member),
           },
         ],
         creator,
@@ -87,7 +86,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
 
       await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
       queryClient.invalidateQueries({
-        queryKey: [...multisigProposalsQueryKey, multisigAddress]
+        queryKey: [...multisigProposalsQueryKey, multisigAddress],
       })
 
       handleClose()
@@ -106,48 +105,42 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
   }
 
   return (
-    <Modal visible={!!member} transparent animationType="fade" onRequestClose={handleClose}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <Pressable className="flex-1 items-center justify-center bg-black/30 px-4 py-6" onPress={handleClose}>
-          <Pressable className="w-full rounded-xl bg-white p-5" onPress={(event) => event.stopPropagation()}>
-            <Text className="text-xl font-black text-black">Delete Member</Text>
-            <Text className="mt-2 text-sm leading-6 text-black/60">
-              Remove {member ? shortenAddress(member) : 'this member'} from this multisig?
-            </Text>
-            {error ? <Text className="mt-3 text-xs font-bold text-red-600">{error}</Text> : null}
+    <SmoothModal visible={!!member} onClose={handleClose}>
+      <Text className="text-xl font-black text-black">Delete Member</Text>
+      <Text className="mt-2 text-sm leading-6 text-black/60">
+        Remove {member ? shortenAddress(member) : 'this member'} from this multisig?
+      </Text>
+      {error ? <Text className="mt-3 text-xs font-bold text-red-600">{error}</Text> : null}
 
-            <View className="mt-6 flex-row gap-3">
-              <Pressable
-                onPress={handleClose}
-                disabled={isRemoving}
-                className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
-              >
-                <Text className="text-base font-bold text-black">Cancel</Text>
-              </Pressable>
-              {account ? (
-                <Pressable
-                  onPress={handleDeleteMember}
-                  disabled={isRemoving}
-                  className="h-12 flex-1 items-center justify-center rounded-xl bg-red-600 active:bg-red-700"
-                >
-                  {isRemoving ? (
-                                      <ActivityIndicator size="small" color="#fff" />
-                                    ) : (
-                                      <Text className="text-base font-bold text-white">Delete</Text>
-                                    )}
-                </Pressable>
-              ) : (
-                <Pressable
-                  onPress={handleConnectWallet}
-                  className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
-                >
-                  <Text className="text-base font-bold text-white">Connect Wallet</Text>
-                </Pressable>
-              )}
-            </View>
-          </Pressable>
+      <View className="mt-6 flex-row gap-3">
+        <Pressable
+          onPress={handleClose}
+          disabled={isRemoving}
+          className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
+        >
+          <Text className="text-base font-bold text-black">Cancel</Text>
         </Pressable>
-      </SafeAreaView>
-    </Modal>
+        {account ? (
+          <Pressable
+            onPress={handleDeleteMember}
+            disabled={isRemoving}
+            className="h-12 flex-1 items-center justify-center rounded-xl bg-red-600 active:bg-red-700"
+          >
+            {isRemoving ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text className="text-base font-bold text-white">Delete</Text>
+            )}
+          </Pressable>
+        ) : (
+          <Pressable
+            onPress={handleConnectWallet}
+            className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
+          >
+            <Text className="text-base font-bold text-white">Connect Wallet</Text>
+          </Pressable>
+        )}
+      </View>
+    </SmoothModal>
   )
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { ActivityIndicator, Modal, Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
 import { Check, X } from 'lucide-react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
 import type { SquadsProposalData } from '../../types'
@@ -9,6 +8,7 @@ import { formatTimeAgo, shortenAddress, toPublicKey } from '../../utils'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import * as multisig from '@sqds/multisig'
 import { multisigProposalsQueryKey } from '../../hooks/useProposals'
+import { SmoothModal } from './SmoothModal'
 
 type ProposalDetailsModalProps = {
   proposal: SquadsProposalData | null
@@ -27,26 +27,20 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-export function ProposalDetailsModal({
-  proposal,
-  threshold,
-  onClose,
-  onApprove,
-  onReject,
-}: ProposalDetailsModalProps) {
+export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, onReject }: ProposalDetailsModalProps) {
   const { account, connect, connection, signAndSendTransactions } = useMobileWallet()
   const queryClient = useQueryClient()
   const [error, setError] = useState('')
   const [voteAction, setVoteAction] = useState<'approve' | 'reject' | null>(null)
-  
+
   const visible = !!proposal
   const timeAgo = formatTimeAgo(proposal?.timestamp)
   const connectedWalletAddress = account?.address.toString() ?? ''
-  const hasVoted = !!proposal && (
-    proposal.approvals.includes(connectedWalletAddress)
-    || proposal.rejects.includes(connectedWalletAddress)
-    || proposal.cancellations.includes(connectedWalletAddress)
-  )
+  const hasVoted =
+    !!proposal &&
+    (proposal.approvals.includes(connectedWalletAddress) ||
+      proposal.rejects.includes(connectedWalletAddress) ||
+      proposal.cancellations.includes(connectedWalletAddress))
   const canVote = !!proposal && proposal.status === 'Active' && !!account && !hasVoted && !voteAction
   const relatedAddressLabel = proposal?.relatedAddressLabel ?? 'Related address'
   const relatedAddress = proposal?.memberAddress ? shortenAddress(proposal.memberAddress, 8) : 'Unavailable'
@@ -79,17 +73,18 @@ export function ProposalDetailsModal({
       const multisigPda = toPublicKey(proposal.multisigAddress)
       // @ts-expect-error wallet adapter address is compatible with PublicKey input here.
       const member = toPublicKey(account.address)
-      const instruction = action === 'approve'
-        ? multisig.instructions.proposalApprove({
-          multisigPda,
-          transactionIndex: proposal.transactionIndex,
-          member,
-        })
-        : multisig.instructions.proposalReject({
-          multisigPda,
-          transactionIndex: proposal.transactionIndex,
-          member,
-        })
+      const instruction =
+        action === 'approve'
+          ? multisig.instructions.proposalApprove({
+              multisigPda,
+              transactionIndex: proposal.transactionIndex,
+              member,
+            })
+          : multisig.instructions.proposalReject({
+              multisigPda,
+              transactionIndex: proposal.transactionIndex,
+              member,
+            })
 
       const {
         context: { slot: minContextSlot },
@@ -141,92 +136,85 @@ export function ProposalDetailsModal({
   }
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <SafeAreaView style={{ flex: 1 }}>
-        <Pressable className="flex-1 items-center justify-center bg-black/30 px-4 py-6" onPress={onClose}>
-          <Pressable className="max-h-[86%] w-full rounded-xl bg-white p-5" onPress={(event) => event.stopPropagation()}>
-            {proposal ? (
+    <SmoothModal visible={visible} onClose={onClose} contentClassName="w-full rounded-xl bg-white p-5">
+      {proposal ? (
+        <>
+          <View className="flex-row items-start justify-between gap-4">
+            <View className="flex-1">
+              <Text className="text-xl font-black text-black">{proposal.title}</Text>
+              <Text className="mt-2 text-sm leading-6 text-black/60">
+                {proposal.memo || `${proposal.category} proposal`}
+              </Text>
+            </View>
+            <Pressable
+              onPress={onClose}
+              className="h-10 w-10 items-center justify-center rounded-xl border border-black/10 active:bg-black/5"
+            >
+              <X color="#090A0F" size={17} strokeWidth={2.4} />
+            </Pressable>
+          </View>
+
+            <View className="rounded-xl mt-5 border border-black/10 px-4">
+              <DetailRow label={relatedAddressLabel} value={relatedAddress} />
+              <DetailRow label="Status" value={proposal.status} />
+              <DetailRow label="Approvals" value={`${proposal.approvals.length} of ${threshold}`} />
+              <DetailRow label="Rejected" value={String(proposal.rejects.length)} />
+              <DetailRow label="Cancelled" value={String(proposal.cancellations.length)} />
+            </View>
+          
+          <View className="w-full flex-row justify-end my-5">
+            <Text>{timeAgo}</Text>
+          </View>
+
+          {error ? <Text className="mt-4 text-xs font-bold text-red-600">{error}</Text> : null}
+
+          <View className="mt-6 flex-row gap-3">
+            {account ? (
               <>
-                <View className="flex-row items-start justify-between gap-4">
-                  <View className="flex-1">
-                    <Text className="text-xl font-black text-black">{proposal.title}</Text>
-                    <Text className="mt-2 text-sm leading-6 text-black/60">
-                      {proposal.memo || `${proposal.category} proposal`}
-                    </Text>
-                  </View>
-                  <Pressable
-                    onPress={onClose}
-                    className="h-10 w-10 items-center justify-center rounded-xl border border-black/10 active:bg-black/5"
-                  >
-                    <X color="#090A0F" size={17} strokeWidth={2.4} />
-                  </Pressable>
-                </View>
-
-                <ScrollView className="mt-5" showsVerticalScrollIndicator={false}>
-                  <View className="rounded-xl border border-black/10 px-4">
-                    <DetailRow label={relatedAddressLabel} value={relatedAddress} />
-                    <DetailRow label="Status" value={proposal.status} />
-                    <DetailRow label="Approvals" value={`${proposal.approvals.length} of ${threshold}`} />
-                    <DetailRow label="Rejected" value={String(proposal.rejects.length)} />
-                    <DetailRow label="Cancelled" value={String(proposal.cancellations.length)} />
-                  </View>
-                </ScrollView>
-                <View className='w-full flex-row justify-end my-5'>
-                  <Text>{timeAgo}</Text>
-                </View>
-
-                {error ? <Text className="mt-4 text-xs font-bold text-red-600">{error}</Text> : null}
-
-                <View className="mt-6 flex-row gap-3">
-                  {account ? (
-                    <>
-                      <Pressable
-                        onPress={handleReject}
-                        disabled={!canVote}
-                        className={`h-12 flex-1 flex-row items-center justify-center rounded-xl border border-black/15 ${canVote ? 'active:bg-black/5' : 'bg-black/5'}`}
-                      >
-                        {voteAction === 'reject' ? (
-                          <ActivityIndicator size="small" color="#090A0F" />
-                        ) : (
-                          <>
-                            <X color={canVote ? '#090A0F' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
-                            <Text className={`ml-2 text-base font-bold ${canVote ? 'text-black' : 'text-black/35'}`}>
-                              Reject
-                            </Text>
-                          </>
-                        )}
-                      </Pressable>
-                      <Pressable
-                        onPress={handleApprove}
-                        disabled={!canVote}
-                        className={`h-12 flex-1 flex-row items-center justify-center rounded-xl ${canVote ? 'bg-black active:bg-black/80' : 'bg-black/10'}`}
-                      >
-                        {voteAction === 'approve' ? (
-                          <ActivityIndicator size="small" color="#FFFFFF" />
-                        ) : (
-                          <>
-                            <Check color={canVote ? '#FFFFFF' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
-                            <Text className={`ml-2 text-base font-bold ${canVote ? 'text-white' : 'text-black/35'}`}>
-                              Approve
-                            </Text>
-                          </>
-                        )}
-                      </Pressable>
-                    </>
+                <Pressable
+                  onPress={handleReject}
+                  disabled={!canVote}
+                  className={`h-12 flex-1 flex-row items-center justify-center rounded-xl border border-black/15 ${canVote ? 'active:bg-black/5' : 'bg-black/5'}`}
+                >
+                  {voteAction === 'reject' ? (
+                    <ActivityIndicator size="small" color="#090A0F" />
                   ) : (
-                    <Pressable
-                      onPress={handleConnectWallet}
-                      className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
-                    >
-                      <Text className="text-base font-bold text-white">Connect Wallet</Text>
-                    </Pressable>
+                    <>
+                      <X color={canVote ? '#090A0F' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
+                      <Text className={`ml-2 text-base font-bold ${canVote ? 'text-black' : 'text-black/35'}`}>
+                        Reject
+                      </Text>
+                    </>
                   )}
-                </View>
+                </Pressable>
+                <Pressable
+                  onPress={handleApprove}
+                  disabled={!canVote}
+                  className={`h-12 flex-1 flex-row items-center justify-center rounded-xl ${canVote ? 'bg-black active:bg-black/80' : 'bg-black/10'}`}
+                >
+                  {voteAction === 'approve' ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Check color={canVote ? '#FFFFFF' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
+                      <Text className={`ml-2 text-base font-bold ${canVote ? 'text-white' : 'text-black/35'}`}>
+                        Approve
+                      </Text>
+                    </>
+                  )}
+                </Pressable>
               </>
-            ) : null}
-          </Pressable>
-        </Pressable>
-      </SafeAreaView>
-    </Modal>
+            ) : (
+              <Pressable
+                onPress={handleConnectWallet}
+                className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
+              >
+                <Text className="text-base font-bold text-white">Connect Wallet</Text>
+              </Pressable>
+            )}
+          </View>
+        </>
+      ) : null}
+    </SmoothModal>
   )
 }

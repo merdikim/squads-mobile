@@ -68,7 +68,7 @@ export default function HomeScreen() {
       typeof multisig.name === 'string' && multisig.name.trim()
         ? multisig.name.trim()
         : shortenAddress(multisig.address),
-    subtitle: `${multisig.threshold} of ${multisig.members.length} - ${shortenAddress(multisig.address)}`,
+    subtitle:  shortenAddress(multisig.address, 6),
     imageUri: multisig.imageUri,
   }))
   const selectedParticipants = selectedMultisig?.members.length ?? 0

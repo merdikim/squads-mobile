@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { LogIn, LogOut, WalletCards } from 'lucide-react-native'
+import { LogIn, LogOut } from 'lucide-react-native'
 import { useQuery } from '@tanstack/react-query'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { CopyText } from '../../components/CopyText'
@@ -19,7 +19,10 @@ export default function SettingsScreen() {
     queryFn: getSelectedMultisigAddress,
   })
   const selectedMultisig = multisigs.find((multisig) => multisig.address === storedSelectedMultisigKey)
-  const selectedMultisigAddress = selectedMultisig?.address ?? storedSelectedMultisigKey
+  const selectedMultisigAccount = selectedMultisig?.address ?? storedSelectedMultisigKey
+  const selectedMultisigVaultAccount = selectedMultisig?.vaultAddress ?? ''
+  const walletName = selectedMultisig?.name ?? ''
+  const signersCount = selectedMultisig?.members.length
 
   const handleWalletPress = () => {
     if (!account) {
@@ -38,38 +41,66 @@ export default function SettingsScreen() {
             <Text className="text-base font-black text-black">Settings</Text>
           </View>
 
-          <View className="mt-4 rounded-xl p-4 shadow-xs">
-            <View className="flex-row items-center gap-3">
-              <View className="h-10 w-10 items-center justify-center rounded-xl bg-black/5">
-                <WalletCards color="#090A0F" size={20} strokeWidth={2.4} />
-              </View>
-              <View className="flex-1">
-                <Text className="text-xs font-bold uppercase text-black/45">Wallet</Text>
-                <Text className="mt-1 text-sm font-black text-black">
-                  {walletAddress ? `Wallet ${shortenAddress(walletAddress)}` : 'No wallet connected'}
-                </Text>
+          <View className="mt-4">
+            <View className="h-48 flex items-center justify-center">
+              <View>
+                {isMultisigsLoading ? (
+                  <>
+                    <CardSkeleton className="h-9 w-56 rounded-lg" />
+                    <CardSkeleton className="mt-3 h-7 w-40 rounded-xl" />
+                  </>
+                ) : (
+                  <>
+                    <Text className="text-3xl font-black text-black">
+                      {walletName ||
+                        (selectedMultisigAccount ? shortenAddress(selectedMultisigAccount) : 'No wallet selected')}
+                    </Text>
+                    {selectedMultisigVaultAccount ? (
+                      <View className="mt-3 flex-row items-center">
+                        <Text className="text-sm font-bold text-black/45">
+                          {shortenAddress(selectedMultisigVaultAccount, 9)}
+                        </Text>
+                        <CopyText
+                          text={selectedMultisigVaultAccount}
+                          accessibilityLabel="Copy wallet address"
+                          className="ml-1 h-8 w-8 items-center justify-center rounded-xl bg-black/5 disabled:opacity-40"
+                        />
+                      </View>
+                    ) : null}
+                  </>
+                )}
               </View>
             </View>
 
             <View className="mt-5 gap-3">
               <SettingsValueRow
-                label="Selected Multisig Account"
-                value={selectedMultisigAddress}
-                displayValue={selectedMultisigAddress ? shortenAddress(selectedMultisigAddress, 9) : 'No multisig selected'}
+                label="Wallet Account"
+                value={selectedMultisigAccount}
+                displayValue={
+                  selectedMultisigAccount ? shortenAddress(selectedMultisigAccount, 9) : 'No multisig selected'
+                }
                 isLoading={isMultisigsLoading}
-                copyLabel="Copy multisig account"
+                copyLabel="Copy wallet address"
               />
               <SettingsValueRow
-                label="Selected Vault"
-                value={selectedMultisig?.vaultAddress ?? ''}
-                displayValue={selectedMultisig?.vaultAddress ? shortenAddress(selectedMultisig.vaultAddress, 9) : 'Unavailable'}
+                label="Vault Account"
+                value={selectedMultisigVaultAccount}
+                displayValue={
+                  selectedMultisigVaultAccount ? shortenAddress(selectedMultisigVaultAccount, 9) : 'No wallet selected'
+                }
                 isLoading={isMultisigsLoading}
-                copyLabel="Copy vault address"
+                copyLabel="Copy wallet address"
+              />
+              <SettingsValueRow
+                label="Number of Signers"
+                value={signersCount !== undefined ? String(signersCount) : ''}
+                displayValue={signersCount !== undefined ? String(signersCount) : 'Unavailable'}
+                isLoading={isMultisigsLoading}
               />
               <SettingsValueRow
                 label="Threshold"
                 value={selectedMultisig ? String(selectedMultisig.threshold) : ''}
-                displayValue={selectedMultisig ? `${selectedMultisig.threshold} of ${selectedMultisig.members.length}` : 'Unavailable'}
+                displayValue={selectedMultisig ? String(selectedMultisig.threshold) : 'Unavailable'}
                 isLoading={isMultisigsLoading}
               />
             </View>
@@ -79,15 +110,15 @@ export default function SettingsScreen() {
             <Pressable
               onPress={handleWalletPress}
               className={`h-14 flex-row items-center justify-center rounded-xl px-5 active:bg-black/80 ${
-                account ? 'border border-red-500/25 bg-white' : 'bg-black'
+                account ? 'border border-black/15 bg-white active:bg-black/5' : 'bg-black'
               }`}
             >
               {account ? (
-                <LogOut color="#F87171" size={16} strokeWidth={2.4} />
+                <LogOut color="#090A0F" size={16} strokeWidth={2.4} />
               ) : (
                 <LogIn color="#FFFFFF" size={16} strokeWidth={2.4} />
               )}
-              <Text className={`ml-2 text-sm font-black ${account ? 'text-red-400' : 'text-white'}`}>
+              <Text className={`ml-2 text-sm font-black ${account ? 'text-black' : 'text-white'}`}>
                 {account ? 'Disconnect Wallet' : 'Connect Wallet'}
               </Text>
             </Pressable>
@@ -113,8 +144,21 @@ function SettingsValueRow({
   isLoading?: boolean
   copyLabel?: string
 }) {
+  if (!copyLabel) {
+    return (
+      <View className="flex-row items-center justify-between gap-3 rounded-xl bg-[#F9F9F9] p-5">
+        <Text className="flex-1 text-xs font-bold uppercase text-black/45">{label}</Text>
+        {isLoading ? (
+          <CardSkeleton className="h-4 w-20 rounded-md" />
+        ) : (
+          <Text className="max-w-[52%] text-right text-sm font-black text-black">{displayValue}</Text>
+        )}
+      </View>
+    )
+  }
+
   return (
-    <View className="flex-row items-center justify-between gap-3 rounded-xl bg-white p-3">
+    <View className="flex-row items-center bg-[#F9F9F9] justify-between gap-3 rounded-xl p-3">
       <View className="flex-1">
         <Text className="text-xs font-bold uppercase text-black/45">{label}</Text>
         {isLoading ? (
@@ -123,16 +167,13 @@ function SettingsValueRow({
           <Text className="mt-1 text-sm font-black text-black">{displayValue}</Text>
         )}
       </View>
-      {copyLabel ? (
-        isLoading ? (
-          <CardSkeleton className="h-9 w-9 rounded-xl" />
-        ) : (
-          <CopyText
-            text={value}
-            accessibilityLabel={copyLabel}
-            className="h-9 w-9 items-center justify-center rounded-xl bg-black/5 disabled:opacity-40"
-          />
-        )
+      {isLoading ? <CardSkeleton className="h-9 w-9 rounded-xl" /> : null}
+      {!isLoading ? (
+        <CopyText
+          text={value}
+          accessibilityLabel={copyLabel}
+          className="h-9 w-9 items-center justify-center rounded-xl bg-black/5 disabled:opacity-40"
+        />
       ) : null}
     </View>
   )
