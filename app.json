@@ -5,15 +5,28 @@
     "orientation": "default",
     "name": "Squads",
     "slug": "squads-mobile",
+    "icon": "./src/assets/logo.png",
     "android": {
       "package": "com.anonymous.kit_expo_uniwind"
     },
-    "plugins": [
-      "expo-router"
-    ],
+
     "ios": {
       "bundleIdentifier": "com.anonymous.kit-expo-uniwind"
     },
+
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#fff",
+          "image": "./src/assets/logo.png",
+          "imageWidth": 40,
+          "resizeMode": "contain"
+        }
+      ]
+    ],
+
     "platforms": ["ios", "android"]
   }
 }

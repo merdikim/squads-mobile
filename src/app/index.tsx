@@ -8,6 +8,7 @@ import { Animated, Easing, Image, Pressable, Text, View } from 'react-native'
 import { useEffect, useRef, useState } from 'react'
 import { APP_BACKGROUND_COLOR } from '../constants'
 
+const squadsLogo = require('../assets/logo.png')
 const introWordDuration = 2000
 
 const introWords = [
@@ -41,27 +42,30 @@ const App = () => {
   const { account, connect } = useMobileWallet()
   const walletAddress = account?.address.toString() ?? ''
   const { multisigs = [], isMultisigsLoading } = useMultisigs(walletAddress)
+  const isLoadingMultisigs = Boolean(walletAddress && isMultisigsLoading)
   const loadingSpinValue = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
-    if (walletAddress && !isMultisigsLoading && multisigs.length > 0) {
+    if (walletAddress && !isLoadingMultisigs && multisigs.length > 0) {
       router.replace('/home')
     }
-  }, [isMultisigsLoading, multisigs.length, walletAddress])
+  }, [isLoadingMultisigs, multisigs.length, walletAddress])
 
   useEffect(() => {
-    if (!isMultisigsLoading) {
+    if (!isLoadingMultisigs) {
       loadingSpinValue.stopAnimation()
       loadingSpinValue.setValue(0)
       return
     }
+
+    loadingSpinValue.setValue(0)
 
     const animation = Animated.loop(
       Animated.timing(loadingSpinValue, {
         toValue: 1,
         duration: 900,
         easing: Easing.linear,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     )
 
@@ -70,24 +74,24 @@ const App = () => {
     return () => {
       animation.stop()
     }
-  }, [isMultisigsLoading, loadingSpinValue])
+  }, [isLoadingMultisigs, loadingSpinValue])
 
   const loadingSpin = loadingSpinValue.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   })
 
-  if (isMultisigsLoading) {
+  if (isLoadingMultisigs) {
     return (
       <View className="flex-1 justify-center items-center" style={{ backgroundColor: APP_BACKGROUND_COLOR }}>
-        <Animated.View style={{ transform: [{ rotate: loadingSpin }] }}>
-          <Image source={require('../assets/logo.png')} className="h-12 w-12" resizeMode="contain" />
+        <Animated.View style={{ height: 48, width: 48, transform: [{ rotate: loadingSpin }] }}>
+          <Image source={squadsLogo} style={{ height: 48, width: 48 }} resizeMode="contain" />
         </Animated.View>
       </View>
     )
   }
 
-  if (account && !isMultisigsLoading && multisigs.length === 0) {
+  if (account && !isLoadingMultisigs && multisigs.length === 0) {
     return <NoMultisigs />
   }
 
@@ -127,7 +131,7 @@ const App = () => {
               The coordination layer for onchain assets
             </Text>
             <View className="mt-7 flex-row items-center justify-center">
-              <Image source={require('../assets/logo.png')} className="h-8 w-8" resizeMode="contain" />
+              <Image source={squadsLogo} className="h-8 w-8" resizeMode="contain" />
             </View>
           </View>
 

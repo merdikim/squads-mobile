@@ -1,7 +1,9 @@
 import '../global.css'
 
+import { useEffect } from 'react'
 import { Slot } from 'expo-router'
 import { useFonts } from 'expo-font'
+import * as SplashScreen from 'expo-splash-screen'
 import { AppIdentity, MobileWalletProvider } from '@wallet-ui/react-native-web3js'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -13,10 +15,22 @@ const identity: AppIdentity = { name: APP_NAME, icon: require('../assets/logo.pn
 
 const queryClient = new QueryClient()
 
+SplashScreen.preventAutoHideAsync().catch(() => null)
+SplashScreen.setOptions({
+  duration: 350,
+  fade: true,
+})
+
 applyManropeFontDefaults()
 
 export default function Layout() {
   const [fontsLoaded] = useFonts(manropeFonts)
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      void SplashScreen.hideAsync()
+    }
+  }, [fontsLoaded])
 
   if (!fontsLoaded) {
     return null

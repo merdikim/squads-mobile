@@ -14,12 +14,14 @@ import { clearSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 const squadsLetters = ['S', 'Q', 'U', 'A', 'D', 'S']
 const introDuration = 1000
 const letterDuration = introDuration / squadsLetters.length
+const squadsLogo = require('../../assets/logo.png')
 
 export default function NoMultisigs() {
   const { account, disconnect } = useMobileWallet()
   const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
   const { multisigs = [], isMultisigsLoading } = useMultisigs(walletAddress)
+  const loadingSpinValue = useRef(new Animated.Value(0)).current
   const spinValue = useRef(new Animated.Value(0)).current
   const letterValues = useRef(squadsLetters.map(() => new Animated.Value(0))).current
   const [isCreatingModalOpen, setIsCreatingModalOpen] = useState(false)
@@ -29,6 +31,31 @@ export default function NoMultisigs() {
       router.replace('/home')
     }
   }, [isMultisigsLoading, multisigs.length])
+
+  useEffect(() => {
+    if (!isMultisigsLoading) {
+      loadingSpinValue.stopAnimation()
+      loadingSpinValue.setValue(0)
+      return
+    }
+
+    loadingSpinValue.setValue(0)
+
+    const loadingAnimation = Animated.loop(
+      Animated.timing(loadingSpinValue, {
+        toValue: 1,
+        duration: 900,
+        easing: Easing.linear,
+        useNativeDriver: false,
+      }),
+    )
+
+    loadingAnimation.start()
+
+    return () => {
+      loadingAnimation.stop()
+    }
+  }, [isMultisigsLoading, loadingSpinValue])
 
   useEffect(() => {
     const introAnimation = Animated.sequence(
@@ -62,11 +89,30 @@ export default function NoMultisigs() {
     outputRange: ['0deg', `${squadsLetters.length * 45}deg`],
   })
 
+  const loadingSpin = loadingSpinValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  })
+
   const logout = () => {
     disconnect()
     queryClient.setQueryData(['selectedMultisigAddress'], '')
     void clearSelectedMultisigAddress()
     router.replace('/')
+  }
+
+  if (isMultisigsLoading) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: APP_BACKGROUND_COLOR }}>
+        <View className="flex-1 items-center justify-center">
+          <Animated.View style={{ height: 48, width: 48, transform: [{ rotate: loadingSpin }] }}>
+            <Image source={squadsLogo} style={{ height: 48, width: 48 }} resizeMode="contain" />
+          </Animated.View>
+        </View>
+
+        <StatusBar style="light" />
+      </SafeAreaView>
+    )
   }
 
   return (
@@ -75,14 +121,14 @@ export default function NoMultisigs() {
         <View className="flex-1 items-center justify-center bg-neutral-100 shadow rounded-xl">
           <View className="flex-row items-center justify-center">
             <Animated.View style={{ transform: [{ rotate: spin }] }}>
-              <Image source={require('../../assets/logo.png')} className="h-12 w-12" resizeMode="contain" />
+              <Image source={squadsLogo} className="h-12 w-12" resizeMode="contain" />
             </Animated.View>
 
             <View className="ml-5 flex-row items-center justify-center">
               {squadsLetters.map((letter, index) => (
                 <Animated.Text
                   key={`${letter}-${index}`}
-                  className="mx-1 text-3xl font-extrabold"
+                  className="text-3xl font-extrabold"
                   style={{
                     opacity: letterValues[index],
                     transform: [
