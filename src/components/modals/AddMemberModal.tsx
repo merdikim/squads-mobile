@@ -5,7 +5,7 @@ import { X } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import * as multisig from '@sqds/multisig'
 import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
-import { buildProposalIx } from '../../lib/squads'
+import { buildProposalIxs } from '../../lib/squads'
 import { toPublicKey } from '../../utils'
 import { multisigProposalsQueryKey } from '../../hooks/useProposals'
 import { useQueryClient } from '@tanstack/react-query'
@@ -93,7 +93,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
         transactionIndex: newTransactionIndex,
         rentPayer: creator,
       })
-      const proposalIx = buildProposalIx(multisigPda, creator, newTransactionIndex)
+      const proposalIxs = buildProposalIxs(multisigPda, creator, newTransactionIndex)
 
       const {
         context: { slot: minContextSlot },
@@ -103,7 +103,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
       const message = new TransactionMessage({
         payerKey: creator,
         recentBlockhash: latestBlockhash.blockhash,
-        instructions: [addMemberIx, proposalIx],
+        instructions: [addMemberIx, ...proposalIxs],
       }).compileToV0Message()
 
       const transaction = new VersionedTransaction(message)

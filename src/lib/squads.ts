@@ -88,5 +88,28 @@ export function buildProposalIx(
   })
 }
 
+export function buildProposalApprovalIx(
+  multisigPda: PublicKey,
+  member: PublicKey,
+  transactionIndex: bigint,
+): TransactionInstruction {
+  return multisig.instructions.proposalApprove({
+    multisigPda,
+    member,
+    transactionIndex,
+  })
+}
+
+export function buildProposalIxs(
+  multisigPda: PublicKey,
+  member: PublicKey,
+  transactionIndex: bigint,
+): TransactionInstruction[] {
+  return [
+    buildProposalIx(multisigPda, member, transactionIndex),
+    buildProposalApprovalIx(multisigPda, member, transactionIndex),
+  ]
+}
+
 
 export { LAMPORTS_PER_SOL, Permission, Permissions }

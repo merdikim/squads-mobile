@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { shortenAddress, toPublicKey } from '../../utils'
 import * as multisig from '@sqds/multisig'
-import { buildProposalIx } from '../../lib/squads'
+import { buildProposalIxs } from '../../lib/squads'
 import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
 import { multisigProposalsQueryKey } from '../../hooks/useProposals'
@@ -61,7 +61,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
         transactionIndex: newTransactionIndex,
         rentPayer: creator,
       })
-      const proposalIx = buildProposalIx(multisigPda, creator, newTransactionIndex)
+      const proposalIxs = buildProposalIxs(multisigPda, creator, newTransactionIndex)
 
       const {
         context: { slot: minContextSlot },
@@ -71,7 +71,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
       const message = new TransactionMessage({
         payerKey: creator,
         recentBlockhash: latestBlockhash.blockhash,
-        instructions: [removeMemberIx, proposalIx],
+        instructions: [removeMemberIx, ...proposalIxs],
       }).compileToV0Message()
 
       const transaction = new VersionedTransaction(message)
