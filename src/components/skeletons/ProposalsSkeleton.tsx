@@ -1,7 +1,6 @@
 import { View } from 'react-native'
 import { CardSkeleton } from './CardSkeleton'
 
-
 export function ProposalsSkeleton() {
   const proposalRows = Array.from({ length: 3 })
 

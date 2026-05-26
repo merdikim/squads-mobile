@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
-import { shortenAddress, toPublicKey } from '../../utils'
+import { addressesEqual, shortenAddress, toPublicKey } from '../../utils'
 import * as multisig from '@sqds/multisig'
 import { buildProposalIxs } from '../../lib/squads'
 import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
 import { multisigProposalsQueryKey } from '../../hooks/useProposals'
 import { SmoothModal } from './SmoothModal'
+import { multisigsQueryKey } from '../../hooks/useMultisigs'
 
 type DeleteMemberModalProps = {
   member: string
@@ -19,7 +20,7 @@ type DeleteMemberModalProps = {
 export function DeleteMemberModal({ multisigAddress, member, members, onClose }: DeleteMemberModalProps) {
   const { account, connect, connection, signAndSendTransactions } = useMobileWallet()
   const connectedWalletAddress = account?.address.toString() ?? ''
-  const isConnectedWalletMember = members.includes(connectedWalletAddress)
+  const isConnectedWalletMember = members.some((currentMember) => addressesEqual(currentMember, connectedWalletAddress))
   const [error, setError] = useState('')
   const [isRemoving, setIsRemoving] = useState(false)
   const queryClient = useQueryClient()
@@ -30,6 +31,10 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
   }
 
   const handleDeleteMember = async () => {
+    if (isRemoving) {
+      return
+    }
+
     if (!member) return
 
     if (!account) {
@@ -45,10 +50,9 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
     try {
       setIsRemoving(true)
       const multisigPda = toPublicKey(multisigAddress)
-      // @ts-expect-error
-      const creator = toPublicKey(account.address)
+      const creator = toPublicKey(account.address.toString())
       const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(connection, multisigPda)
-      const newTransactionIndex = BigInt(Number(multisigInfo.transactionIndex) + 1)
+      const newTransactionIndex = BigInt(multisigInfo.transactionIndex.toString()) + 1n
       const removeMemberIx = multisig.instructions.configTransactionCreate({
         multisigPda,
         actions: [
@@ -78,7 +82,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
       const simulation = await connection.simulateTransaction(transaction, { sigVerify: false })
 
       if (simulation.value.err) {
-        console.log(simulation.value.logs)
+        console.warn('Remove member simulation failed', simulation.value.logs)
         throw new Error('Remove member simulation failed.')
       }
 
@@ -88,15 +92,17 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
       queryClient.invalidateQueries({
         queryKey: [...multisigProposalsQueryKey, multisigAddress],
       })
+      queryClient.invalidateQueries({
+        queryKey: multisigsQueryKey,
+      })
 
       handleClose()
     } catch (err) {
-      console.log(err)
-      setError('Failed to add member. Please try again.')
+      console.warn('Failed to remove member', err)
+      setError('Failed to remove member. Please try again.')
     } finally {
       setIsRemoving(false)
     }
-    handleClose()
   }
 
   const handleConnectWallet = () => {
@@ -124,7 +130,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
           <Pressable
             onPress={handleDeleteMember}
             disabled={isRemoving}
-            className="h-12 flex-1 items-center justify-center rounded-xl bg-red-600 active:bg-red-700"
+            className="h-12 flex-1 items-center justify-center rounded-xl bg-red-600 active:bg-red-700 disabled:opacity-60"
           >
             {isRemoving ? (
               <ActivityIndicator size="small" color="#fff" />

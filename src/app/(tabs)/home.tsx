@@ -1,7 +1,7 @@
 import { StatusBar } from 'expo-status-bar'
-import { useEffect, useRef, useState } from 'react'
-import { Animated, Easing, Pressable, Text, View } from 'react-native'
-import { Plus, RefreshCw, UsersRound } from 'lucide-react-native'
+import { useEffect, useState } from 'react'
+import { Pressable, Text, View } from 'react-native'
+import { Plus, UsersRound } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { router } from 'expo-router'
@@ -10,7 +10,7 @@ import { Dropdown } from '../../components/Dropdown'
 import { ProposalsMenu } from '../../components/home-screen/ProposalsMenu'
 import { CoinsMenu } from '../../components/home-screen/CoinsMenu'
 import { NftsMenu } from '../../components/home-screen/NftsMenu'
-import CreateMultisigModal from '../../components/modals/CreateMultisigModal'
+import { CreateMultisigModal } from '../../components/modals/CreateMultisigModal'
 import { getSelectedMultisigAddress, saveSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 import useBalances from '../../hooks/useBalances'
 import useMultisigs from '../../hooks/useMultisigs'
@@ -53,7 +53,7 @@ export default function HomeScreen() {
   const { account } = useMobileWallet()
   const queryClient = useQueryClient()
   const walletAddress = account?.address.toString() ?? ''
-  const { multisigs = [], isMultisigsLoading, isRefetchingMultisig } = useMultisigs(walletAddress)
+  const { multisigs = [], isMultisigsLoading } = useMultisigs(walletAddress)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isCreatingModalOpen, setIsCreatingModalOpen] = useState(false)
   const [selectedMenuItem, setSelectedMenuItem] = useState<MenuItem>('Proposals')
@@ -76,36 +76,6 @@ export default function HomeScreen() {
   const selectedVaultAddress = selectedMultisig?.vaultAddress
   const { totalUsd, isBalancesLoading } = useBalances(selectedVaultAddress ?? '')
   const selectedBalance = formatUsd(totalUsd)
-  const refetchSpinValue = useRef(new Animated.Value(0)).current
-
-  useEffect(() => {
-    if (!isRefetchingMultisig) {
-      refetchSpinValue.stopAnimation()
-      refetchSpinValue.setValue(0)
-      return
-    }
-
-    const animation = Animated.loop(
-      Animated.timing(refetchSpinValue, {
-        toValue: 1,
-        duration: 800,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }),
-    )
-
-    animation.start()
-
-    return () => {
-      animation.stop()
-    }
-  }, [isRefetchingMultisig, refetchSpinValue])
-
-  const refetchSpin = refetchSpinValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  })
-
   useEffect(() => {
     if (!isMultisigsLoading && multisigs.length === 0) {
       router.replace('/')

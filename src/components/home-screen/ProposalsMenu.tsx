@@ -10,11 +10,7 @@ type ProposalsMenuProps = {
   threshold: number
 }
 
-
-export function ProposalsMenu({
-  multisigAddress,
-  threshold,
-}: ProposalsMenuProps) {
+export function ProposalsMenu({ multisigAddress, threshold }: ProposalsMenuProps) {
   const {
     proposals = [],
     proposalsError,
@@ -30,26 +26,22 @@ export function ProposalsMenu({
   } = useProposals(multisigAddress)
 
   if (isProposalsLoading) {
-    return (
-      <ProposalsSkeleton/>
-    )
+    return <ProposalsSkeleton />
   }
 
   if (proposalsError) {
-    return <EmptyMenuState title='Api Error' description={proposalsError.message} />
+    return <EmptyMenuState title="Api Error" description={proposalsError.message} />
   }
 
   if (!isProposalsLoading && proposals.length === 0) {
-    return <EmptyMenuState title='No Proposals' description="No active proposals found" />
+    return <EmptyMenuState title="No Proposals" description="No active proposals found" />
   }
 
   return (
     <ScrollView className="mt-5" showsVerticalScrollIndicator={false}>
       {totalPages > 1 ? (
         <View className="mb-2 flex-row items-center justify-between">
-          <Text className="text-xs font-bold uppercase text-black/40">
-            {totalEntries} active proposals
-          </Text>
+          <Text className="text-xs font-bold uppercase text-black/40">{totalEntries} active proposals</Text>
           <View className="flex-row items-center gap-2">
             <Pressable
               onPress={previousPage}
@@ -75,11 +67,7 @@ export function ProposalsMenu({
       ) : null}
 
       {proposals.map((proposal) => (
-        <ProposalCard
-          key={proposal.address}
-          proposal={proposal}
-          threshold={threshold}
-        />
+        <ProposalCard key={proposal.address} proposal={proposal} threshold={threshold} />
       ))}
     </ScrollView>
   )

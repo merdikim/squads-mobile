@@ -1,6 +1,6 @@
-import { isAddress } from '@solana/kit'
 import { useQuery } from '@tanstack/react-query'
 import type { SquadsApiNft, SquadsApiNftsResponse, SquadsNftData } from '../types'
+import { isSolanaAddress } from '../utils'
 
 const NFTS_DATA_STALE_TIME = 60 * 1000
 const NFTS_DATA_GC_TIME = 10 * 60 * 1000
@@ -39,7 +39,7 @@ const useNfts = (address = DEFAULT_NFTS_ADDRESS) => {
   } = useQuery({
     queryKey: [...nftsQueryKey, selectedAddress],
     queryFn: async () => {
-      if (!isAddress(selectedAddress)) {
+      if (!isSolanaAddress(selectedAddress)) {
         return {
           nfts: [],
           nextCursor: null,
@@ -64,7 +64,7 @@ const useNfts = (address = DEFAULT_NFTS_ADDRESS) => {
         prevCursor: result.prev_cursor,
       }
     },
-    enabled: !!selectedAddress,
+    enabled: !!selectedAddress && isSolanaAddress(selectedAddress),
     staleTime: NFTS_DATA_STALE_TIME,
     gcTime: NFTS_DATA_GC_TIME,
   })

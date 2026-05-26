@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import type { Multisig, SquadsApiMultisigsResponse } from '../types'
-import { isAddress } from '@solana/kit'
+import { isSolanaAddress } from '../utils'
 
 export const multisigsQueryKey = ['multisigs'] as const
 
@@ -13,11 +13,16 @@ const useMultisigs = (address?: string) => {
   } = useQuery({
     queryKey: [...multisigsQueryKey, address],
     queryFn: async (): Promise<Multisig[]> => {
-      if (!address || !isAddress(address)) {
+      if (!address || !isSolanaAddress(address)) {
         return []
       }
 
       const response = await fetch(`https://v4-api.squads.so/multisigs/${address}?useProd=true`)
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch multisigs: ${response.status}`)
+      }
+
       const result = (await response.json()) as SquadsApiMultisigsResponse
       const multisigs = result.map((multisig) => {
         const metadataName = multisig.metadata?.name
@@ -37,7 +42,7 @@ const useMultisigs = (address?: string) => {
       })
       return multisigs
     },
-    enabled: !!address,
+    enabled: !!address && isSolanaAddress(address),
   })
 
   return { multisigs, isMultisigsLoading, refetchMultisig, isRefetchingMultisig }

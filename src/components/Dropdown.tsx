@@ -106,13 +106,7 @@ function DropdownImage({
   sizeClassName: string
 }) {
   if (imageUri) {
-    return (
-      <Image
-        source={{ uri: imageUri }}
-        className={`${sizeClassName} rounded-xl bg-black/5`}
-        resizeMode="cover"
-      />
-    )
+    return <Image source={{ uri: imageUri }} className={`${sizeClassName} rounded-xl bg-black/5`} resizeMode="cover" />
   }
 
   return (

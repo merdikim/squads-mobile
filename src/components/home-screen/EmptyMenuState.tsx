@@ -1,7 +1,7 @@
 import { Image, Text, View } from 'react-native'
 
 type EmptyMenuStateProps = {
-  title: string,
+  title: string
   description: string
 }
 
@@ -12,7 +12,7 @@ export function EmptyMenuState({ title, description }: EmptyMenuStateProps) {
         <Image source={require('../../assets/logo.png')} className="mr-4 h-5 w-5" />
         <Text className="text-lg ">{title}</Text>
       </View>
-      <Text className='mt-4 text-neutral-500'>{description}</Text>
+      <Text className="mt-4 text-neutral-500">{description}</Text>
     </View>
   )
 }

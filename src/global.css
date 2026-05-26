@@ -2,8 +2,8 @@
 @import 'uniwind';
 
 @utility font-extralight {
-  font-family: Manrope_200ExtraLight;
-  font-weight: 200;
+  font-family: Manrope_300Light;
+  font-weight: 300;
 }
 
 @utility font-light {
@@ -17,8 +17,8 @@
 }
 
 @utility font-medium {
-  font-family: Manrope_500Medium;
-  font-weight: 500;
+  font-family: Manrope_600SemiBold;
+  font-weight: 600;
 }
 
 @utility font-semibold {

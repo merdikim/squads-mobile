@@ -1,7 +1,7 @@
-import { isAddress } from '@solana/kit'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import type { SquadsApiProposalRow, SquadsApiProposalsResponse, SquadsProposalData } from '../types'
+import { isSolanaAddress } from '../utils'
 import { multisigsQueryKey } from './useMultisigs'
 
 const PROPOSALS_DATA_STALE_TIME = 180 * 1000
@@ -46,15 +46,16 @@ const normalizeProposalRow = (row: SquadsApiProposalRow): SquadsProposalData => 
   const summaryType = summary?.type
   const transactionType = transaction.type
   const title = actionType
-    ? configTypes[actionType] ?? humanizeType(actionType)
+    ? (configTypes[actionType] ?? humanizeType(actionType))
     : summaryType === 'NativeTransfer'
       ? formatNativeTransferTitle(summaryData?.lamports, summaryData?.metadata?.symbol)
       : humanizeType(summaryType) || humanizeType(transactionType) || `${humanizeType(category)} Proposal`
-  const memberAddress = actionType === 'AddMember'
-    ? firstAction?.newMember?.key
-    : actionType === 'RemoveMember'
-      ? firstAction?.oldMember
-      : summaryData?.destination ?? transaction.account.creator
+  const memberAddress =
+    actionType === 'AddMember'
+      ? firstAction?.newMember?.key
+      : actionType === 'RemoveMember'
+        ? firstAction?.oldMember
+        : (summaryData?.destination ?? transaction.account.creator)
 
   return {
     address: transaction.address,
@@ -68,11 +69,12 @@ const normalizeProposalRow = (row: SquadsApiProposalRow): SquadsProposalData => 
     rejects: proposal.rejected,
     cancellations: proposal.cancelled,
     memberAddress,
-    relatedAddressLabel: actionType === 'AddMember' || actionType === 'RemoveMember'
-      ? 'Member address'
-      : summaryData?.destination
-        ? 'Destination'
-        : 'Creator',
+    relatedAddressLabel:
+      actionType === 'AddMember' || actionType === 'RemoveMember'
+        ? 'Member address'
+        : summaryData?.destination
+          ? 'Destination'
+          : 'Creator',
     timestamp: proposal.status.timestamp,
     hasApproved: false,
   }
@@ -94,7 +96,7 @@ const useProposals = (multisigAddress: string) => {
   } = useQuery({
     queryKey: [...multisigProposalsQueryKey, selectedMultisigAddress, page],
     queryFn: async () => {
-      if (!selectedMultisigAddress || !isAddress(selectedMultisigAddress)) {
+      if (!selectedMultisigAddress || !isSolanaAddress(selectedMultisigAddress)) {
         return {
           proposals: [],
           page: 1,
@@ -124,7 +126,7 @@ const useProposals = (multisigAddress: string) => {
         totalPages: Math.max(result.total_pages ?? 1, 1),
       }
     },
-    enabled: !!selectedMultisigAddress,
+    enabled: !!selectedMultisigAddress && isSolanaAddress(selectedMultisigAddress),
     staleTime: PROPOSALS_DATA_STALE_TIME,
     gcTime: PROPOSALS_DATA_GC_TIME,
   })

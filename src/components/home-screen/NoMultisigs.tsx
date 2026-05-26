@@ -6,7 +6,7 @@ import { router } from 'expo-router'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { useQueryClient } from '@tanstack/react-query'
 import { LogOut, Plus } from 'lucide-react-native'
-import CreateMultisigModal from '../modals/CreateMultisigModal'
+import { CreateMultisigModal } from '../modals/CreateMultisigModal'
 import useMultisigs from '../../hooks/useMultisigs'
 import { APP_BACKGROUND_COLOR } from '../../constants'
 import { clearSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
@@ -46,7 +46,7 @@ export default function NoMultisigs() {
         toValue: 1,
         duration: 900,
         easing: Easing.linear,
-        useNativeDriver: false,
+        useNativeDriver: true,
       }),
     )
 

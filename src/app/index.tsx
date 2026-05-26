@@ -65,7 +65,7 @@ const App = () => {
         toValue: 1,
         duration: 900,
         easing: Easing.linear,
-        useNativeDriver: false,
+        useNativeDriver: true,
       }),
     )
 

@@ -7,9 +7,8 @@ import * as SplashScreen from 'expo-splash-screen'
 import { AppIdentity, MobileWalletProvider } from '@wallet-ui/react-native-web3js'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { APP_BACKGROUND_COLOR, APP_NAME } from '../constants'
+import { APP_BACKGROUND_COLOR, APP_NAME, RPC_URL } from '../constants'
 import { applyManropeFontDefaults, manropeFonts } from '../lib/fonts'
-import { clusterApiUrl } from '@solana/web3.js'
 
 const identity: AppIdentity = { name: APP_NAME, icon: require('../assets/logo.png') }
 
@@ -36,10 +35,8 @@ export default function Layout() {
     return null
   }
 
-  const endpoint = clusterApiUrl('mainnet-beta')
-
   return (
-    <MobileWalletProvider chain="solana:mainnet" endpoint={endpoint} identity={identity}>
+    <MobileWalletProvider chain="solana:mainnet" endpoint={RPC_URL} identity={identity}>
       <SafeAreaProvider style={{ flex: 1, backgroundColor: APP_BACKGROUND_COLOR }}>
         <QueryClientProvider client={queryClient}>
           <Slot />

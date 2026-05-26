@@ -1,25 +1,15 @@
+import { StyleSheet, Text, TextInput, type StyleProp, type TextStyle } from 'react-native'
 import {
-  StyleSheet,
-  Text,
-  TextInput,
-  type StyleProp,
-  type TextStyle,
-} from 'react-native'
-import {
-  Manrope_200ExtraLight,
   Manrope_300Light,
   Manrope_400Regular,
-  Manrope_500Medium,
   Manrope_600SemiBold,
   Manrope_700Bold,
   Manrope_800ExtraBold,
 } from '@expo-google-fonts/manrope'
 
 export const manropeFonts = {
-  Manrope_200ExtraLight,
   Manrope_300Light,
   Manrope_400Regular,
-  Manrope_500Medium,
   Manrope_600SemiBold,
   Manrope_700Bold,
   Manrope_800ExtraBold,
@@ -40,16 +30,8 @@ export function getManropeFontFamily(style: StyleProp<TextStyle>) {
     return flattenedStyle.fontFamily
   }
 
-  if (fontWeight === '200') {
-    return 'Manrope_200ExtraLight'
-  }
-
   if (fontWeight === '300') {
     return 'Manrope_300Light'
-  }
-
-  if (fontWeight === '500') {
-    return 'Manrope_500Medium'
   }
 
   if (fontWeight === '600') {
@@ -72,14 +54,8 @@ export function applyManropeFontDefaults() {
   const DefaultTextInput = TextInput as TextComponentWithDefaults
 
   DefaultText.defaultProps = DefaultText.defaultProps ?? {}
-  DefaultText.defaultProps.style = [
-    DefaultText.defaultProps.style,
-    { fontFamily: defaultFontFamily },
-  ]
+  DefaultText.defaultProps.style = [DefaultText.defaultProps.style, { fontFamily: defaultFontFamily }]
 
   DefaultTextInput.defaultProps = DefaultTextInput.defaultProps ?? {}
-  DefaultTextInput.defaultProps.style = [
-    DefaultTextInput.defaultProps.style,
-    { fontFamily: defaultFontFamily },
-  ]
+  DefaultTextInput.defaultProps.style = [DefaultTextInput.defaultProps.style, { fontFamily: defaultFontFamily }]
 }

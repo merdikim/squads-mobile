@@ -1,14 +1,8 @@
 import * as multisig from '@sqds/multisig'
-import {
-  Connection,
-  LAMPORTS_PER_SOL,
-  PublicKey,
-  TransactionInstruction,
-} from '@solana/web3.js'
+import { Connection, LAMPORTS_PER_SOL, PublicKey, TransactionInstruction } from '@solana/web3.js'
 import { SquadsMultisigData, SquadsProposalData } from '../types'
 import { RPC_URL } from '../constants'
 import { toPublicKey } from '../utils'
-
 
 const { Permission, Permissions } = multisig.types
 
@@ -110,6 +104,5 @@ export function buildProposalIxs(
     buildProposalApprovalIx(multisigPda, member, transactionIndex),
   ]
 }
-
 
 export { LAMPORTS_PER_SOL, Permission, Permissions }

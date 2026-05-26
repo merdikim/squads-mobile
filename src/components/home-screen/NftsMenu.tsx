@@ -28,11 +28,11 @@ export function NftsMenu({ address }: NftsMenuProps) {
   }
 
   if (nftsError) {
-    return <EmptyMenuState title='Api Error' description={nftsError.message} />
+    return <EmptyMenuState title="Api Error" description={nftsError.message} />
   }
 
   if (nfts.length === 0) {
-    return <EmptyMenuState title="No NFTs found" description='No NFTs found on this account' />
+    return <EmptyMenuState title="No NFTs found" description="No NFTs found on this account" />
   }
 
   return (

@@ -1,6 +1,6 @@
-import { isAddress } from '@solana/kit'
 import { useQuery } from '@tanstack/react-query'
 import type { SquadsApiBalancesResponse, SquadsBalanceData } from '../types'
+import { isSolanaAddress } from '../utils'
 
 const BALANCES_DATA_STALE_TIME = 60 * 1000
 const BALANCES_DATA_GC_TIME = 10 * 60 * 1000
@@ -20,7 +20,7 @@ const normalizeBalance = (balance: SquadsBalanceData): SquadsBalanceData => ({
   name: balance.name,
 })
 
-const useBalances = (address:string) => {
+const useBalances = (address: string) => {
   const selectedAddress = address
 
   const {
@@ -32,7 +32,7 @@ const useBalances = (address:string) => {
   } = useQuery({
     queryKey: [...balancesQueryKey, selectedAddress],
     queryFn: async () => {
-      if (!isAddress(selectedAddress)) {
+      if (!isSolanaAddress(selectedAddress)) {
         return {
           balances: [],
           totalUsd: 0,
@@ -62,7 +62,7 @@ const useBalances = (address:string) => {
         totalUsd: balances.reduce((total, balance) => total + balance.uiPrice, 0),
       }
     },
-    enabled: !!selectedAddress,
+    enabled: !!selectedAddress && isSolanaAddress(selectedAddress),
     staleTime: BALANCES_DATA_STALE_TIME,
     gcTime: BALANCES_DATA_GC_TIME,
   })

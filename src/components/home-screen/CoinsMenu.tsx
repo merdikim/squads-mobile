@@ -21,23 +21,15 @@ const formatUsd = (amount: number) => {
   })
 }
 
-export function CoinsMenu({address}:{address:string}) {
-  const {
-    balances = [],
-    balancesError,
-    isBalancesLoading,
-    totalUsd,
-  } = useBalances(address)
+export function CoinsMenu({ address }: { address: string }) {
+  const { balances = [], balancesError, isBalancesLoading } = useBalances(address)
   const sortedBalances = [...balances].sort((a, b) => b.uiPrice - a.uiPrice)
 
   if (isBalancesLoading) {
     return (
       <View className="mt-5">
         {[0, 1, 2].map((item) => (
-          <View
-            key={item}
-            className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4"
-          >
+          <View key={item} className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4">
             <CardSkeleton className="h-10 w-10 rounded-full" />
             <View className="ml-3 flex-1">
               <CardSkeleton className="h-4 w-28 rounded-md" />
@@ -54,11 +46,11 @@ export function CoinsMenu({address}:{address:string}) {
   }
 
   if (balancesError) {
-    return <EmptyMenuState title='Api Error' description={balancesError.message} />
+    return <EmptyMenuState title="API Error" description={balancesError.message} />
   }
 
   if (sortedBalances.length === 0) {
-    return <EmptyMenuState title="No coins found" description='No coins found in custody of this account' />
+    return <EmptyMenuState title="No coins found" description="No coins found in custody of this account" />
   }
 
   return (
@@ -84,9 +76,7 @@ export function CoinsMenu({address}:{address:string}) {
             <Text className="text-sm font-extrabold text-black" numberOfLines={1}>
               {formatTokenAmount(balance.uiAmount)}
             </Text>
-            <Text className="mt-1 text-xs font-bold text-black/45">
-              {formatUsd(balance.uiPrice)}
-            </Text>
+            <Text className="mt-1 text-xs font-bold text-black/45">{formatUsd(balance.uiPrice)}</Text>
           </View>
         </View>
       ))}

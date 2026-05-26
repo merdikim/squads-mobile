@@ -1,11 +1,15 @@
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js"
+import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 
 export function formatSol(lamports: number) {
   const sol = lamports / LAMPORTS_PER_SOL
   return `${sol.toLocaleString(undefined, { maximumFractionDigits: 4 })} SOL`
 }
 
-export function shortenAddress(address: string, size:number = 4) {
+export function shortenAddress(address: string, size: number = 4) {
+  if (!address) {
+    return ''
+  }
+
   return `${address.slice(0, size)}...${address.slice(-size)}`
 }
 
@@ -36,6 +40,23 @@ export function formatTimeAgo(timestamp?: number) {
   return 'just now'
 }
 
-export function toPublicKey(address: string) {
-  return new PublicKey(address)
+export function toPublicKey(address: string | PublicKey) {
+  return address instanceof PublicKey ? address : new PublicKey(address)
+}
+
+export function isSolanaAddress(address?: string) {
+  if (!address) {
+    return false
+  }
+
+  try {
+    toPublicKey(address)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function addressesEqual(left?: string, right?: string) {
+  return !!left && !!right && left === right
 }

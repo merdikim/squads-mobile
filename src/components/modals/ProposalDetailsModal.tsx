@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native'
+import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { Check, X } from 'lucide-react-native'
 import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
 import type { SquadsProposalData } from '../../types'
-import { formatTimeAgo, shortenAddress, toPublicKey } from '../../utils'
+import { addressesEqual, formatTimeAgo, shortenAddress, toPublicKey } from '../../utils'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import * as multisig from '@sqds/multisig'
 import { multisigProposalsQueryKey } from '../../hooks/useProposals'
@@ -38,9 +38,9 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
   const connectedWalletAddress = account?.address.toString() ?? ''
   const hasVoted =
     !!proposal &&
-    (proposal.approvals.includes(connectedWalletAddress) ||
-      proposal.rejects.includes(connectedWalletAddress) ||
-      proposal.cancellations.includes(connectedWalletAddress))
+    (proposal.approvals.some((address) => addressesEqual(address, connectedWalletAddress)) ||
+      proposal.rejects.some((address) => addressesEqual(address, connectedWalletAddress)) ||
+      proposal.cancellations.some((address) => addressesEqual(address, connectedWalletAddress)))
   const canVote = !!proposal && proposal.status === 'Active' && !!account && !hasVoted && !voteAction
   const relatedAddressLabel = proposal?.relatedAddressLabel ?? 'Related address'
   const relatedAddress = proposal?.memberAddress ? shortenAddress(proposal.memberAddress, 8) : 'Unavailable'
@@ -71,8 +71,7 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
       setVoteAction(action)
 
       const multisigPda = toPublicKey(proposal.multisigAddress)
-      // @ts-expect-error wallet adapter address is compatible with PublicKey input here.
-      const member = toPublicKey(account.address)
+      const member = toPublicKey(account.address.toString())
       const instruction =
         action === 'approve'
           ? multisig.instructions.proposalApprove({
@@ -101,7 +100,7 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
       const simulation = await connection.simulateTransaction(transaction, { sigVerify: false })
 
       if (simulation.value.err) {
-        console.log(simulation.value.logs)
+        console.warn('Proposal vote simulation failed', simulation.value.logs)
         throw new Error('Proposal vote simulation failed.')
       }
 
@@ -118,7 +117,7 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
 
       onClose()
     } catch (err) {
-      console.log(err)
+      console.warn('Failed to vote on proposal', err)
       setError(action === 'approve' ? 'Failed to approve proposal.' : 'Failed to reject proposal.')
     } finally {
       setVoteAction(null)
@@ -154,14 +153,14 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
             </Pressable>
           </View>
 
-            <View className="rounded-xl mt-5 border border-black/10 px-4">
-              <DetailRow label={relatedAddressLabel} value={relatedAddress} />
-              <DetailRow label="Status" value={proposal.status} />
-              <DetailRow label="Approvals" value={`${proposal.approvals.length} of ${threshold}`} />
-              <DetailRow label="Rejected" value={String(proposal.rejects.length)} />
-              <DetailRow label="Cancelled" value={String(proposal.cancellations.length)} />
-            </View>
-          
+          <View className="rounded-xl mt-5 border border-black/10 px-4">
+            <DetailRow label={relatedAddressLabel} value={relatedAddress} />
+            <DetailRow label="Status" value={proposal.status} />
+            <DetailRow label="Approvals" value={`${proposal.approvals.length} of ${threshold}`} />
+            <DetailRow label="Rejected" value={String(proposal.rejects.length)} />
+            <DetailRow label="Cancelled" value={String(proposal.cancellations.length)} />
+          </View>
+
           <View className="w-full flex-row justify-end my-5">
             <Text>{timeAgo}</Text>
           </View>

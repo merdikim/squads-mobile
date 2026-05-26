@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
-import { isAddress } from '@solana/kit'
 import { X } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import * as multisig from '@sqds/multisig'
 import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import { buildProposalIxs } from '../../lib/squads'
-import { toPublicKey } from '../../utils'
+import { addressesEqual, isSolanaAddress, toPublicKey } from '../../utils'
 import { multisigProposalsQueryKey } from '../../hooks/useProposals'
 import { useQueryClient } from '@tanstack/react-query'
 import { SmoothModal } from './SmoothModal'
+import { multisigsQueryKey } from '../../hooks/useMultisigs'
 
 const { Permissions } = multisig.types
 
@@ -26,7 +26,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
   const [isAdding, setIsAdding] = useState(false)
   const { account, connect, connection, signAndSendTransactions } = useMobileWallet()
   const connectedWalletAddress = account?.address.toString() ?? ''
-  const isConnectedWalletMember = members.includes(connectedWalletAddress)
+  const isConnectedWalletMember = members.some((member) => addressesEqual(member, connectedWalletAddress))
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -43,6 +43,10 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
   }
 
   const handleAddMember = async () => {
+    if (isAdding) {
+      return
+    }
+
     const nextMemberAddress = address.trim()
     setError('')
 
@@ -61,12 +65,12 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
       return
     }
 
-    if (!isAddress(nextMemberAddress)) {
+    if (!isSolanaAddress(nextMemberAddress)) {
       setError('Enter a valid Solana wallet address.')
       return
     }
 
-    if (members.includes(nextMemberAddress)) {
+    if (members.some((member) => addressesEqual(member, nextMemberAddress))) {
       setError('This wallet is already a member.')
       return
     }
@@ -74,10 +78,9 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
     try {
       setIsAdding(true)
       const multisigPda = toPublicKey(multisigAddress)
-      // @ts-expect-error
-      const creator = toPublicKey(account.address)
+      const creator = toPublicKey(account.address.toString())
       const multisigInfo = await multisig.accounts.Multisig.fromAccountAddress(connection, multisigPda)
-      const newTransactionIndex = BigInt(Number(multisigInfo.transactionIndex) + 1)
+      const newTransactionIndex = BigInt(multisigInfo.transactionIndex.toString()) + 1n
       const addMemberIx = multisig.instructions.configTransactionCreate({
         multisigPda,
         actions: [
@@ -110,7 +113,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
       const simulation = await connection.simulateTransaction(transaction, { sigVerify: false })
 
       if (simulation.value.err) {
-        console.log(simulation.value.logs)
+        console.warn('Add member simulation failed', simulation.value.logs)
         throw new Error('Add member simulation failed.')
       }
 
@@ -121,10 +124,13 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
       queryClient.invalidateQueries({
         queryKey: [...multisigProposalsQueryKey, multisigAddress],
       })
+      queryClient.invalidateQueries({
+        queryKey: multisigsQueryKey,
+      })
 
       handleClose()
     } catch (err) {
-      console.log(err)
+      console.warn('Failed to add member', err)
       setError('Failed to add member. Please try again.')
     } finally {
       setIsAdding(false)
