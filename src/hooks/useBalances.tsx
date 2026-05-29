@@ -7,8 +7,7 @@ const BALANCES_DATA_GC_TIME = 10 * 60 * 1000
 
 export const balancesQueryKey = ['balances'] as const
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 
 const isFiniteNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value)
 
@@ -44,13 +43,10 @@ const normalizeBalance = (balance: SquadsApiBalance): SquadsBalanceData => ({
 })
 
 const useBalances = (address?: string) => {
-
   const {
     data,
     error: balancesError,
     isLoading: isBalancesLoading,
-    isFetching: isBalancesFetching,
-    refetch: refetchBalances,
   } = useQuery({
     queryKey: [...balancesQueryKey, address],
     queryFn: async () => {
@@ -99,8 +95,6 @@ const useBalances = (address?: string) => {
     balances: data?.balances,
     balancesError,
     isBalancesLoading,
-    isBalancesFetching,
-    refetchBalances,
     totalUsd: data?.totalUsd ?? 0,
   }
 }

@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { Plus, UsersRound } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -19,6 +19,7 @@ import { shortenAddress } from '../../utils'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { CardSkeleton } from '../../components/skeletons/CardSkeleton'
 import { APP_BACKGROUND_COLOR } from '../../constants'
+import { AppText, Button } from '../../components/ui'
 
 const menuItems: MenuItem[] = ['Proposals', 'Coins', 'NFTs']
 
@@ -36,7 +37,6 @@ function MenuContent({
 }: {
   selectedMenuItem: MenuItem
   multisigData?: SquadsMultisigData | null
-  isLoading?: boolean
 }) {
   if (selectedMenuItem === 'Coins') {
     return <CoinsMenu address={multisigData?.vaultAddress} />
@@ -156,13 +156,14 @@ export default function HomeScreen() {
                 onSelect={selectMultisig}
                 menuMaxHeight={260}
                 button={
-                  <Pressable
+                  <Button
                     onPress={openCreateMultisig}
-                    className="h-11 flex-row items-center justify-center rounded-xl bg-black active:bg-black/80"
+                    className="h-11"
+                    textClassName="text-sm font-mono-extrabold"
+                    leftIcon={<Plus color="#FFFFFF" size={16} strokeWidth={2.4} />}
                   >
-                    <Plus color="#FFFFFF" size={16} strokeWidth={2.4} />
-                    <Text className="ml-2 text-sm font-mono-extrabold text-white">Create Multisig</Text>
-                  </Pressable>
+                    Create Multisig
+                  </Button>
                 }
               />
 
@@ -171,7 +172,7 @@ export default function HomeScreen() {
                 {isMultisigsLoading && !selectedMultisig ? (
                   <CardSkeleton className="h-4 w-5 rounded-md" />
                 ) : (
-                  <Text className="text-sm font-mono-bold text-black">{selectedParticipants}</Text>
+                  <AppText className="font-mono-bold">{selectedParticipants}</AppText>
                 )}
               </View>
             </View>
@@ -185,13 +186,15 @@ export default function HomeScreen() {
                 </View>
               ) : (
                 <>
-                  <Text className="text-xs font-mono-semibold text-black/45">Total Balance</Text>
-                  <Text className="mt-3 text-center text-4xl font-mono-extrabold text-black">{selectedBalance}</Text>
+                  <AppText variant="caption">Total Balance</AppText>
+                  <AppText variant="heading" className="mt-3 text-center text-4xl">
+                    {selectedBalance}
+                  </AppText>
                   {selectedVaultAddress ? (
                     <View className="mt-2 flex-row items-center justify-center">
-                      <Text className="text-xs font-mono-bold text-black/45">
+                      <AppText variant="caption" className="font-mono-bold">
                         Vault {shortenAddress(selectedVaultAddress)}
-                      </Text>
+                      </AppText>
                       <CopyText
                         text={selectedVaultAddress}
                         accessibilityLabel="Copy vault address"
@@ -237,11 +240,11 @@ export default function HomeScreen() {
                   onPress={() => setSelectedMenuItem(item)}
                   className="h-11 flex-1 items-center justify-end"
                 >
-                  <Text
+                  <AppText
                     className={`mb-2 text-sm font-mono-semibold ${isSelected ? 'text-black font-mono-extrabold' : 'text-black/60'}`}
                   >
                     {item}
-                  </Text>
+                  </AppText>
                   <View
                     className="w-full"
                     style={{

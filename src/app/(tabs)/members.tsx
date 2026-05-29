@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import { useCallback, useMemo, useRef, useState } from 'react'
-import { Animated, FlatList, PanResponder, Pressable, Text, View } from 'react-native'
+import { Animated, FlatList, PanResponder, View } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { CheckCircle2, Plus, Trash2, UsersRound } from 'lucide-react-native'
@@ -12,6 +12,7 @@ import { getSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
 import { shortenAddress } from '../../utils'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { APP_BACKGROUND_COLOR } from '../../constants'
+import { AppText, Card, IconButton } from '../../components/ui'
 
 const DELETE_REVEAL_WIDTH = 72
 const keyExtractor = (member: string) => member
@@ -62,29 +63,30 @@ export default function MembersScreen() {
       <>
         <View className="flex-row items-center justify-between gap-3 mb-8">
           <View className="flex-row items-center gap-2">
-            <Text className="text-base font-mono-extrabold text-black">Members</Text>
+            <AppText variant="button" className="font-mono-extrabold">
+              Members
+            </AppText>
             {isMultisigsLoading ? (
               <CardSkeleton className="h-5 w-6 rounded-md" />
             ) : (
-              <Text className="text-base font-mono-extrabold text-black">({members.length})</Text>
+              <AppText variant="button" className="font-mono-extrabold">
+                ({members.length})
+              </AppText>
             )}
           </View>
           <View className="flex-row items-center gap-3">
-            <Pressable
-              onPress={openAddMemberModal}
-              className="h-10 w-10 items-center justify-center rounded-xl bg-black active:bg-black/80"
-            >
+            <IconButton onPress={openAddMemberModal} variant="soft" className="bg-black active:bg-black/80">
               <Plus color="#FFFFFF" size={17} strokeWidth={2.4} />
-            </Pressable>
+            </IconButton>
           </View>
         </View>
 
         {isMultisigsLoading ? (
           <MembersLoadingSkeleton />
         ) : members.length === 0 ? (
-          <Text className="mt-3 text-sm leading-6 text-black/65">
+          <AppText variant="muted" className="mt-3 text-black/65">
             Members will appear here after a multisig is selected.
-          </Text>
+          </AppText>
         ) : null}
       </>
     ),
@@ -147,14 +149,14 @@ function MembersLoadingSkeleton() {
   return (
     <View className="mt-4 gap-3">
       {memberRows.map((_, index) => (
-        <View key={index} className="flex-row items-center gap-3 rounded-xl bg-neutral-100/60 p-3 shadow-xs">
+        <Card key={index} className="flex-row items-center gap-3 p-3">
           <CardSkeleton className="h-10 w-10 rounded-xl" />
           <View className="flex-1">
             <CardSkeleton className="h-4 w-24 rounded-md" />
             <CardSkeleton className="mt-2 h-4 w-28 rounded-md" />
           </View>
           <CardSkeleton className="h-7 w-14 rounded-xl" />
-        </View>
+        </Card>
       ))}
     </View>
   )
@@ -209,39 +211,38 @@ function MemberCard({
   })
 
   return (
-    <View className="overflow-hidden rounded-xl bg-neutral-100/60 shadow-xs">
+    <Card className="overflow-hidden">
       {canDelete ? (
         <Animated.View
           className="absolute inset-y-0 right-0 w-18 items-center justify-center"
           style={{ opacity: deleteOpacity }}
         >
-          <Pressable
-            onPress={handleDelete}
-            className="h-10 w-10 items-center justify-center rounded-xl border border-red-500/25 bg-white active:bg-red-100"
-          >
+          <IconButton onPress={handleDelete} className="border-red-500/25 bg-white active:bg-red-100">
             <Trash2 color="#DC2626" size={17} strokeWidth={2.4} />
-          </Pressable>
+          </IconButton>
         </Animated.View>
       ) : null}
 
       <Animated.View style={{ transform: [{ translateX }] }} {...(canDelete ? panResponder.panHandlers : {})}>
-        <View className="flex-row items-center gap-3 rounded-xl bg-neutral-100/60 p-3">
+        <View className="flex-row items-center gap-3 p-3">
           <View className="h-10 w-10 items-center justify-center rounded-xl bg-black/5">
-            <Text className="text-sm font-mono-extrabold text-black">{index + 1}</Text>
+            <AppText className="font-mono-extrabold">{index + 1}</AppText>
           </View>
           <View className="flex-1">
             <View className="flex-row items-center gap-2">
-              <Text className="text-sm font-mono-extrabold text-black">Member {index + 1}</Text>
+              <AppText className="font-mono-extrabold">Member {index + 1}</AppText>
               {isConnectedWallet ? <CheckCircle2 color="#090A0F" size={14} strokeWidth={2.4} /> : null}
             </View>
-            <Text className="mt-1 text-sm font-mono-bold text-black/45">{shortenAddress(member)}</Text>
+            <AppText className="mt-1 font-mono-bold text-black/45">{shortenAddress(member)}</AppText>
           </View>
           <View className="rounded-xl bg-black/5 px-2 py-1">
-            <Text className="text-xs font-mono-bold text-black/60">{isConnectedWallet ? 'You' : 'Signer'}</Text>
+            <AppText variant="caption" className="font-mono-bold text-black/60">
+              {isConnectedWallet ? 'You' : 'Signer'}
+            </AppText>
           </View>
         </View>
       </Animated.View>
-    </View>
+    </Card>
   )
 }
 
@@ -249,10 +250,10 @@ function NoMembersScreen() {
   return (
     <View className="flex-1 items-center justify-center gap-3 px-6" style={{ backgroundColor: APP_BACKGROUND_COLOR }}>
       <UsersRound color="#090A0F" size={48} strokeWidth={1.5} />
-      <Text className="text-center text-lg font-mono-bold text-black">No Members</Text>
-      <Text className="text-center text-sm text-black/65">
+      <AppText className="text-center text-lg font-mono-bold">No Members</AppText>
+      <AppText className="text-center text-black/65">
         Select a multisig from the home screen to view its members.
-      </Text>
+      </AppText>
       <StatusBar style="dark" />
     </View>
   )

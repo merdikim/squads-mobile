@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useRef, useState } from 'react'
-import { Animated, Easing, Image, Pressable, Text, View } from 'react-native'
+import { Animated, Easing, Image, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
@@ -10,6 +10,7 @@ import { CreateMultisigModal } from '../modals/CreateMultisigModal'
 import useMultisigs from '../../hooks/useMultisigs'
 import { APP_BACKGROUND_COLOR } from '../../constants'
 import { clearSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
+import { AppText, Button, Card } from '../ui'
 
 const squadsLetters = ['S', 'Q', 'U', 'A', 'D', 'S']
 const introDuration = 1000
@@ -118,7 +119,7 @@ export default function NoMultisigs() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: APP_BACKGROUND_COLOR }}>
       <View className="flex-1 px-6 pt-10 text-black">
-        <View className="flex-1 items-center justify-center bg-neutral-100 shadow rounded-xl">
+        <Card className="flex-1 items-center justify-center bg-neutral-100">
           <View className="flex-row items-center justify-center">
             <Animated.View style={{ transform: [{ rotate: spin }] }}>
               <Image source={squadsLogo} className="h-12 w-12" resizeMode="contain" />
@@ -152,37 +153,41 @@ export default function NoMultisigs() {
               ))}
             </View>
           </View>
-        </View>
+        </Card>
 
         <View className="flex-[1.25] items-center justify-center">
-          <Text className="text-center text-3xl font-mono-extrabold leading-tight">The safest way to manage funds together</Text>
+          <AppText variant="heading" className="text-center leading-tight">
+            The safest way to manage funds together
+          </AppText>
 
-          <Text className="mt-5 text-center text-sm leading-7 text-black/70">
+          <AppText variant="muted" className="mt-5 text-center leading-7 text-black/70">
             Built for teams that move assets together. Secure every transaction with collective approval
-          </Text>
+          </AppText>
         </View>
 
         <View className="flex-[0.75] justify-center">
-          <Pressable
+          <Button
             onPress={() => setIsCreatingModalOpen(true)}
-            className="h-14 flex-row items-center justify-center rounded-xl bg-black px-5 active:bg-black/80"
+            className="h-14"
+            leftIcon={<Plus color="#FFFFFF" size={18} strokeWidth={2.4} />}
           >
-            <Plus color="#FFFFFF" size={18} strokeWidth={2.4} />
-            <Text className="ml-2 text-base font-mono-extrabold text-white">Create Multisig</Text>
-          </Pressable>
-          <Pressable
+            Create Multisig
+          </Button>
+          <Button
             onPress={logout}
-            className="mt-3 h-11 flex-row items-center justify-center rounded-xl border border-black/10 bg-neutral-100/60 px-5 active:bg-black/5"
+            variant="secondary"
+            className="mt-3 h-11 border-black/10 bg-neutral-100/60"
+            textClassName="text-sm text-black/55"
+            leftIcon={<LogOut color="rgba(9, 10, 15, 0.55)" size={15} strokeWidth={2.4} />}
           >
-            <LogOut color="rgba(9, 10, 15, 0.55)" size={15} strokeWidth={2.4} />
-            <Text className="ml-2 text-sm font-mono-bold text-black/55">Log out</Text>
-          </Pressable>
+            Log out
+          </Button>
         </View>
       </View>
 
       <CreateMultisigModal visible={isCreatingModalOpen} onClose={() => setIsCreatingModalOpen(false)} />
 
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
     </SafeAreaView>
   )
 }

@@ -7,8 +7,7 @@ const NFTS_DATA_GC_TIME = 10 * 60 * 1000
 
 export const nftsQueryKey = ['nfts'] as const
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 
 const getString = (value: unknown) => (typeof value === 'string' ? value : undefined)
 
@@ -30,22 +29,17 @@ const normalizeNft = (nft: SquadsApiNft, index: number): SquadsNftData => {
   }
 }
 
-const useNfts = (address?:string) => {
-
+const useNfts = (address?: string) => {
   const {
     data,
     error: nftsError,
     isLoading: isNftsLoading,
-    isFetching: isNftsFetching,
-    refetch: refetchNfts,
   } = useQuery({
     queryKey: [...nftsQueryKey, address],
     queryFn: async () => {
       if (!isSolanaAddress(address)) {
         return {
           nfts: [],
-          nextCursor: null,
-          prevCursor: null,
         }
       }
 
@@ -66,8 +60,6 @@ const useNfts = (address?:string) => {
 
       return {
         nfts: result.nfts.map(normalizeNft),
-        nextCursor: getString(result.next_cursor) ?? null,
-        prevCursor: getString(result.prev_cursor) ?? null,
       }
     },
     enabled: !!address && isSolanaAddress(address),
@@ -77,12 +69,8 @@ const useNfts = (address?:string) => {
 
   return {
     nfts: data?.nfts,
-    nextCursor: data?.nextCursor ?? null,
-    prevCursor: data?.prevCursor ?? null,
     nftsError,
     isNftsLoading,
-    isNftsFetching,
-    refetchNfts,
   }
 }
 

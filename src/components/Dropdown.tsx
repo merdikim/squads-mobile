@@ -1,6 +1,7 @@
-import { GestureResponderEvent, Image, Pressable, ScrollView, Text, View } from 'react-native'
+import { GestureResponderEvent, Image, Pressable, ScrollView, View } from 'react-native'
 import { ChevronDown } from 'lucide-react-native'
 import type { ReactNode } from 'react'
+import { AppText } from './ui'
 
 export type DropdownItem = {
   key: string
@@ -36,9 +37,9 @@ export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuM
     <View className="relative z-20">
       <Pressable onPress={handleToggle} className="h-10 flex-row items-center gap-2">
         <DropdownImage imageUri={selectedItem?.imageUri} label={selectedLabel} sizeClassName="h-8 w-8" />
-        <Text className="max-w-40 text-sm font-mono-semibold text-black" numberOfLines={1}>
+        <AppText className="max-w-40 font-mono-semibold" numberOfLines={1}>
           {selectedLabel}
-        </Text>
+        </AppText>
         <ChevronDown color="#090A0F" size={16} strokeWidth={2.4} />
       </Pressable>
 
@@ -60,16 +61,16 @@ export function Dropdown({ items, selectedKey, isOpen, onToggle, onSelect, menuM
                 >
                   <DropdownImage imageUri={item.imageUri} label={label} sizeClassName="h-9 w-9" />
                   <View className="flex-1">
-                    <Text
-                      className={`text-sm font-mono-bold ${selectedKey === item.key ? 'text-black' : 'text-black/60'}`}
+                    <AppText
+                      className={`font-mono-bold ${selectedKey === item.key ? 'text-black' : 'text-black/60'}`}
                       numberOfLines={1}
                     >
                       {label}
-                    </Text>
+                    </AppText>
                     {subtitle ? (
-                      <Text className="mt-0.5 text-xs font-mono-semibold text-black/40" numberOfLines={1}>
+                      <AppText variant="caption" className="mt-0.5 text-black/40" numberOfLines={1}>
                         {subtitle}
-                      </Text>
+                      </AppText>
                     ) : null}
                   </View>
                 </Pressable>
@@ -111,7 +112,9 @@ function DropdownImage({
 
   return (
     <View className={`${sizeClassName} items-center justify-center rounded-xl bg-black/5`}>
-      <Text className="text-xs font-mono-extrabold text-black/50">{label.slice(0, 1).toUpperCase()}</Text>
+      <AppText variant="caption" className="font-mono-extrabold text-black/50">
+        {label.slice(0, 1).toUpperCase()}
+      </AppText>
     </View>
   )
 }
