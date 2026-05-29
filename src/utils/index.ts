@@ -1,9 +1,4 @@
-import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
-
-export function formatSol(lamports: number) {
-  const sol = lamports / LAMPORTS_PER_SOL
-  return `${sol.toLocaleString(undefined, { maximumFractionDigits: 4 })} SOL`
-}
+import { PublicKey } from '@solana/web3.js'
 
 export function shortenAddress(address: string, size: number = 4) {
   if (!address) {

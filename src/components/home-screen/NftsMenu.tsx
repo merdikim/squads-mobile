@@ -1,17 +1,19 @@
 import { useCallback } from 'react'
 import { Image as ExpoImage } from 'expo-image'
-import { FlatList, StyleSheet, Text, View } from 'react-native'
+import { FlatList, StyleSheet, View } from 'react-native'
 import { EmptyMenuState } from './EmptyMenuState'
 import { CardSkeleton } from '../skeletons/CardSkeleton'
 import useNfts from '../../hooks/useNfts'
 import { shortenAddress } from '../../utils'
 import type { SquadsNftData } from '../../types'
+import { Card } from '../ui/Card'
+import { AppText } from '../ui/AppText'
 
 const keyExtractor = (nft: SquadsNftData) => nft.id
 
 function NftRow({ nft }: { nft: SquadsNftData }) {
   return (
-    <View className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4">
+    <Card className="mb-3 flex-row items-center p-4">
       <ExpoImage
         source={nft.imageUri ? { uri: nft.imageUri } : require('../../assets/logo.png')}
         style={styles.nftImage}
@@ -20,14 +22,14 @@ function NftRow({ nft }: { nft: SquadsNftData }) {
         transition={120}
       />
       <View className="ml-3 flex-1">
-        <Text className="text-sm font-mono-extrabold text-black" numberOfLines={1}>
+        <AppText className="font-mono-extrabold" numberOfLines={1}>
           {nft.name}
-        </Text>
-        <Text className="mt-1 text-xs font-mono-semibold text-black/45" numberOfLines={1}>
+        </AppText>
+        <AppText variant="caption" className="mt-1" numberOfLines={1}>
           {nft.collectionName ?? nft.symbol ?? (nft.mint ? shortenAddress(nft.mint) : 'Collectible')}
-        </Text>
+        </AppText>
       </View>
-    </View>
+    </Card>
   )
 }
 
@@ -48,13 +50,13 @@ export function NftsMenu({ address }: { address?: string }) {
     return (
       <View className="mt-5">
         {[0, 1, 2].map((item) => (
-          <View key={item} className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4">
+          <Card key={item} className="mb-3 flex-row items-center p-4">
             <CardSkeleton className="h-12 w-12 rounded-lg" />
             <View className="ml-3 flex-1">
               <CardSkeleton className="h-4 w-32 rounded-md" />
               <CardSkeleton className="mt-2 h-3 w-20 rounded-md" />
             </View>
-          </View>
+          </Card>
         ))}
       </View>
     )

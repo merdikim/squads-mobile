@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Image, Pressable, Text, TextInput, View } from 'react-native'
+import { Image, View } from 'react-native'
 import { ArrowLeft, ImagePlus, Plus, X } from 'lucide-react-native'
 import { SmoothModal } from './SmoothModal'
+import { AppText, Button, IconButton, ModalHeader, TextField } from '../ui'
 
 type CreateMultisigPayload = {
   name: string
@@ -63,42 +64,37 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
 
   return (
     <SmoothModal visible={visible} onClose={onClose}>
-      <View className="flex-row items-start justify-between gap-4">
-        <View className="flex-1">
-          <Text className="text-xl font-mono-extrabold text-black">Create Multisig</Text>
-          <Text className="mt-2 text-sm leading-6 text-black/60">
-            {step === 'details'
-              ? 'Name your multisig and add an image before inviting members.'
-              : 'Add the wallet addresses that should be members of this multisig.'}
-          </Text>
-        </View>
-
-        {step === 'members' ? (
-          <Pressable
-            onPress={() => setStep('details')}
-            className="h-10 w-10 items-center justify-center rounded-xl border border-black/10 active:bg-black/5"
-          >
-            <ArrowLeft color="#090A0F" size={17} strokeWidth={2.4} />
-          </Pressable>
-        ) : null}
-      </View>
+      <ModalHeader
+        title="Create Multisig"
+        description={
+          step === 'details'
+            ? 'Name your multisig and add an image before inviting members.'
+            : 'Add the wallet addresses that should be members of this multisig.'
+        }
+        action={
+          step === 'members' ? (
+            <IconButton accessibilityLabel="Back to multisig details" onPress={() => setStep('details')}>
+              <ArrowLeft color="#090A0F" size={17} strokeWidth={2.4} />
+            </IconButton>
+          ) : null
+        }
+      />
 
       {step === 'details' ? (
         <View className="mt-5 gap-5">
           <View>
-            <Text className="text-sm font-mono-bold text-black">Multisig name</Text>
-            <TextInput
+            <AppText className="font-mono-bold">Multisig name</AppText>
+            <TextField
               value={name}
               onChangeText={setName}
               autoCapitalize="words"
               placeholder="Enter multisig name"
-              placeholderTextColor="rgba(0,0,0,0.35)"
-              className="mt-2 min-h-12 rounded-xl border border-black/15 px-3 text-sm text-black"
+              className="mt-2"
             />
           </View>
 
           <View>
-            <Text className="text-sm font-mono-bold text-black">Image</Text>
+            <AppText className="font-mono-bold">Image</AppText>
             <View className="mt-2 flex-row items-center gap-3">
               <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-xl border border-black/10 bg-black/5">
                 {imageUri.trim() ? (
@@ -107,14 +103,13 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
                   <ImagePlus color="rgba(0,0,0,0.45)" size={22} strokeWidth={2.4} />
                 )}
               </View>
-              <TextInput
+              <TextField
                 value={imageUri}
                 onChangeText={setImageUri}
                 autoCapitalize="none"
                 autoCorrect={false}
                 placeholder="Enter image URL"
-                placeholderTextColor="rgba(0,0,0,0.35)"
-                className="min-h-12 flex-1 rounded-xl border border-black/15 px-3 text-sm text-black"
+                className="flex-1"
               />
             </View>
           </View>
@@ -123,52 +118,45 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
         <View className="mt-5 gap-3">
           {members.map((member, index) => (
             <View key={index} className="flex-row items-center gap-2">
-              <TextInput
+              <TextField
                 value={member}
                 onChangeText={(value) => updateMember(index, value)}
                 autoCapitalize="none"
                 autoCorrect={false}
                 placeholder="Enter member address"
-                placeholderTextColor="rgba(0,0,0,0.35)"
-                className="min-h-12 flex-1 rounded-xl border border-black/15 px-3 text-sm text-black"
+                className="flex-1"
               />
-              <Pressable
+              <IconButton
+                accessibilityLabel={`Remove member ${index + 1}`}
                 onPress={() => removeMember(index)}
-                className="h-12 w-12 items-center justify-center rounded-xl border border-black/10 active:bg-black/5"
+                className="h-12 w-12"
               >
                 <X color="#090A0F" size={17} strokeWidth={2.4} />
-              </Pressable>
+              </IconButton>
             </View>
           ))}
 
-          <Pressable
+          <Button
             onPress={addMember}
-            className="h-12 flex-row items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
+            variant="secondary"
+            leftIcon={<Plus color="#090A0F" size={17} strokeWidth={2.4} />}
           >
-            <Plus color="#090A0F" size={17} strokeWidth={2.4} />
-            <Text className="ml-2 text-sm font-mono-extrabold text-black">Add Member</Text>
-          </Pressable>
+            Add Member
+          </Button>
         </View>
       )}
 
       <View className="mt-6 flex-row gap-3">
-        <Pressable
-          onPress={onClose}
-          className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
-        >
-          <Text className="text-base font-mono-bold text-black">Cancel</Text>
-        </Pressable>
-        <Pressable
+        <Button onPress={onClose} variant="secondary" className="flex-1">
+          Cancel
+        </Button>
+        <Button
           onPress={step === 'details' ? () => setStep('members') : handleCreate}
           disabled={step === 'details' ? !canGoNext : !canCreate}
-          className={`h-12 flex-1 items-center justify-center rounded-xl ${
-            (step === 'details' && !canGoNext) || (step === 'members' && !canCreate)
-              ? 'bg-black/25'
-              : 'bg-black active:bg-black/80'
-          }`}
+          className="flex-1"
         >
-          <Text className="text-base font-mono-bold text-white">{step === 'details' ? 'Next' : 'Create'}</Text>
-        </Pressable>
+          {step === 'details' ? 'Next' : 'Create'}
+        </Button>
       </View>
     </SmoothModal>
   )

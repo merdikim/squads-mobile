@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { View } from 'react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { addressesEqual, shortenAddress, toPublicKey } from '../../utils'
 import * as multisig from '@sqds/multisig'
@@ -9,6 +9,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { multisigProposalsQueryKey } from '../../hooks/useProposals'
 import { SmoothModal } from './SmoothModal'
 import { multisigsQueryKey } from '../../hooks/useMultisigs'
+import { AppText, Button, ModalHeader } from '../ui'
 
 type DeleteMemberModalProps = {
   member: string
@@ -138,39 +139,28 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
 
   return (
     <SmoothModal visible={visible} onClose={handleClose}>
-      <Text className="text-xl font-mono-extrabold text-black">Delete Member</Text>
-      <Text className="mt-2 text-sm leading-6 text-black/60">
-        Remove {member ? shortenAddress(member) : 'this member'} from this multisig?
-      </Text>
-      {error ? <Text className="mt-3 text-xs font-mono-bold text-red-600">{error}</Text> : null}
+      <ModalHeader
+        title="Delete Member"
+        description={`Remove ${member ? shortenAddress(member) : 'this member'} from this multisig?`}
+      />
+      {error ? (
+        <AppText variant="error" className="mt-3">
+          {error}
+        </AppText>
+      ) : null}
 
       <View className="mt-6 flex-row gap-3">
-        <Pressable
-          onPress={handleClose}
-          disabled={isRemoving}
-          className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
-        >
-          <Text className="text-base font-mono-bold text-black">Cancel</Text>
-        </Pressable>
+        <Button onPress={handleClose} disabled={isRemoving} variant="secondary" className="flex-1">
+          Cancel
+        </Button>
         {account ? (
-          <Pressable
-            onPress={handleDeleteMember}
-            disabled={isRemoving}
-            className="h-12 flex-1 items-center justify-center rounded-xl bg-red-600 active:bg-red-700 disabled:opacity-60"
-          >
-            {isRemoving ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text className="text-base font-mono-bold text-white">Delete</Text>
-            )}
-          </Pressable>
+          <Button onPress={handleDeleteMember} isLoading={isRemoving} variant="danger" className="flex-1">
+            Delete
+          </Button>
         ) : (
-          <Pressable
-            onPress={handleConnectWallet}
-            className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
-          >
-            <Text className="text-base font-mono-bold text-white">Connect Wallet</Text>
-          </Pressable>
+          <Button onPress={handleConnectWallet} className="flex-1">
+            Connect Wallet
+          </Button>
         )}
       </View>
     </SmoothModal>

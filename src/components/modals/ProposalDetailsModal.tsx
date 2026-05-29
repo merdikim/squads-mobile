@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
+import { View } from 'react-native'
 import { Check, X } from 'lucide-react-native'
 import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
 import { useQueryClient } from '@tanstack/react-query'
@@ -9,25 +9,26 @@ import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import * as multisig from '@sqds/multisig'
 import { multisigProposalsQueryKey } from '../../hooks/useProposals'
 import { SmoothModal } from './SmoothModal'
+import { AppText, Button, IconButton, ModalHeader } from '../ui'
 
 type ProposalDetailsModalProps = {
   proposal: SquadsProposalData | null
   threshold: number
   onClose: () => void
-  onApprove?: (proposal: SquadsProposalData) => void
-  onReject?: (proposal: SquadsProposalData) => void
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <View className="flex-row items-start justify-between gap-4 border-b border-black/10 py-3">
-      <Text className="text-xs font-mono-bold uppercase text-black/40">{label}</Text>
-      <Text className="max-w-[68%] text-right text-sm font-mono-bold text-black">{value}</Text>
+      <AppText variant="label" className="text-black/40">
+        {label}
+      </AppText>
+      <AppText className="max-w-[68%] text-right font-mono-bold">{value}</AppText>
     </View>
   )
 }
 
-export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, onReject }: ProposalDetailsModalProps) {
+export function ProposalDetailsModal({ proposal, threshold, onClose }: ProposalDetailsModalProps) {
   const { account, connect, connection, signAndSendTransactions } = useMobileWallet()
   const queryClient = useQueryClient()
   const [error, setError] = useState('')
@@ -129,12 +130,6 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
       await queryClient.invalidateQueries({ queryKey: multisigProposalsQueryKey })
 
       if (canUpdateState()) {
-        if (action === 'approve') {
-          onApprove?.(proposal)
-        } else {
-          onReject?.(proposal)
-        }
-
         onClose()
       }
     } catch (err) {
@@ -164,20 +159,15 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
     <SmoothModal visible={visible} onClose={onClose} contentClassName="w-full rounded-xl bg-white p-5">
       {proposal ? (
         <>
-          <View className="flex-row items-start justify-between gap-4">
-            <View className="flex-1">
-              <Text className="text-xl font-mono-extrabold text-black">{proposal.title}</Text>
-              <Text className="mt-2 text-sm leading-6 text-black/60">
-                {proposal.memo || `${proposal.category} proposal`}
-              </Text>
-            </View>
-            <Pressable
-              onPress={onClose}
-              className="h-10 w-10 items-center justify-center rounded-xl border border-black/10 active:bg-black/5"
-            >
-              <X color="#090A0F" size={17} strokeWidth={2.4} />
-            </Pressable>
-          </View>
+          <ModalHeader
+            title={proposal.title}
+            description={proposal.memo || `${proposal.category} proposal`}
+            action={
+              <IconButton accessibilityLabel="Close proposal details" onPress={onClose}>
+                <X color="#090A0F" size={17} strokeWidth={2.4} />
+              </IconButton>
+            }
+          />
 
           <View className="rounded-xl mt-5 border border-black/10 px-4">
             <DetailRow label={relatedAddressLabel} value={relatedAddress} />
@@ -188,54 +178,42 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
           </View>
 
           <View className="w-full flex-row justify-end my-5">
-            <Text>{timeAgo}</Text>
+            <AppText>{timeAgo}</AppText>
           </View>
 
-          {error ? <Text className="mt-4 text-xs font-mono-bold text-red-600">{error}</Text> : null}
+          {error ? (
+            <AppText variant="error" className="mt-4">
+              {error}
+            </AppText>
+          ) : null}
 
           <View className="mt-6 flex-row gap-3">
             {account ? (
               <>
-                <Pressable
+                <Button
                   onPress={handleReject}
                   disabled={!canVote}
-                  className={`h-12 flex-1 flex-row items-center justify-center rounded-xl border border-black/15 ${canVote ? 'active:bg-black/5' : 'bg-black/5'}`}
+                  isLoading={voteAction === 'reject'}
+                  variant="secondary"
+                  className="flex-1"
+                  leftIcon={<X color="#090A0F" size={16} strokeWidth={2.4} />}
                 >
-                  {voteAction === 'reject' ? (
-                    <ActivityIndicator size="small" color="#090A0F" />
-                  ) : (
-                    <>
-                      <X color={canVote ? '#090A0F' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
-                      <Text className={`ml-2 text-base font-mono-bold ${canVote ? 'text-black' : 'text-black/35'}`}>
-                        Reject
-                      </Text>
-                    </>
-                  )}
-                </Pressable>
-                <Pressable
+                  Reject
+                </Button>
+                <Button
                   onPress={handleApprove}
                   disabled={!canVote}
-                  className={`h-12 flex-1 flex-row items-center justify-center rounded-xl ${canVote ? 'bg-black active:bg-black/80' : 'bg-black/10'}`}
+                  isLoading={voteAction === 'approve'}
+                  className="flex-1"
+                  leftIcon={<Check color="#FFFFFF" size={16} strokeWidth={2.4} />}
                 >
-                  {voteAction === 'approve' ? (
-                    <ActivityIndicator size="small" color="#FFFFFF" />
-                  ) : (
-                    <>
-                      <Check color={canVote ? '#FFFFFF' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
-                      <Text className={`ml-2 text-base font-mono-bold ${canVote ? 'text-white' : 'text-black/35'}`}>
-                        Approve
-                      </Text>
-                    </>
-                  )}
-                </Pressable>
+                  Approve
+                </Button>
               </>
             ) : (
-              <Pressable
-                onPress={handleConnectWallet}
-                className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
-              >
-                <Text className="text-base font-mono-bold text-white">Connect Wallet</Text>
-              </Pressable>
+              <Button onPress={handleConnectWallet} className="flex-1">
+                Connect Wallet
+              </Button>
             )}
           </View>
         </>

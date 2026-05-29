@@ -1,4 +1,5 @@
-import { Image, Text, View } from 'react-native'
+import { Image, View } from 'react-native'
+import { AppText } from '../ui/AppText'
 
 type EmptyMenuStateProps = {
   title: string
@@ -10,9 +11,9 @@ export function EmptyMenuState({ title, description }: EmptyMenuStateProps) {
     <View className="mt-5 min-h-56 items-center justify-center">
       <View className="flex-row items-center justify-center">
         <Image source={require('../../assets/logo.png')} className="mr-4 h-5 w-5" />
-        <Text className="text-lg font-mono-semibold">{title}</Text>
+        <AppText className="text-lg font-mono-semibold">{title}</AppText>
       </View>
-      <Text className="mt-4 text-neutral-500 font-mono-light">{description}</Text>
+      <AppText className="mt-4 font-mono-light text-neutral-500">{description}</AppText>
     </View>
   )
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
+import { View } from 'react-native'
 import { X } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import * as multisig from '@sqds/multisig'
@@ -10,6 +10,7 @@ import { multisigProposalsQueryKey } from '../../hooks/useProposals'
 import { useQueryClient } from '@tanstack/react-query'
 import { SmoothModal } from './SmoothModal'
 import { multisigsQueryKey } from '../../hooks/useMultisigs'
+import { AppText, Button, IconButton, ModalHeader, TextField } from '../ui'
 
 const { Permissions } = multisig.types
 
@@ -163,22 +164,19 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
 
   return (
     <SmoothModal visible={visible} onClose={handleClose}>
-      <View className="flex-row items-start justify-between gap-4">
-        <View className="flex-1">
-          <Text className="text-xl font-mono-extrabold text-black">Add Member</Text>
-          <Text className="mt-2 text-sm leading-6 text-black/60">Enter a wallet address to add to this multisig.</Text>
-        </View>
-        <Pressable
-          onPress={handleClose}
-          className="h-10 w-10 items-center justify-center rounded-xl border border-black/10 active:bg-black/5"
-        >
-          <X color="#090A0F" size={17} strokeWidth={2.4} />
-        </Pressable>
-      </View>
+      <ModalHeader
+        title="Add Member"
+        description="Enter a wallet address to add to this multisig."
+        action={
+          <IconButton accessibilityLabel="Close add member modal" onPress={handleClose}>
+            <X color="#090A0F" size={17} strokeWidth={2.4} />
+          </IconButton>
+        }
+      />
 
       <View className="mt-5">
-        <Text className="text-sm font-mono-bold text-black">Wallet address</Text>
-        <TextInput
+        <AppText className="font-mono-bold">Wallet address</AppText>
+        <TextField
           value={address}
           onChangeText={(value) => {
             setAddress(value)
@@ -187,39 +185,27 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
           autoCapitalize="none"
           autoCorrect={false}
           placeholder="Enter member wallet address"
-          placeholderTextColor="rgba(0,0,0,0.35)"
-          className="mt-2 min-h-12 rounded-xl border border-black/15 px-3 text-sm text-black"
+          className="mt-2"
         />
-        {error ? <Text className="mt-2 text-xs font-mono-bold text-red-600">{error}</Text> : null}
+        {error ? (
+          <AppText variant="error" className="mt-2">
+            {error}
+          </AppText>
+        ) : null}
       </View>
 
       <View className="mt-6 flex-row gap-3">
-        <Pressable
-          onPress={handleClose}
-          disabled={isAdding}
-          className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
-        >
-          <Text className="text-base font-mono-bold text-black">Cancel</Text>
-        </Pressable>
+        <Button onPress={handleClose} disabled={isAdding} variant="secondary" className="flex-1">
+          Cancel
+        </Button>
         {account ? (
-          <Pressable
-            onPress={handleAddMember}
-            disabled={isAdding}
-            className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80 disabled:opacity-60"
-          >
-            {isAdding ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text className="text-base font-mono-bold text-white">Add</Text>
-            )}
-          </Pressable>
+          <Button onPress={handleAddMember} isLoading={isAdding} className="flex-1">
+            Add
+          </Button>
         ) : (
-          <Pressable
-            onPress={handleConnectWallet}
-            className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
-          >
-            <Text className="text-base font-mono-bold text-white">Connect Wallet</Text>
-          </Pressable>
+          <Button onPress={handleConnectWallet} className="flex-1">
+            Connect Wallet
+          </Button>
         )}
       </View>
     </SmoothModal>

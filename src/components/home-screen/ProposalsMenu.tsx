@@ -1,11 +1,12 @@
 import { useCallback, useMemo } from 'react'
-import { FlatList, Pressable, Text, View } from 'react-native'
+import { FlatList, Pressable, View } from 'react-native'
 import { ChevronLeft, ChevronRight } from 'lucide-react-native'
 import { EmptyMenuState } from '../home-screen/EmptyMenuState'
 import { ProposalCard } from '../cards/ProposalCard'
 import useProposals from '../../hooks/useProposals'
 import { ProposalsSkeleton } from '../skeletons/ProposalsSkeleton'
 import type { SquadsProposalData } from '../../types'
+import { AppText } from '../ui'
 
 type ProposalsMenuProps = {
   multisigAddress?: string
@@ -39,7 +40,9 @@ export function ProposalsMenu({ multisigAddress, threshold }: ProposalsMenuProps
 
     return (
       <View className="mb-2 flex-row items-center justify-between">
-        <Text className="text-xs font-mono-bold uppercase text-black/40">{totalEntries} active proposals</Text>
+        <AppText variant="label" className="text-black/40">
+          {totalEntries} active proposals
+        </AppText>
         <View className="flex-row items-center gap-2">
           <Pressable
             onPress={previousPage}
@@ -49,9 +52,9 @@ export function ProposalsMenu({ multisigAddress, threshold }: ProposalsMenuProps
           >
             <ChevronLeft color={hasPreviousPage ? '#090A0F' : 'rgba(9, 10, 15, 0.3)'} size={16} strokeWidth={2.6} />
           </Pressable>
-          <Text className="text-xs font-mono-bold text-black/50">
+          <AppText variant="caption" className="font-mono-bold text-black/50">
             {page} / {totalPages}
-          </Text>
+          </AppText>
           <Pressable
             onPress={nextPage}
             disabled={!hasNextPage || isProposalsFetching}
@@ -63,16 +66,7 @@ export function ProposalsMenu({ multisigAddress, threshold }: ProposalsMenuProps
         </View>
       </View>
     )
-  }, [
-    hasNextPage,
-    hasPreviousPage,
-    isProposalsFetching,
-    nextPage,
-    page,
-    previousPage,
-    totalEntries,
-    totalPages,
-  ])
+  }, [hasNextPage, hasPreviousPage, isProposalsFetching, nextPage, page, previousPage, totalEntries, totalPages])
 
   if (isProposalsLoading) {
     return <ProposalsSkeleton />

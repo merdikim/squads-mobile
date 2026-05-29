@@ -1,9 +1,5 @@
 import * as multisig from '@sqds/multisig'
-import { LAMPORTS_PER_SOL, PublicKey, TransactionInstruction } from '@solana/web3.js'
-
-
-const { Permission, Permissions } = multisig.types
-
+import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 
 export function buildProposalIx(
   multisigPda: PublicKey,
@@ -41,5 +37,3 @@ export function buildProposalIxs(
     buildProposalApprovalIx(multisigPda, member, transactionIndex),
   ]
 }
-
-export { LAMPORTS_PER_SOL, Permission, Permissions }

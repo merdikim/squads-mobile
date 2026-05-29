@@ -1,11 +1,12 @@
 import { StatusBar } from 'expo-status-bar'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { LogIn, LogOut } from 'lucide-react-native'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { CopyText } from '../../components/CopyText'
 import { CardSkeleton } from '../../components/skeletons/CardSkeleton'
+import { AppText, Button, Card } from '../../components/ui'
 import useMultisigs from '../../hooks/useMultisigs'
 import { APP_BACKGROUND_COLOR } from '../../constants'
 import { clearSelectedMultisigAddress, getSelectedMultisigAddress } from '../../lib/selectedMultisigStorage'
@@ -42,7 +43,9 @@ export default function SettingsScreen() {
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <View className="flex-1 px-6 py-8">
           <View className="flex-row items-center justify-between gap-3">
-            <Text className="text-base font-mono-extrabold text-black">Settings</Text>
+            <AppText variant="button" className="font-mono-extrabold">
+              Settings
+            </AppText>
           </View>
 
           <View className="mt-4">
@@ -55,15 +58,15 @@ export default function SettingsScreen() {
                   </>
                 ) : (
                   <>
-                    <Text className="text-3xl font-mono-extrabold text-black">
+                    <AppText variant="heading">
                       {walletName ||
                         (selectedMultisigAccount ? shortenAddress(selectedMultisigAccount) : 'No wallet selected')}
-                    </Text>
+                    </AppText>
                     {selectedMultisigVaultAccount ? (
                       <View className="mt-3 flex-row items-center">
-                        <Text className="text-sm font-mono-bold text-black/45">
+                        <AppText className="font-mono-bold text-black/45">
                           {shortenAddress(selectedMultisigVaultAccount, 9)}
-                        </Text>
+                        </AppText>
                         <CopyText
                           text={selectedMultisigVaultAccount}
                           accessibilityLabel="Copy wallet address"
@@ -111,21 +114,20 @@ export default function SettingsScreen() {
           </View>
 
           <View className="mt-auto pt-8">
-            <Pressable
+            <Button
               onPress={handleWalletPress}
-              className={`h-14 flex-row items-center justify-center rounded-xl px-5 active:bg-black/80 ${
-                account ? 'border border-black/15 bg-white active:bg-black/5' : 'bg-black'
-              }`}
+              variant={account ? 'secondary' : 'primary'}
+              className="h-14"
+              leftIcon={
+                account ? (
+                  <LogOut color="#090A0F" size={16} strokeWidth={2.4} />
+                ) : (
+                  <LogIn color="#FFFFFF" size={16} strokeWidth={2.4} />
+                )
+              }
             >
-              {account ? (
-                <LogOut color="#090A0F" size={16} strokeWidth={2.4} />
-              ) : (
-                <LogIn color="#FFFFFF" size={16} strokeWidth={2.4} />
-              )}
-              <Text className={`ml-2 text-sm font-mono-extrabold ${account ? 'text-black' : 'text-white'}`}>
-                {account ? 'Disconnect Wallet' : 'Connect Wallet'}
-              </Text>
-            </Pressable>
+              {account ? 'Disconnect Wallet' : 'Connect Wallet'}
+            </Button>
           </View>
         </View>
       </ScrollView>
@@ -150,25 +152,27 @@ function SettingsValueRow({
 }) {
   if (!copyLabel) {
     return (
-      <View className="flex-row items-center justify-between gap-3 rounded-xl bg-neutral-100/60 p-5 shadow-xs">
-        <Text className="flex-1 text-xs font-mono-bold uppercase text-black/45">{label}</Text>
+      <Card className="flex-row items-center justify-between gap-3 p-5">
+        <AppText variant="label" className="flex-1">
+          {label}
+        </AppText>
         {isLoading ? (
           <CardSkeleton className="h-4 w-20 rounded-md" />
         ) : (
-          <Text className="max-w-[52%] text-right text-sm font-mono-extrabold text-black">{displayValue}</Text>
+          <AppText className="max-w-[52%] text-right font-mono-extrabold">{displayValue}</AppText>
         )}
-      </View>
+      </Card>
     )
   }
 
   return (
-    <View className="flex-row items-center justify-between gap-3 rounded-xl bg-neutral-100/60 p-3 shadow-xs">
+    <Card className="flex-row items-center justify-between gap-3 p-3">
       <View className="flex-1">
-        <Text className="text-xs font-mono-bold uppercase text-black/45">{label}</Text>
+        <AppText variant="label">{label}</AppText>
         {isLoading ? (
           <CardSkeleton className="mt-2 h-4 w-36 rounded-md" />
         ) : (
-          <Text className="mt-1 text-sm font-mono-extrabold text-black">{displayValue}</Text>
+          <AppText className="mt-1 font-mono-extrabold">{displayValue}</AppText>
         )}
       </View>
       {isLoading ? <CardSkeleton className="h-9 w-9 rounded-xl" /> : null}
@@ -179,6 +183,6 @@ function SettingsValueRow({
           className="h-9 w-9 items-center justify-center rounded-xl bg-black/5 disabled:opacity-40"
         />
       ) : null}
-    </View>
+    </Card>
   )
 }

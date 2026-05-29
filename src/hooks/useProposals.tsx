@@ -15,8 +15,7 @@ const configTypes: Record<string, string> = {
 
 export const multisigProposalsQueryKey = [...multisigsQueryKey, 'proposals']
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 
 const isStringArray = (value: unknown): value is string[] =>
   Array.isArray(value) && value.every((item) => typeof item === 'string')
@@ -110,7 +109,6 @@ const normalizeProposalRow = (row: SquadsApiProposalRow): SquadsProposalData => 
           ? 'Destination'
           : 'Creator',
     timestamp: proposal.status.timestamp,
-    hasApproved: false,
   }
 }
 

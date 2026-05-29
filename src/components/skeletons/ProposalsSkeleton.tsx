@@ -1,5 +1,6 @@
 import { View } from 'react-native'
 import { CardSkeleton } from './CardSkeleton'
+import { Card } from '../ui'
 
 export function ProposalsSkeleton() {
   const proposalRows = Array.from({ length: 3 })
@@ -7,7 +8,7 @@ export function ProposalsSkeleton() {
   return (
     <View className="mt-5">
       {proposalRows.map((_, index) => (
-        <View key={index} className="my-2 rounded-xl bg-neutral-100/60 p-4 shadow-xs">
+        <Card key={index} className="my-2 p-4">
           <View className="flex-row items-start justify-between gap-3">
             <View className="flex-1">
               <CardSkeleton className="h-5 w-4/5 rounded-md" />
@@ -23,7 +24,7 @@ export function ProposalsSkeleton() {
               <CardSkeleton className="h-3 w-16 rounded-md" />
             </View>
           </View>
-        </View>
+        </Card>
       ))}
     </View>
   )

@@ -4,9 +4,10 @@ import { StatusBar } from 'expo-status-bar'
 import { router } from 'expo-router'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { CheckCircle, HandshakeIcon, Network, ShieldCheck, Users, WalletCards } from 'lucide-react-native'
-import { Animated, Easing, Image, Pressable, Text, View } from 'react-native'
+import { Animated, Easing, Image, View } from 'react-native'
 import { useEffect, useRef, useState } from 'react'
 import { APP_BACKGROUND_COLOR } from '../constants'
+import { AppText, Button } from '../components/ui'
 
 const squadsLogo = require('../assets/logo.png')
 const introWordDuration = 2000
@@ -127,27 +128,23 @@ const App = () => {
           <IntroWordsCarousel />
 
           <View className="flex-[1.25] items-center justify-center">
-            <Text className="text-center text-3xl font-mono-extrabold leading-tight">
+            <AppText variant="heading" className="text-center leading-tight">
               The coordination layer for onchain assets
-            </Text>
+            </AppText>
             <View className="mt-7 flex-row items-center justify-center">
               <Image source={squadsLogo} className="h-8 w-8" resizeMode="contain" />
             </View>
           </View>
 
           <View className="flex-[0.75] justify-center gap-3 pb-10">
-            <Pressable
+            <Button
               onPress={connect}
               disabled={!!account}
-              className={`h-14 flex-row items-center justify-center rounded-xl px-5 ${
-                account ? 'bg-black/70' : 'bg-black active:bg-black/80'
-              }`}
+              className={account ? 'h-14 bg-black/70' : 'h-14'}
+              leftIcon={<WalletCards color="#FFFFFF" size={18} strokeWidth={2.4} />}
             >
-              <WalletCards color="#FFFFFF" size={18} strokeWidth={2.4} />
-              <Text className="ml-2 text-base font-mono-extrabold text-white">
-                {account ? 'Wallet Connected' : 'Connect Wallet'}
-              </Text>
-            </Pressable>
+              {account ? 'Wallet Connected' : 'Connect Wallet'}
+            </Button>
           </View>
         </View>
       </View>
@@ -195,9 +192,9 @@ function IntroWordsCarousel() {
             opacity: 0.32,
           }}
         >
-          <Text className="text-center text-xl font-mono-light text-black" numberOfLines={1}>
+          <AppText className="text-center text-xl font-mono-light" numberOfLines={1}>
             {nextWord.text}
-          </Text>
+          </AppText>
         </Animated.View>
 
         <Animated.View
@@ -216,9 +213,9 @@ function IntroWordsCarousel() {
           <View className="h-16 w-16 items-center justify-center">
             <CurrentIcon color="#090A0F" size={30} strokeWidth={2} />
           </View>
-          <Text className="mt-4 text-center text-3xl font-mono-extrabold text-black" numberOfLines={1}>
+          <AppText variant="heading" className="mt-4 text-center" numberOfLines={1}>
             {currentWord.text}
-          </Text>
+          </AppText>
         </Animated.View>
 
         <Animated.View
@@ -228,9 +225,9 @@ function IntroWordsCarousel() {
             opacity: 0.32,
           }}
         >
-          <Text className="text-center text-xl font-mono-light text-black" numberOfLines={1}>
+          <AppText className="text-center text-xl font-mono-light" numberOfLines={1}>
             {previousWord.text}
-          </Text>
+          </AppText>
         </Animated.View>
       </View>
     </View>
