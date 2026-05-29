@@ -75,7 +75,12 @@ export default function MembersScreen() {
             )}
           </View>
           <View className="flex-row items-center gap-3">
-            <IconButton onPress={openAddMemberModal} variant="soft" className="bg-black active:bg-black/80">
+            <IconButton
+              accessibilityLabel="Add member"
+              onPress={openAddMemberModal}
+              variant="soft"
+              className="bg-black active:bg-black/80"
+            >
               <Plus color="#FFFFFF" size={17} strokeWidth={2.4} />
             </IconButton>
           </View>
@@ -217,7 +222,11 @@ function MemberCard({
           className="absolute inset-y-0 right-0 w-18 items-center justify-center"
           style={{ opacity: deleteOpacity }}
         >
-          <IconButton onPress={handleDelete} className="border-red-500/25 bg-white active:bg-red-100">
+          <IconButton
+            accessibilityLabel={`Delete member ${member}`}
+            onPress={handleDelete}
+            className="border-red-500/25 bg-white active:bg-red-100"
+          >
             <Trash2 color="#DC2626" size={17} strokeWidth={2.4} />
           </IconButton>
         </Animated.View>

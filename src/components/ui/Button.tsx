@@ -42,6 +42,8 @@ export function Button({
       className={cn('h-12 flex-row items-center justify-center rounded-xl px-4', buttonClassNames[variant], className)}
       disabled={isDisabled}
       {...props}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: isDisabled, busy: isLoading }}
     >
       {isLoading ? (
         <ActivityIndicator size="small" color={indicatorColor} />

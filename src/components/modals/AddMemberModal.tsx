@@ -168,7 +168,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
         title="Add Member"
         description="Enter a wallet address to add to this multisig."
         action={
-          <IconButton onPress={handleClose}>
+          <IconButton accessibilityLabel="Close add member modal" onPress={handleClose}>
             <X color="#090A0F" size={17} strokeWidth={2.4} />
           </IconButton>
         }

@@ -163,7 +163,7 @@ export function ProposalDetailsModal({ proposal, threshold, onClose }: ProposalD
             title={proposal.title}
             description={proposal.memo || `${proposal.category} proposal`}
             action={
-              <IconButton onPress={onClose}>
+              <IconButton accessibilityLabel="Close proposal details" onPress={onClose}>
                 <X color="#090A0F" size={17} strokeWidth={2.4} />
               </IconButton>
             }

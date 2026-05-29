@@ -73,7 +73,7 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
         }
         action={
           step === 'members' ? (
-            <IconButton onPress={() => setStep('details')}>
+            <IconButton accessibilityLabel="Back to multisig details" onPress={() => setStep('details')}>
               <ArrowLeft color="#090A0F" size={17} strokeWidth={2.4} />
             </IconButton>
           ) : null
@@ -126,7 +126,11 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
                 placeholder="Enter member address"
                 className="flex-1"
               />
-              <IconButton onPress={() => removeMember(index)} className="h-12 w-12">
+              <IconButton
+                accessibilityLabel={`Remove member ${index + 1}`}
+                onPress={() => removeMember(index)}
+                className="h-12 w-12"
+              >
                 <X color="#090A0F" size={17} strokeWidth={2.4} />
               </IconButton>
             </View>
