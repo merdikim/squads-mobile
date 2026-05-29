@@ -46,15 +46,20 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
     )
   }
 
+  const canGoNext = name.trim().length > 0
+  const canCreate = typeof onCreate === 'function'
+
   const handleCreate = () => {
-    onCreate?.({
+    if (!onCreate) {
+      return
+    }
+
+    onCreate({
       name: name.trim(),
       imageUri: imageUri.trim(),
       members: members.map((member) => member.trim()).filter(Boolean),
     })
   }
-
-  const canGoNext = name.trim().length > 0
 
   return (
     <SmoothModal visible={visible} onClose={onClose}>
@@ -155,9 +160,11 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
         </Pressable>
         <Pressable
           onPress={step === 'details' ? () => setStep('members') : handleCreate}
-          disabled={step === 'details' && !canGoNext}
+          disabled={step === 'details' ? !canGoNext : !canCreate}
           className={`h-12 flex-1 items-center justify-center rounded-xl ${
-            step === 'details' && !canGoNext ? 'bg-black/25' : 'bg-black active:bg-black/80'
+            (step === 'details' && !canGoNext) || (step === 'members' && !canCreate)
+              ? 'bg-black/25'
+              : 'bg-black active:bg-black/80'
           }`}
         >
           <Text className="text-base font-bold text-white">{step === 'details' ? 'Next' : 'Create'}</Text>

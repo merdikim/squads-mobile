@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import type { SquadsApiBalancesResponse, SquadsBalanceData } from '../types'
+import type { SquadsApiBalance, SquadsBalanceData } from '../types'
 import { isSolanaAddress } from '../utils'
 
 const BALANCES_DATA_STALE_TIME = 60 * 1000
@@ -7,7 +7,30 @@ const BALANCES_DATA_GC_TIME = 10 * 60 * 1000
 
 export const balancesQueryKey = ['balances'] as const
 
-const normalizeBalance = (balance: SquadsBalanceData): SquadsBalanceData => ({
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const isFiniteNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value)
+
+const isApiBalance = (value: unknown): value is SquadsApiBalance => {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  return (
+    isFiniteNumber(value.amount) &&
+    isFiniteNumber(value.uiAmount) &&
+    isFiniteNumber(value.uiPrice) &&
+    isFiniteNumber(value.pricePerUnit) &&
+    isFiniteNumber(value.decimals) &&
+    typeof value.source === 'string' &&
+    typeof value.mint === 'string' &&
+    typeof value.symbol === 'string' &&
+    typeof value.name === 'string'
+  )
+}
+
+const normalizeBalance = (balance: SquadsApiBalance): SquadsBalanceData => ({
   amount: balance.amount,
   uiAmount: balance.uiAmount,
   uiPrice: balance.uiPrice,
@@ -20,8 +43,7 @@ const normalizeBalance = (balance: SquadsBalanceData): SquadsBalanceData => ({
   name: balance.name,
 })
 
-const useBalances = (address: string) => {
-  const selectedAddress = address
+const useBalances = (address?: string) => {
 
   const {
     data,
@@ -30,9 +52,9 @@ const useBalances = (address: string) => {
     isFetching: isBalancesFetching,
     refetch: refetchBalances,
   } = useQuery({
-    queryKey: [...balancesQueryKey, selectedAddress],
+    queryKey: [...balancesQueryKey, address],
     queryFn: async () => {
-      if (!isSolanaAddress(selectedAddress)) {
+      if (!isSolanaAddress(address)) {
         return {
           balances: [],
           totalUsd: 0,
@@ -45,15 +67,21 @@ const useBalances = (address: string) => {
         useProd: 'true',
       })
       const response = await fetch(
-        `https://balances-v4-api.squads.so/balancesDasV2Cached/${selectedAddress}?${params.toString()}`,
+        `https://balances-v4-api.squads.so/balancesDasV2Cached/${address}?${params.toString()}`,
       )
 
       if (!response.ok) {
         throw new Error(`Failed to fetch balances: ${response.status}`)
       }
 
-      const result = (await response.json()) as SquadsApiBalancesResponse
-      const balances = (result.balances ?? [])
+      const result = await response.json()
+
+      if (!isRecord(result) || !Array.isArray(result.balances)) {
+        throw new Error('Unexpected balances response')
+      }
+
+      const balances = result.balances
+        .filter(isApiBalance)
         .map(normalizeBalance)
         .filter((balance) => balance.amount > 0 || balance.uiAmount > 0 || balance.uiPrice > 0)
 
@@ -62,7 +90,7 @@ const useBalances = (address: string) => {
         totalUsd: balances.reduce((total, balance) => total + balance.uiPrice, 0),
       }
     },
-    enabled: !!selectedAddress && isSolanaAddress(selectedAddress),
+    enabled: !!address && isSolanaAddress(address),
     staleTime: BALANCES_DATA_STALE_TIME,
     gcTime: BALANCES_DATA_GC_TIME,
   })

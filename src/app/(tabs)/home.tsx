@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { Plus, UsersRound } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
@@ -39,14 +39,14 @@ function MenuContent({
   isLoading?: boolean
 }) {
   if (selectedMenuItem === 'Coins') {
-    return <CoinsMenu address={multisigData?.vaultAddress ?? ''} />
+    return <CoinsMenu address={multisigData?.vaultAddress} />
   }
 
   if (selectedMenuItem === 'NFTs') {
-    return <NftsMenu />
+    return <NftsMenu address={multisigData?.vaultAddress} />
   }
 
-  return <ProposalsMenu multisigAddress={multisigData?.address ?? ''} threshold={multisigData?.threshold ?? 0} />
+  return <ProposalsMenu multisigAddress={multisigData?.address} threshold={multisigData?.threshold ?? 0} />
 }
 
 export default function HomeScreen() {
@@ -62,20 +62,27 @@ export default function HomeScreen() {
     queryFn: getSelectedMultisigAddress,
   })
   const [selectedMultisigKey, setSelectedMultisigKey] = useState('')
-  const selectedMultisig = multisigs.find((multisig) => multisig.address === selectedMultisigKey)
-  const multisigDropdownItems = multisigs.map((multisig) => ({
-    key: multisig.address,
-    label:
-      typeof multisig.name === 'string' && multisig.name.trim()
-        ? multisig.name.trim()
-        : shortenAddress(multisig.address),
-    subtitle: shortenAddress(multisig.address, 6),
-    imageUri: multisig.imageUri,
-  }))
+  const selectedMultisig = useMemo(
+    () => multisigs.find((multisig) => multisig.address === selectedMultisigKey),
+    [multisigs, selectedMultisigKey],
+  )
+  const multisigDropdownItems = useMemo(
+    () =>
+      multisigs.map((multisig) => ({
+        key: multisig.address,
+        label:
+          typeof multisig.name === 'string' && multisig.name.trim()
+            ? multisig.name.trim()
+            : shortenAddress(multisig.address),
+        subtitle: shortenAddress(multisig.address, 6),
+        imageUri: multisig.imageUri,
+      })),
+    [multisigs],
+  )
   const selectedParticipants = selectedMultisig?.members.length ?? 0
   const selectedVaultAddress = selectedMultisig?.vaultAddress
   const { totalUsd, isBalancesLoading } = useBalances(selectedVaultAddress ?? '')
-  const selectedBalance = formatUsd(totalUsd)
+  const selectedBalance = useMemo(() => formatUsd(totalUsd), [totalUsd])
   useEffect(() => {
     if (!isMultisigsLoading && multisigs.length === 0) {
       router.replace('/')
@@ -112,21 +119,32 @@ export default function HomeScreen() {
     }
   }, [isSelectedMultisigFetched, multisigs, queryClient, selectedMultisigKey, storedSelectedMultisigKey])
 
-  const selectMultisig = (address: string) => {
-    setSelectedMultisigKey(address)
-    queryClient.setQueryData(['selectedMultisigAddress'], address)
-    void saveSelectedMultisigAddress(address)
+  const closeDropdown = useCallback(() => {
     setIsDropdownOpen(false)
-  }
+  }, [])
 
-  const openCreateMultisig = () => {
+  const toggleDropdown = useCallback(() => {
+    setIsDropdownOpen((value) => !value)
+  }, [])
+
+  const selectMultisig = useCallback(
+    (address: string) => {
+      setSelectedMultisigKey(address)
+      queryClient.setQueryData(['selectedMultisigAddress'], address)
+      void saveSelectedMultisigAddress(address)
+      setIsDropdownOpen(false)
+    },
+    [queryClient],
+  )
+
+  const openCreateMultisig = useCallback(() => {
     setIsDropdownOpen(false)
     setIsCreatingModalOpen(true)
-  }
+  }, [])
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: APP_BACKGROUND_COLOR }}>
-      <Pressable className="flex-1" onPress={() => setIsDropdownOpen(false)}>
+      <Pressable className="flex-1" onPress={closeDropdown}>
         <View className="p-4 flex-1">
           <View className="h-56 w-full px-3">
             <View className="z-10 flex-row items-start justify-between">
@@ -134,7 +152,7 @@ export default function HomeScreen() {
                 items={multisigDropdownItems}
                 selectedKey={selectedMultisig?.address ?? selectedMultisigKey}
                 isOpen={isDropdownOpen}
-                onToggle={() => setIsDropdownOpen((value) => !value)}
+                onToggle={toggleDropdown}
                 onSelect={selectMultisig}
                 menuMaxHeight={260}
                 button={

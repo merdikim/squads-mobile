@@ -1,15 +1,39 @@
-import { Image, ScrollView, Text, View } from 'react-native'
+import { useCallback } from 'react'
+import { Image as ExpoImage } from 'expo-image'
+import { FlatList, Text, View } from 'react-native'
 import { EmptyMenuState } from './EmptyMenuState'
 import { CardSkeleton } from '../skeletons/CardSkeleton'
 import useNfts from '../../hooks/useNfts'
 import { shortenAddress } from '../../utils'
+import type { SquadsNftData } from '../../types'
 
-type NftsMenuProps = {
-  address?: string
+const keyExtractor = (nft: SquadsNftData) => nft.id
+
+function NftRow({ nft }: { nft: SquadsNftData }) {
+  return (
+    <View className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4">
+      <ExpoImage
+        source={nft.imageUri ? { uri: nft.imageUri } : require('../../assets/logo.png')}
+        className="h-12 w-12 rounded-lg bg-black/5"
+        cachePolicy="disk"
+        contentFit="cover"
+        transition={120}
+      />
+      <View className="ml-3 flex-1">
+        <Text className="text-sm font-extrabold text-black" numberOfLines={1}>
+          {nft.name}
+        </Text>
+        <Text className="mt-1 text-xs font-semibold text-black/45" numberOfLines={1}>
+          {nft.collectionName ?? nft.symbol ?? (nft.mint ? shortenAddress(nft.mint) : 'Collectible')}
+        </Text>
+      </View>
+    </View>
+  )
 }
 
-export function NftsMenu({ address }: NftsMenuProps) {
+export function NftsMenu({ address }: { address?: string }) {
   const { nfts = [], nftsError, isNftsLoading } = useNfts(address)
+  const renderNft = useCallback(({ item }: { item: SquadsNftData }) => <NftRow nft={item} />, [])
 
   if (isNftsLoading) {
     return (
@@ -36,23 +60,15 @@ export function NftsMenu({ address }: NftsMenuProps) {
   }
 
   return (
-    <ScrollView className="mt-5" showsVerticalScrollIndicator={false}>
-      {nfts.map((nft) => (
-        <View key={nft.id} className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4">
-          <Image
-            source={nft.imageUri ? { uri: nft.imageUri } : require('../../assets/logo.png')}
-            className="h-12 w-12 rounded-lg bg-black/5"
-          />
-          <View className="ml-3 flex-1">
-            <Text className="text-sm font-extrabold text-black" numberOfLines={1}>
-              {nft.name}
-            </Text>
-            <Text className="mt-1 text-xs font-semibold text-black/45" numberOfLines={1}>
-              {nft.collectionName ?? nft.symbol ?? (nft.mint ? shortenAddress(nft.mint) : 'Collectible')}
-            </Text>
-          </View>
-        </View>
-      ))}
-    </ScrollView>
+    <FlatList
+      className="mt-5"
+      data={nfts}
+      keyExtractor={keyExtractor}
+      renderItem={renderNft}
+      initialNumToRender={10}
+      maxToRenderPerBatch={10}
+      windowSize={7}
+      showsVerticalScrollIndicator={false}
+    />
   )
 }

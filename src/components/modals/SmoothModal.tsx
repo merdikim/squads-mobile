@@ -24,6 +24,14 @@ export function SmoothModal({
   const [isMounted, setIsMounted] = useState(visible)
   const [renderedChildren, setRenderedChildren] = useState(children)
   const progress = useRef(new Animated.Value(0)).current
+  const isComponentMountedRef = useRef(true)
+
+  useEffect(() => {
+    return () => {
+      isComponentMountedRef.current = false
+      progress.stopAnimation()
+    }
+  }, [progress])
 
   useEffect(() => {
     if (visible) {
@@ -36,25 +44,36 @@ export function SmoothModal({
 
     if (visible) {
       setIsMounted(true)
-      Animated.timing(progress, {
+      const animation = Animated.timing(progress, {
         toValue: 1,
         duration: ENTER_DURATION,
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
-      }).start()
-      return
+      })
+
+      animation.start()
+
+      return () => {
+        animation.stop()
+      }
     }
 
-    Animated.timing(progress, {
+    const animation = Animated.timing(progress, {
       toValue: 0,
       duration: EXIT_DURATION,
       easing: Easing.in(Easing.cubic),
       useNativeDriver: true,
-    }).start(({ finished }) => {
-      if (finished) {
+    })
+
+    animation.start(({ finished }) => {
+      if (finished && isComponentMountedRef.current) {
         setIsMounted(false)
       }
     })
+
+    return () => {
+      animation.stop()
+    }
   }, [progress, visible])
 
   const backdropOpacity = progress.interpolate({

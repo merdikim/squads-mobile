@@ -1,7 +1,10 @@
-import { Image, ScrollView, Text, View } from 'react-native'
+import { useCallback, useMemo } from 'react'
+import { Image as ExpoImage } from 'expo-image'
+import { FlatList, Text, View } from 'react-native'
 import { EmptyMenuState } from './EmptyMenuState'
 import { CardSkeleton } from '../skeletons/CardSkeleton'
 import useBalances from '../../hooks/useBalances'
+import type { SquadsBalanceData } from '../../types'
 
 const formatTokenAmount = (amount: number) => {
   if (amount === 0) {
@@ -21,9 +24,40 @@ const formatUsd = (amount: number) => {
   })
 }
 
-export function CoinsMenu({ address }: { address: string }) {
+const keyExtractor = (balance: SquadsBalanceData) => `${balance.mint}-${balance.source}`
+
+function CoinRow({ balance }: { balance: SquadsBalanceData }) {
+  return (
+    <View className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4">
+      <ExpoImage
+        source={balance.logoUri ? { uri: balance.logoUri } : require('../../assets/logo.png')}
+        className="h-10 w-10 rounded-full bg-black/5"
+        cachePolicy="disk"
+        contentFit="cover"
+        transition={120}
+      />
+      <View className="ml-3 flex-1">
+        <Text className="text-sm font-extrabold text-black" numberOfLines={1}>
+          {balance.symbol || balance.name}
+        </Text>
+        <Text className="mt-1 text-xs font-semibold text-black/45" numberOfLines={1}>
+          {balance.name}
+        </Text>
+      </View>
+      <View className="ml-3 items-end">
+        <Text className="text-sm font-extrabold text-black" numberOfLines={1}>
+          {formatTokenAmount(balance.uiAmount)}
+        </Text>
+        <Text className="mt-1 text-xs font-bold text-black/45">{formatUsd(balance.uiPrice)}</Text>
+      </View>
+    </View>
+  )
+}
+
+export function CoinsMenu({ address }: { address?: string }) {
   const { balances = [], balancesError, isBalancesLoading } = useBalances(address)
-  const sortedBalances = [...balances].sort((a, b) => b.uiPrice - a.uiPrice)
+  const sortedBalances = useMemo(() => [...balances].sort((a, b) => b.uiPrice - a.uiPrice), [balances])
+  const renderCoin = useCallback(({ item }: { item: SquadsBalanceData }) => <CoinRow balance={item} />, [])
 
   if (isBalancesLoading) {
     return (
@@ -54,32 +88,15 @@ export function CoinsMenu({ address }: { address: string }) {
   }
 
   return (
-    <ScrollView className="mt-5" showsVerticalScrollIndicator={false}>
-      {sortedBalances.map((balance) => (
-        <View
-          key={`${balance.mint}-${balance.source}`}
-          className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4"
-        >
-          <Image
-            source={balance.logoUri ? { uri: balance.logoUri } : require('../../assets/logo.png')}
-            className="h-10 w-10 rounded-full bg-black/5"
-          />
-          <View className="ml-3 flex-1">
-            <Text className="text-sm font-extrabold text-black" numberOfLines={1}>
-              {balance.symbol || balance.name}
-            </Text>
-            <Text className="mt-1 text-xs font-semibold text-black/45" numberOfLines={1}>
-              {balance.name}
-            </Text>
-          </View>
-          <View className="ml-3 items-end">
-            <Text className="text-sm font-extrabold text-black" numberOfLines={1}>
-              {formatTokenAmount(balance.uiAmount)}
-            </Text>
-            <Text className="mt-1 text-xs font-bold text-black/45">{formatUsd(balance.uiPrice)}</Text>
-          </View>
-        </View>
-      ))}
-    </ScrollView>
+    <FlatList
+      className="mt-5"
+      data={sortedBalances}
+      keyExtractor={keyExtractor}
+      renderItem={renderCoin}
+      initialNumToRender={12}
+      maxToRenderPerBatch={12}
+      windowSize={7}
+      showsVerticalScrollIndicator={false}
+    />
   )
 }

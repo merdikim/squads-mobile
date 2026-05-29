@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native'
 import { X } from 'lucide-react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
@@ -24,17 +24,29 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
   const [address, setAddress] = useState('')
   const [error, setError] = useState('')
   const [isAdding, setIsAdding] = useState(false)
+  const isMountedRef = useRef(true)
+  const isVisibleRef = useRef(visible)
   const { account, connect, connection, signAndSendTransactions } = useMobileWallet()
   const connectedWalletAddress = account?.address.toString() ?? ''
   const isConnectedWalletMember = members.some((member) => addressesEqual(member, connectedWalletAddress))
   const queryClient = useQueryClient()
 
   useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
+  useEffect(() => {
+    isVisibleRef.current = visible
+
     if (!visible) {
       setAddress('')
       setError('')
     }
   }, [visible])
+
+  const canUpdateState = () => isMountedRef.current && isVisibleRef.current
 
   const handleClose = () => {
     setAddress('')
@@ -128,12 +140,19 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
         queryKey: multisigsQueryKey,
       })
 
-      handleClose()
+      if (canUpdateState()) {
+        handleClose()
+      }
     } catch (err) {
       console.warn('Failed to add member', err)
-      setError('Failed to add member. Please try again.')
+
+      if (canUpdateState()) {
+        setError('Failed to add member. Please try again.')
+      }
     } finally {
-      setIsAdding(false)
+      if (canUpdateState()) {
+        setIsAdding(false)
+      }
     }
   }
 

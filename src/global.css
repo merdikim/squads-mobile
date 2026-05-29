@@ -1,42 +1,47 @@
 @import 'tailwindcss';
 @import 'uniwind';
 
+@utility font-thin {
+  font-family: Mynerve_400Regular;
+  font-weight: 100;
+}
+
 @utility font-extralight {
-  font-family: Manrope_300Light;
-  font-weight: 300;
+  font-family: Mynerve_400Regular;
+  font-weight: 200;
 }
 
 @utility font-light {
-  font-family: Manrope_300Light;
+  font-family: Mynerve_400Regular;
   font-weight: 300;
 }
 
 @utility font-normal {
-  font-family: Manrope_400Regular;
+  font-family: Mynerve_400Regular;
   font-weight: 400;
 }
 
 @utility font-medium {
-  font-family: Manrope_600SemiBold;
-  font-weight: 600;
+  font-family: Mynerve_400Regular;
+  font-weight: 500;
 }
 
 @utility font-semibold {
-  font-family: Manrope_600SemiBold;
+  font-family: Mynerve_400Regular;
   font-weight: 600;
 }
 
 @utility font-bold {
-  font-family: Manrope_700Bold;
+  font-family: Mynerve_400Regular;
   font-weight: 700;
 }
 
 @utility font-extrabold {
-  font-family: Manrope_800ExtraBold;
+  font-family: Mynerve_400Regular;
   font-weight: 800;
 }
 
 @utility font-black {
-  font-family: Manrope_800ExtraBold;
-  font-weight: 800;
+  font-family: Mynerve_400Regular;
+  font-weight: 900;
 }

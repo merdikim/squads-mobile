@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { addressesEqual, shortenAddress, toPublicKey } from '../../utils'
@@ -23,7 +23,26 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
   const isConnectedWalletMember = members.some((currentMember) => addressesEqual(currentMember, connectedWalletAddress))
   const [error, setError] = useState('')
   const [isRemoving, setIsRemoving] = useState(false)
+  const visible = !!member
+  const isMountedRef = useRef(true)
+  const isVisibleRef = useRef(visible)
   const queryClient = useQueryClient()
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
+  useEffect(() => {
+    isVisibleRef.current = visible
+
+    if (!visible) {
+      setError('')
+    }
+  }, [visible])
+
+  const canUpdateState = () => isMountedRef.current && isVisibleRef.current
 
   const handleClose = () => {
     setError('')
@@ -96,12 +115,19 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
         queryKey: multisigsQueryKey,
       })
 
-      handleClose()
+      if (canUpdateState()) {
+        handleClose()
+      }
     } catch (err) {
       console.warn('Failed to remove member', err)
-      setError('Failed to remove member. Please try again.')
+
+      if (canUpdateState()) {
+        setError('Failed to remove member. Please try again.')
+      }
     } finally {
-      setIsRemoving(false)
+      if (canUpdateState()) {
+        setIsRemoving(false)
+      }
     }
   }
 
@@ -111,7 +137,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
   }
 
   return (
-    <SmoothModal visible={!!member} onClose={handleClose}>
+    <SmoothModal visible={visible} onClose={handleClose}>
       <Text className="text-xl font-black text-black">Delete Member</Text>
       <Text className="mt-2 text-sm leading-6 text-black/60">
         Remove {member ? shortenAddress(member) : 'this member'} from this multisig?

@@ -247,11 +247,9 @@ export type SquadsApiProposalsResponse = {
 export type SquadsMultisigData = {
   address: string
   vaultAddress: string
-  balanceLamports: number
   threshold: number
   members: string[]
   transactionIndex: bigint
-  proposals: SquadsProposalData[]
 }
 
 export type Multisig = SquadsMultisigData & {

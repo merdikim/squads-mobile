@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar'
-import { useMemo, useRef, useState } from 'react'
-import { Animated, PanResponder, Pressable, ScrollView, Text, View } from 'react-native'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { Animated, FlatList, PanResponder, Pressable, Text, View } from 'react-native'
 import { useQuery } from '@tanstack/react-query'
 import { useMobileWallet } from '@wallet-ui/react-native-web3js'
 import { CheckCircle2, Plus, Trash2, UsersRound } from 'lucide-react-native'
@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { APP_BACKGROUND_COLOR } from '../../constants'
 
 const DELETE_REVEAL_WIDTH = 72
+const keyExtractor = (member: string) => member
 
 export default function MembersScreen() {
   const { account } = useMobileWallet()
@@ -30,6 +31,92 @@ export default function MembersScreen() {
   const members = useMemo(() => {
     return selectedMultisig?.members ?? []
   }, [selectedMultisig])
+  const openAddMemberModal = useCallback(() => {
+    setIsAddMemberModalOpen(true)
+  }, [])
+  const closeAddMemberModal = useCallback(() => {
+    setIsAddMemberModalOpen(false)
+  }, [])
+  const closeDeleteMemberModal = useCallback(() => {
+    setMemberToDelete('')
+  }, [])
+  const renderMember = useCallback(
+    ({ item: member, index }: { item: string; index: number }) => {
+      const isConnectedWallet = member === walletAddress
+
+      return (
+        <View className="mb-3">
+          <MemberCard
+            index={index}
+            member={member}
+            isConnectedWallet={isConnectedWallet}
+            onDelete={() => setMemberToDelete(member)}
+          />
+        </View>
+      )
+    },
+    [walletAddress],
+  )
+  const listHeader = useMemo(
+    () => (
+      <>
+        <View className="flex-row items-center justify-between gap-3 mb-8">
+          <View className="flex-row items-center gap-2">
+            <Text className="text-base font-black text-black">Members</Text>
+            {isMultisigsLoading ? (
+              <CardSkeleton className="h-5 w-6 rounded-md" />
+            ) : (
+              <Text className="text-base font-black text-black">({members.length})</Text>
+            )}
+          </View>
+          <View className="flex-row items-center gap-3">
+            <Pressable
+              onPress={openAddMemberModal}
+              className="h-10 w-10 items-center justify-center rounded-xl bg-black active:bg-black/80"
+            >
+              <Plus color="#FFFFFF" size={17} strokeWidth={2.4} />
+            </Pressable>
+          </View>
+        </View>
+
+        {isMultisigsLoading ? (
+          <MembersLoadingSkeleton />
+        ) : members.length === 0 ? (
+          <Text className="mt-3 text-sm leading-6 text-black/65">
+            Members will appear here after a multisig is selected.
+          </Text>
+        ) : null}
+      </>
+    ),
+    [isMultisigsLoading, members.length, openAddMemberModal],
+  )
+  const listFooter = useMemo(
+    () => (
+      <>
+        <StatusBar style="dark" />
+        <AddMemberModal
+          visible={isAddMemberModalOpen}
+          members={members}
+          multisigAddress={selectedMultisigAddress}
+          onClose={closeAddMemberModal}
+        />
+        <DeleteMemberModal
+          member={memberToDelete}
+          members={members}
+          multisigAddress={selectedMultisigAddress}
+          onClose={closeDeleteMemberModal}
+        />
+      </>
+    ),
+    [
+      closeAddMemberModal,
+      closeDeleteMemberModal,
+      isAddMemberModalOpen,
+      memberToDelete,
+      members,
+      selectedMultisigAddress,
+    ],
+  )
 
   if (!selectedMultisigAddress) {
     return <NoMembersScreen />
@@ -37,66 +124,19 @@ export default function MembersScreen() {
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: APP_BACKGROUND_COLOR }}>
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        <View className="flex-1 px-6 py-8">
-          <View className="flex-row items-center justify-between gap-3">
-            <View className="flex-row items-center gap-2">
-              <Text className="text-base font-black text-black">Members</Text>
-              {isMultisigsLoading ? (
-                <CardSkeleton className="h-5 w-6 rounded-md" />
-              ) : (
-                <Text className="text-base font-black text-black">({members.length})</Text>
-              )}
-            </View>
-            <View className="flex-row items-center gap-3">
-              <Pressable
-                onPress={() => setIsAddMemberModalOpen(true)}
-                className="h-10 w-10 items-center justify-center rounded-xl bg-black active:bg-black/80"
-              >
-                <Plus color="#FFFFFF" size={17} strokeWidth={2.4} />
-              </Pressable>
-            </View>
-          </View>
-
-          {isMultisigsLoading ? (
-            <MembersLoadingSkeleton />
-          ) : members.length > 0 ? (
-            <View className="mt-4 gap-3">
-              {members.map((member, index) => {
-                const isConnectedWallet = member === walletAddress
-
-                return (
-                  <MemberCard
-                    key={member}
-                    index={index}
-                    member={member}
-                    isConnectedWallet={isConnectedWallet}
-                    onDelete={() => setMemberToDelete(member)}
-                  />
-                )
-              })}
-            </View>
-          ) : (
-            <Text className="mt-3 text-sm leading-6 text-black/65">
-              Members will appear here after a multisig is selected.
-            </Text>
-          )}
-        </View>
-
-        <StatusBar style="dark" />
-        <AddMemberModal
-          visible={isAddMemberModalOpen}
-          members={members}
-          multisigAddress={selectedMultisigAddress}
-          onClose={() => setIsAddMemberModalOpen(false)}
-        />
-        <DeleteMemberModal
-          member={memberToDelete}
-          members={members}
-          multisigAddress={selectedMultisigAddress}
-          onClose={() => setMemberToDelete('')}
-        />
-      </ScrollView>
+      <FlatList
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 32 }}
+        data={isMultisigsLoading ? [] : members}
+        keyExtractor={keyExtractor}
+        renderItem={renderMember}
+        ListHeaderComponent={listHeader}
+        ListFooterComponent={listFooter}
+        initialNumToRender={12}
+        maxToRenderPerBatch={12}
+        windowSize={7}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   )
 }

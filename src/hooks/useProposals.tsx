@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import type { SquadsApiProposalRow, SquadsApiProposalsResponse, SquadsProposalData } from '../types'
+import type { SquadsApiProposalRow, SquadsProposalData } from '../types'
 import { isSolanaAddress } from '../utils'
 import { multisigsQueryKey } from './useMultisigs'
 
@@ -14,6 +14,40 @@ const configTypes: Record<string, string> = {
 }
 
 export const multisigProposalsQueryKey = [...multisigsQueryKey, 'proposals']
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === 'string')
+
+const getNumber = (value: unknown, fallback: number) => (typeof value === 'number' ? value : fallback)
+
+const isApiProposalRow = (value: unknown): value is SquadsApiProposalRow => {
+  if (!isRecord(value) || !isRecord(value.proposal) || !isRecord(value.transaction)) {
+    return false
+  }
+
+  const { proposal, transaction } = value
+
+  if (!isRecord(proposal.status) || !isRecord(transaction.account) || !isRecord(transaction.metadata)) {
+    return false
+  }
+
+  return (
+    typeof value.category === 'string' &&
+    typeof proposal.multisig === 'string' &&
+    typeof proposal.transactionIndex === 'number' &&
+    Number.isInteger(proposal.transactionIndex) &&
+    typeof proposal.status.type === 'string' &&
+    isStringArray(proposal.approved) &&
+    isStringArray(proposal.rejected) &&
+    isStringArray(proposal.cancelled) &&
+    typeof transaction.address === 'string' &&
+    typeof transaction.type === 'string' &&
+    typeof transaction.account.creator === 'string'
+  )
+}
 
 const humanizeType = (value?: string) => {
   if (!value) {
@@ -80,13 +114,12 @@ const normalizeProposalRow = (row: SquadsApiProposalRow): SquadsProposalData => 
   }
 }
 
-const useProposals = (multisigAddress: string) => {
+const useProposals = (multisigAddress?: string) => {
   const [page, setPage] = useState(1)
-  const selectedMultisigAddress = multisigAddress
 
   useEffect(() => {
     setPage(1)
-  }, [selectedMultisigAddress])
+  }, [multisigAddress])
 
   const {
     data: proposalsPage,
@@ -94,9 +127,9 @@ const useProposals = (multisigAddress: string) => {
     isLoading: isProposalsLoading,
     isFetching: isProposalsFetching,
   } = useQuery({
-    queryKey: [...multisigProposalsQueryKey, selectedMultisigAddress, page],
+    queryKey: [...multisigProposalsQueryKey, multisigAddress, page],
     queryFn: async () => {
-      if (!selectedMultisigAddress || !isSolanaAddress(selectedMultisigAddress)) {
+      if (!multisigAddress || !isSolanaAddress(multisigAddress)) {
         return {
           proposals: [],
           page: 1,
@@ -110,23 +143,27 @@ const useProposals = (multisigAddress: string) => {
         limit: String(PROPOSALS_PAGE_SIZE),
       })
       const response = await fetch(
-        `https://multisig-api.squads.xyz/transactions/multisig/${selectedMultisigAddress}/active?${params.toString()}`,
+        `https://multisig-api.squads.xyz/transactions/multisig/${multisigAddress}/active?${params.toString()}`,
       )
 
       if (!response.ok) {
         throw new Error(`Failed to fetch proposals: ${response.status}`)
       }
 
-      const result = (await response.json()) as SquadsApiProposalsResponse
+      const result = await response.json()
+
+      if (!isRecord(result) || !Array.isArray(result.transactions)) {
+        throw new Error('Unexpected proposals response')
+      }
 
       return {
-        proposals: (result.transactions ?? []).map(normalizeProposalRow),
-        page: result.page ?? page,
-        totalEntries: result.total_entries ?? 0,
-        totalPages: Math.max(result.total_pages ?? 1, 1),
+        proposals: result.transactions.filter(isApiProposalRow).map(normalizeProposalRow),
+        page: getNumber(result.page, page),
+        totalEntries: getNumber(result.total_entries, 0),
+        totalPages: Math.max(getNumber(result.total_pages, 1), 1),
       }
     },
-    enabled: !!selectedMultisigAddress && isSolanaAddress(selectedMultisigAddress),
+    enabled: !!multisigAddress && isSolanaAddress(multisigAddress),
     staleTime: PROPOSALS_DATA_STALE_TIME,
     gcTime: PROPOSALS_DATA_GC_TIME,
   })

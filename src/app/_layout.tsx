@@ -8,7 +8,7 @@ import { AppIdentity, MobileWalletProvider } from '@wallet-ui/react-native-web3j
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { APP_BACKGROUND_COLOR, APP_NAME, RPC_URL } from '../constants'
-import { applyManropeFontDefaults, manropeFonts } from '../lib/fonts'
+import { appFonts, applyAppFontDefaults } from '../lib/fonts'
 
 const identity: AppIdentity = { name: APP_NAME, icon: require('../assets/logo.png') }
 
@@ -20,10 +20,10 @@ SplashScreen.setOptions({
   fade: true,
 })
 
-applyManropeFontDefaults()
+applyAppFontDefaults()
 
 export default function Layout() {
-  const [fontsLoaded] = useFonts(manropeFonts)
+  const [fontsLoaded] = useFonts(appFonts)
 
   useEffect(() => {
     if (fontsLoaded) {

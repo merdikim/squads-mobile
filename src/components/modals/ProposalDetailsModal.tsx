@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { Check, X } from 'lucide-react-native'
 import { TransactionMessage, VersionedTransaction } from '@solana/web3.js'
@@ -34,6 +34,8 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
   const [voteAction, setVoteAction] = useState<'approve' | 'reject' | null>(null)
 
   const visible = !!proposal
+  const isMountedRef = useRef(true)
+  const isVisibleRef = useRef(visible)
   const timeAgo = formatTimeAgo(proposal?.timestamp)
   const connectedWalletAddress = account?.address.toString() ?? ''
   const hasVoted =
@@ -44,6 +46,23 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
   const canVote = !!proposal && proposal.status === 'Active' && !!account && !hasVoted && !voteAction
   const relatedAddressLabel = proposal?.relatedAddressLabel ?? 'Related address'
   const relatedAddress = proposal?.memberAddress ? shortenAddress(proposal.memberAddress, 8) : 'Unavailable'
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
+  useEffect(() => {
+    isVisibleRef.current = visible
+
+    if (!visible) {
+      setError('')
+      setVoteAction(null)
+    }
+  }, [visible])
+
+  const canUpdateState = () => isMountedRef.current && isVisibleRef.current
 
   const handleConnectWallet = () => {
     setError('')
@@ -109,18 +128,25 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
       await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed')
       await queryClient.invalidateQueries({ queryKey: multisigProposalsQueryKey })
 
-      if (action === 'approve') {
-        onApprove?.(proposal)
-      } else {
-        onReject?.(proposal)
-      }
+      if (canUpdateState()) {
+        if (action === 'approve') {
+          onApprove?.(proposal)
+        } else {
+          onReject?.(proposal)
+        }
 
-      onClose()
+        onClose()
+      }
     } catch (err) {
       console.warn('Failed to vote on proposal', err)
-      setError(action === 'approve' ? 'Failed to approve proposal.' : 'Failed to reject proposal.')
+
+      if (canUpdateState()) {
+        setError(action === 'approve' ? 'Failed to approve proposal.' : 'Failed to reject proposal.')
+      }
     } finally {
-      setVoteAction(null)
+      if (canUpdateState()) {
+        setVoteAction(null)
+      }
     }
   }
 
