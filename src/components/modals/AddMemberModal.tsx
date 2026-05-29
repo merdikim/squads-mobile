@@ -165,7 +165,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
     <SmoothModal visible={visible} onClose={handleClose}>
       <View className="flex-row items-start justify-between gap-4">
         <View className="flex-1">
-          <Text className="text-xl font-black text-black">Add Member</Text>
+          <Text className="text-xl font-mono-extrabold text-black">Add Member</Text>
           <Text className="mt-2 text-sm leading-6 text-black/60">Enter a wallet address to add to this multisig.</Text>
         </View>
         <Pressable
@@ -177,7 +177,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
       </View>
 
       <View className="mt-5">
-        <Text className="text-sm font-bold text-black">Wallet address</Text>
+        <Text className="text-sm font-mono-bold text-black">Wallet address</Text>
         <TextInput
           value={address}
           onChangeText={(value) => {
@@ -190,7 +190,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
           placeholderTextColor="rgba(0,0,0,0.35)"
           className="mt-2 min-h-12 rounded-xl border border-black/15 px-3 text-sm text-black"
         />
-        {error ? <Text className="mt-2 text-xs font-bold text-red-600">{error}</Text> : null}
+        {error ? <Text className="mt-2 text-xs font-mono-bold text-red-600">{error}</Text> : null}
       </View>
 
       <View className="mt-6 flex-row gap-3">
@@ -199,7 +199,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
           disabled={isAdding}
           className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
         >
-          <Text className="text-base font-bold text-black">Cancel</Text>
+          <Text className="text-base font-mono-bold text-black">Cancel</Text>
         </Pressable>
         {account ? (
           <Pressable
@@ -210,7 +210,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
             {isAdding ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text className="text-base font-bold text-white">Add</Text>
+              <Text className="text-base font-mono-bold text-white">Add</Text>
             )}
           </Pressable>
         ) : (
@@ -218,7 +218,7 @@ export function AddMemberModal({ visible, members, multisigAddress, onClose }: A
             onPress={handleConnectWallet}
             className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
           >
-            <Text className="text-base font-bold text-white">Connect Wallet</Text>
+            <Text className="text-base font-mono-bold text-white">Connect Wallet</Text>
           </Pressable>
         )}
       </View>

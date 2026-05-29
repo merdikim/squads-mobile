@@ -1,47 +1,34 @@
 @import 'tailwindcss';
 @import 'uniwind';
 
-@utility font-thin {
-  font-family: Mynerve_400Regular;
-  font-weight: 100;
+@utility font-mono-thin {
+  font-family: 'NotoSansMono_100Thin';
 }
 
-@utility font-extralight {
-  font-family: Mynerve_400Regular;
-  font-weight: 200;
+@utility font-mono-extralight {
+  font-family: 'NotoSansMono_200ExtraLight';
 }
 
-@utility font-light {
-  font-family: Mynerve_400Regular;
-  font-weight: 300;
+@utility font-mono-light {
+  font-family: 'NotoSansMono_300Light';
 }
 
-@utility font-normal {
-  font-family: Mynerve_400Regular;
-  font-weight: 400;
+@utility font-mono {
+  font-family: 'NotoSansMono_400Regular';
 }
 
-@utility font-medium {
-  font-family: Mynerve_400Regular;
-  font-weight: 500;
+@utility font-mono-medium {
+  font-family: 'NotoSansMono_500Medium';
 }
 
-@utility font-semibold {
-  font-family: Mynerve_400Regular;
-  font-weight: 600;
+@utility font-mono-semibold {
+  font-family: 'NotoSansMono_600SemiBold';
 }
 
-@utility font-bold {
-  font-family: Mynerve_400Regular;
-  font-weight: 700;
+@utility font-mono-bold {
+  font-family: 'NotoSansMono_700Bold';
 }
 
-@utility font-extrabold {
-  font-family: Mynerve_400Regular;
-  font-weight: 800;
-}
-
-@utility font-black {
-  font-family: Mynerve_400Regular;
-  font-weight: 900;
+@utility font-mono-extrabold {
+  font-family: 'NotoSansMono_800ExtraBold';
 }

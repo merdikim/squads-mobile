@@ -62,11 +62,11 @@ export default function MembersScreen() {
       <>
         <View className="flex-row items-center justify-between gap-3 mb-8">
           <View className="flex-row items-center gap-2">
-            <Text className="text-base font-black text-black">Members</Text>
+            <Text className="text-base font-mono-extrabold text-black">Members</Text>
             {isMultisigsLoading ? (
               <CardSkeleton className="h-5 w-6 rounded-md" />
             ) : (
-              <Text className="text-base font-black text-black">({members.length})</Text>
+              <Text className="text-base font-mono-extrabold text-black">({members.length})</Text>
             )}
           </View>
           <View className="flex-row items-center gap-3">
@@ -227,17 +227,17 @@ function MemberCard({
       <Animated.View style={{ transform: [{ translateX }] }} {...(canDelete ? panResponder.panHandlers : {})}>
         <View className="flex-row items-center gap-3 rounded-xl bg-neutral-100/60 p-3">
           <View className="h-10 w-10 items-center justify-center rounded-xl bg-black/5">
-            <Text className="text-sm font-black text-black">{index + 1}</Text>
+            <Text className="text-sm font-mono-extrabold text-black">{index + 1}</Text>
           </View>
           <View className="flex-1">
             <View className="flex-row items-center gap-2">
-              <Text className="text-sm font-black text-black">Member {index + 1}</Text>
+              <Text className="text-sm font-mono-extrabold text-black">Member {index + 1}</Text>
               {isConnectedWallet ? <CheckCircle2 color="#090A0F" size={14} strokeWidth={2.4} /> : null}
             </View>
-            <Text className="mt-1 text-sm font-bold text-black/45">{shortenAddress(member)}</Text>
+            <Text className="mt-1 text-sm font-mono-bold text-black/45">{shortenAddress(member)}</Text>
           </View>
           <View className="rounded-xl bg-black/5 px-2 py-1">
-            <Text className="text-xs font-bold text-black/60">{isConnectedWallet ? 'You' : 'Signer'}</Text>
+            <Text className="text-xs font-mono-bold text-black/60">{isConnectedWallet ? 'You' : 'Signer'}</Text>
           </View>
         </View>
       </Animated.View>
@@ -249,7 +249,7 @@ function NoMembersScreen() {
   return (
     <View className="flex-1 items-center justify-center gap-3 px-6" style={{ backgroundColor: APP_BACKGROUND_COLOR }}>
       <UsersRound color="#090A0F" size={48} strokeWidth={1.5} />
-      <Text className="text-center text-lg font-bold text-black">No Members</Text>
+      <Text className="text-center text-lg font-mono-bold text-black">No Members</Text>
       <Text className="text-center text-sm text-black/65">
         Select a multisig from the home screen to view its members.
       </Text>

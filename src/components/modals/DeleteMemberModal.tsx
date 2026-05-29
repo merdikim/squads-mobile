@@ -138,11 +138,11 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
 
   return (
     <SmoothModal visible={visible} onClose={handleClose}>
-      <Text className="text-xl font-black text-black">Delete Member</Text>
+      <Text className="text-xl font-mono-extrabold text-black">Delete Member</Text>
       <Text className="mt-2 text-sm leading-6 text-black/60">
         Remove {member ? shortenAddress(member) : 'this member'} from this multisig?
       </Text>
-      {error ? <Text className="mt-3 text-xs font-bold text-red-600">{error}</Text> : null}
+      {error ? <Text className="mt-3 text-xs font-mono-bold text-red-600">{error}</Text> : null}
 
       <View className="mt-6 flex-row gap-3">
         <Pressable
@@ -150,7 +150,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
           disabled={isRemoving}
           className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
         >
-          <Text className="text-base font-bold text-black">Cancel</Text>
+          <Text className="text-base font-mono-bold text-black">Cancel</Text>
         </Pressable>
         {account ? (
           <Pressable
@@ -161,7 +161,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
             {isRemoving ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text className="text-base font-bold text-white">Delete</Text>
+              <Text className="text-base font-mono-bold text-white">Delete</Text>
             )}
           </Pressable>
         ) : (
@@ -169,7 +169,7 @@ export function DeleteMemberModal({ multisigAddress, member, members, onClose }:
             onPress={handleConnectWallet}
             className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
           >
-            <Text className="text-base font-bold text-white">Connect Wallet</Text>
+            <Text className="text-base font-mono-bold text-white">Connect Wallet</Text>
           </Pressable>
         )}
       </View>

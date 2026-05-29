@@ -39,7 +39,7 @@ export function ProposalsMenu({ multisigAddress, threshold }: ProposalsMenuProps
 
     return (
       <View className="mb-2 flex-row items-center justify-between">
-        <Text className="text-xs font-bold uppercase text-black/40">{totalEntries} active proposals</Text>
+        <Text className="text-xs font-mono-bold uppercase text-black/40">{totalEntries} active proposals</Text>
         <View className="flex-row items-center gap-2">
           <Pressable
             onPress={previousPage}
@@ -49,7 +49,7 @@ export function ProposalsMenu({ multisigAddress, threshold }: ProposalsMenuProps
           >
             <ChevronLeft color={hasPreviousPage ? '#090A0F' : 'rgba(9, 10, 15, 0.3)'} size={16} strokeWidth={2.6} />
           </Pressable>
-          <Text className="text-xs font-bold text-black/50">
+          <Text className="text-xs font-mono-bold text-black/50">
             {page} / {totalPages}
           </Text>
           <Pressable

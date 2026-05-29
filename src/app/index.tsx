@@ -127,7 +127,7 @@ const App = () => {
           <IntroWordsCarousel />
 
           <View className="flex-[1.25] items-center justify-center">
-            <Text className="text-center text-3xl font-black leading-tight">
+            <Text className="text-center text-3xl font-mono-extrabold leading-tight">
               The coordination layer for onchain assets
             </Text>
             <View className="mt-7 flex-row items-center justify-center">
@@ -144,7 +144,7 @@ const App = () => {
               }`}
             >
               <WalletCards color="#FFFFFF" size={18} strokeWidth={2.4} />
-              <Text className="ml-2 text-base font-black text-white">
+              <Text className="ml-2 text-base font-mono-extrabold text-white">
                 {account ? 'Wallet Connected' : 'Connect Wallet'}
               </Text>
             </Pressable>
@@ -195,7 +195,7 @@ function IntroWordsCarousel() {
             opacity: 0.32,
           }}
         >
-          <Text className="text-center text-xl font-light text-black" numberOfLines={1}>
+          <Text className="text-center text-xl font-mono-light text-black" numberOfLines={1}>
             {nextWord.text}
           </Text>
         </Animated.View>
@@ -216,7 +216,7 @@ function IntroWordsCarousel() {
           <View className="h-16 w-16 items-center justify-center">
             <CurrentIcon color="#090A0F" size={30} strokeWidth={2} />
           </View>
-          <Text className="mt-4 text-center text-3xl font-extrabold text-black" numberOfLines={1}>
+          <Text className="mt-4 text-center text-3xl font-mono-extrabold text-black" numberOfLines={1}>
             {currentWord.text}
           </Text>
         </Animated.View>
@@ -228,7 +228,7 @@ function IntroWordsCarousel() {
             opacity: 0.32,
           }}
         >
-          <Text className="text-center text-xl font-light text-black" numberOfLines={1}>
+          <Text className="text-center text-xl font-mono-light text-black" numberOfLines={1}>
             {previousWord.text}
           </Text>
         </Animated.View>

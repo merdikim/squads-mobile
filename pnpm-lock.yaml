@@ -8,9 +8,9 @@ importers:
 
   .:
     dependencies:
-      '@expo-google-fonts/mynerve':
-        specifier: ^0.4.1
-        version: 0.4.1
+      '@expo-google-fonts/noto-sans-mono':
+        specifier: ^0.4.2
+        version: 0.4.2
       '@expo/metro-runtime':
         specifier: ~55.0.6
         version: 55.0.11(@expo/dom-webview@55.0.6)(expo@55.0.26)(react-dom@19.2.0(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.0)(@types/react@19.2.15)(bufferutil@4.1.0)(react@19.2.0)(utf-8-validate@6.0.6))(react@19.2.0)
@@ -651,8 +651,8 @@ packages:
   '@expo-google-fonts/material-symbols@0.4.38':
     resolution: {integrity: sha512-IJkBtN1o8u9BW5fvSii1MyHPQ7Q0HxbWcVBvOrOzgMLpVtZw7R2w94wBTVR7kZwv3w1JNTESMmLA5Sqn1+Z36A==}
 
-  '@expo-google-fonts/mynerve@0.4.1':
-    resolution: {integrity: sha512-q3oHLeE9ylTyUbWUYJgubjbjhRIoUMhZnARTvlJXz1EhNrPBQqqFscguJat5wR+PtFmMP4cUsmpzJu6gw/fwLw==}
+  '@expo-google-fonts/noto-sans-mono@0.4.2':
+    resolution: {integrity: sha512-Am5TeZeLlqPiDbWH71OprS/LZTuWwvpZ0cEObA9I3/FO2uhZEHgbp+fm/3aDPbEiMNr7xN8YpUAnuyBGuEeHoQ==}
 
   '@expo/cli@55.0.32':
     resolution: {integrity: sha512-fq+/yUYBVw5ZudT4igNyJ3WaF17R39iS7EZlrkfHkLI7Y1kmUlivabwKviLoAfepJOKjKODKpViti9EPfmG3SQ==}
@@ -5932,7 +5932,7 @@ snapshots:
 
   '@expo-google-fonts/material-symbols@0.4.38': {}
 
-  '@expo-google-fonts/mynerve@0.4.1': {}
+  '@expo-google-fonts/noto-sans-mono@0.4.2': {}
 
   '@expo/cli@55.0.32(@expo/dom-webview@55.0.6)(@expo/metro-runtime@55.0.11)(bufferutil@4.1.0)(expo-constants@55.0.16)(expo-font@55.0.8)(expo-router@55.0.16)(expo@55.0.26)(react-dom@19.2.0(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.0)(@types/react@19.2.15)(bufferutil@4.1.0)(react@19.2.0)(utf-8-validate@6.0.6))(react@19.2.0)(typescript@5.9.3)(utf-8-validate@6.0.6)':
     dependencies:

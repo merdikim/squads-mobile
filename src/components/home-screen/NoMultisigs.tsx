@@ -110,7 +110,7 @@ export default function NoMultisigs() {
           </Animated.View>
         </View>
 
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
       </SafeAreaView>
     )
   }
@@ -128,7 +128,7 @@ export default function NoMultisigs() {
               {squadsLetters.map((letter, index) => (
                 <Animated.Text
                   key={`${letter}-${index}`}
-                  className="text-3xl font-extrabold"
+                  className="text-3xl font-mono-extrabold"
                   style={{
                     opacity: letterValues[index],
                     transform: [
@@ -155,7 +155,7 @@ export default function NoMultisigs() {
         </View>
 
         <View className="flex-[1.25] items-center justify-center">
-          <Text className="text-center text-3xl font-black leading-tight">The safest way to manage funds together</Text>
+          <Text className="text-center text-3xl font-mono-extrabold leading-tight">The safest way to manage funds together</Text>
 
           <Text className="mt-5 text-center text-sm leading-7 text-black/70">
             Built for teams that move assets together. Secure every transaction with collective approval
@@ -168,14 +168,14 @@ export default function NoMultisigs() {
             className="h-14 flex-row items-center justify-center rounded-xl bg-black px-5 active:bg-black/80"
           >
             <Plus color="#FFFFFF" size={18} strokeWidth={2.4} />
-            <Text className="ml-2 text-base font-black text-white">Create Multisig</Text>
+            <Text className="ml-2 text-base font-mono-extrabold text-white">Create Multisig</Text>
           </Pressable>
           <Pressable
             onPress={logout}
             className="mt-3 h-11 flex-row items-center justify-center rounded-xl border border-black/10 bg-neutral-100/60 px-5 active:bg-black/5"
           >
             <LogOut color="rgba(9, 10, 15, 0.55)" size={15} strokeWidth={2.4} />
-            <Text className="ml-2 text-sm font-bold text-black/55">Log out</Text>
+            <Text className="ml-2 text-sm font-mono-bold text-black/55">Log out</Text>
           </Pressable>
         </View>
       </View>

@@ -20,17 +20,17 @@ export function ProposalCard({ proposal, threshold }: ProposalCardProps) {
     <>
       <Pressable onPress={() => setIsDetailsOpen(true)} className="my-2 rounded-xl bg-neutral-100/60 shadow-xs p-4">
         <View className="flex-row items-start justify-between gap-3">
-          <Text className="flex-1 text-base font-black leading-6 text-black">{title}</Text>
+          <Text className="flex-1 text-base font-mono-extrabold leading-6 text-black">{title}</Text>
           <View className="rounded-xl bg-black px-2 py-1">
-            <Text className="text-xs font-bold text-white">{proposal.status}</Text>
+            <Text className="text-xs font-mono-bold text-white">{proposal.status}</Text>
           </View>
         </View>
         <View className="mt-4 w-full flex-row items-center justify-between">
-          <Text className="text-[11px] leading-6 text-black/60">{relatedAddress}</Text>
+          <Text className="text-[11px] leading-6 font-mono-light text-black/60">{relatedAddress}</Text>
           {timeAgo ? (
             <View className="flex-row items-center gap-1">
               <Clock size={14} />
-              <Text className="text-[11px]">{timeAgo}</Text>
+              <Text className="text-[11px] font-mono-light">{timeAgo}</Text>
             </View>
           ) : null}
         </View>

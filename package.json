@@ -12,8 +12,7 @@
     "ios": "expo run:ios",
     "lint": "expo lint --fix",
     "lint:check": "expo lint",
-    "start": "expo start",
-    "web": "expo start --web"
+    "start": "expo start"
   },
   "displayName": "Uniwind Mobile Kit Expo example",
   "description": "A template for building a Solana mobile app with Expo, React Native, Solana Kit, and Uniwind.",
@@ -29,7 +28,7 @@
   "main": "./index.js",
   "version": "1.0.0",
   "dependencies": {
-    "@expo-google-fonts/mynerve": "^0.4.1",
+    "@expo-google-fonts/noto-sans-mono": "^0.4.2",
     "@expo/metro-runtime": "~55.0.6",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@solana/web3.js": "^1.98.4",

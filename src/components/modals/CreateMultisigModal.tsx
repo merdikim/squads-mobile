@@ -65,7 +65,7 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
     <SmoothModal visible={visible} onClose={onClose}>
       <View className="flex-row items-start justify-between gap-4">
         <View className="flex-1">
-          <Text className="text-xl font-black text-black">Create Multisig</Text>
+          <Text className="text-xl font-mono-extrabold text-black">Create Multisig</Text>
           <Text className="mt-2 text-sm leading-6 text-black/60">
             {step === 'details'
               ? 'Name your multisig and add an image before inviting members.'
@@ -86,7 +86,7 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
       {step === 'details' ? (
         <View className="mt-5 gap-5">
           <View>
-            <Text className="text-sm font-bold text-black">Multisig name</Text>
+            <Text className="text-sm font-mono-bold text-black">Multisig name</Text>
             <TextInput
               value={name}
               onChangeText={setName}
@@ -98,7 +98,7 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
           </View>
 
           <View>
-            <Text className="text-sm font-bold text-black">Image</Text>
+            <Text className="text-sm font-mono-bold text-black">Image</Text>
             <View className="mt-2 flex-row items-center gap-3">
               <View className="h-16 w-16 items-center justify-center overflow-hidden rounded-xl border border-black/10 bg-black/5">
                 {imageUri.trim() ? (
@@ -146,7 +146,7 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
             className="h-12 flex-row items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
           >
             <Plus color="#090A0F" size={17} strokeWidth={2.4} />
-            <Text className="ml-2 text-sm font-black text-black">Add Member</Text>
+            <Text className="ml-2 text-sm font-mono-extrabold text-black">Add Member</Text>
           </Pressable>
         </View>
       )}
@@ -156,7 +156,7 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
           onPress={onClose}
           className="h-12 flex-1 items-center justify-center rounded-xl border border-black/15 active:bg-black/5"
         >
-          <Text className="text-base font-bold text-black">Cancel</Text>
+          <Text className="text-base font-mono-bold text-black">Cancel</Text>
         </Pressable>
         <Pressable
           onPress={step === 'details' ? () => setStep('members') : handleCreate}
@@ -167,7 +167,7 @@ export function CreateMultisigModal({ visible, onClose, onCreate }: CreateMultis
               : 'bg-black active:bg-black/80'
           }`}
         >
-          <Text className="text-base font-bold text-white">{step === 'details' ? 'Next' : 'Create'}</Text>
+          <Text className="text-base font-mono-bold text-white">{step === 'details' ? 'Next' : 'Create'}</Text>
         </Pressable>
       </View>
     </SmoothModal>

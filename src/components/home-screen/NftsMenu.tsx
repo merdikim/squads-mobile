@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { Image as ExpoImage } from 'expo-image'
-import { FlatList, Text, View } from 'react-native'
+import { FlatList, StyleSheet, Text, View } from 'react-native'
 import { EmptyMenuState } from './EmptyMenuState'
 import { CardSkeleton } from '../skeletons/CardSkeleton'
 import useNfts from '../../hooks/useNfts'
@@ -14,22 +14,31 @@ function NftRow({ nft }: { nft: SquadsNftData }) {
     <View className="mb-3 flex-row items-center rounded-xl bg-neutral-100/60 p-4">
       <ExpoImage
         source={nft.imageUri ? { uri: nft.imageUri } : require('../../assets/logo.png')}
-        className="h-12 w-12 rounded-lg bg-black/5"
+        style={styles.nftImage}
         cachePolicy="disk"
         contentFit="cover"
         transition={120}
       />
       <View className="ml-3 flex-1">
-        <Text className="text-sm font-extrabold text-black" numberOfLines={1}>
+        <Text className="text-sm font-mono-extrabold text-black" numberOfLines={1}>
           {nft.name}
         </Text>
-        <Text className="mt-1 text-xs font-semibold text-black/45" numberOfLines={1}>
+        <Text className="mt-1 text-xs font-mono-semibold text-black/45" numberOfLines={1}>
           {nft.collectionName ?? nft.symbol ?? (nft.mint ? shortenAddress(nft.mint) : 'Collectible')}
         </Text>
       </View>
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  nftImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+  },
+})
 
 export function NftsMenu({ address }: { address?: string }) {
   const { nfts = [], nftsError, isNftsLoading } = useNfts(address)

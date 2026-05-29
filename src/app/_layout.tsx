@@ -8,7 +8,7 @@ import { AppIdentity, MobileWalletProvider } from '@wallet-ui/react-native-web3j
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { APP_BACKGROUND_COLOR, APP_NAME, RPC_URL } from '../constants'
-import { appFonts, applyAppFontDefaults } from '../lib/fonts'
+import { appFonts } from '../lib/fonts'
 
 const identity: AppIdentity = { name: APP_NAME, icon: require('../assets/logo.png') }
 
@@ -19,8 +19,6 @@ SplashScreen.setOptions({
   duration: 350,
   fade: true,
 })
-
-applyAppFontDefaults()
 
 export default function Layout() {
   const [fontsLoaded] = useFonts(appFonts)

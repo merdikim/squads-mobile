@@ -37,7 +37,7 @@ export function ProfileModalTrigger() {
         backdropClassName="flex-1 items-center justify-center bg-black/30 px-6 py-6"
         contentClassName="w-full rounded-xl bg-white p-4"
       >
-        <Text className="text-lg font-black text-black">Profile</Text>
+        <Text className="text-lg font-mono-extrabold text-black">Profile</Text>
         <Text className="mt-2 text-sm leading-6 text-black/60">
           {account ? `Connected: ${account.address.toString().slice(0, 8)}...` : 'Connect your wallet to get started.'}
         </Text>
@@ -47,7 +47,7 @@ export function ProfileModalTrigger() {
           className="mt-5 h-12 items-center justify-center rounded-xl border border-black/30 bg-white active:bg-black/5"
           style={{ borderWidth: 1, borderColor: 'black' }}
         >
-          <Text className="text-base font-bold text-black">{account ? 'Disconnect Wallet' : 'Connect Wallet'}</Text>
+          <Text className="text-base font-mono-bold text-black">{account ? 'Disconnect Wallet' : 'Connect Wallet'}</Text>
         </Pressable>
       </SmoothModal>
     </>

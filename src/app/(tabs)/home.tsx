@@ -161,7 +161,7 @@ export default function HomeScreen() {
                     className="h-11 flex-row items-center justify-center rounded-xl bg-black active:bg-black/80"
                   >
                     <Plus color="#FFFFFF" size={16} strokeWidth={2.4} />
-                    <Text className="ml-2 text-sm font-black text-white">Create Multisig</Text>
+                    <Text className="ml-2 text-sm font-mono-extrabold text-white">Create Multisig</Text>
                   </Pressable>
                 }
               />
@@ -171,7 +171,7 @@ export default function HomeScreen() {
                 {isMultisigsLoading && !selectedMultisig ? (
                   <CardSkeleton className="h-4 w-5 rounded-md" />
                 ) : (
-                  <Text className="text-sm font-bold text-black">{selectedParticipants}</Text>
+                  <Text className="text-sm font-mono-bold text-black">{selectedParticipants}</Text>
                 )}
               </View>
             </View>
@@ -185,11 +185,11 @@ export default function HomeScreen() {
                 </View>
               ) : (
                 <>
-                  <Text className="text-xs font-semibold text-black/45">Total Balance</Text>
-                  <Text className="mt-3 text-center text-4xl font-black text-black">{selectedBalance}</Text>
+                  <Text className="text-xs font-mono-semibold text-black/45">Total Balance</Text>
+                  <Text className="mt-3 text-center text-4xl font-mono-extrabold text-black">{selectedBalance}</Text>
                   {selectedVaultAddress ? (
                     <View className="mt-2 flex-row items-center justify-center">
-                      <Text className="text-xs font-bold text-black/45">
+                      <Text className="text-xs font-mono-bold text-black/45">
                         Vault {shortenAddress(selectedVaultAddress)}
                       </Text>
                       <CopyText
@@ -210,7 +210,7 @@ export default function HomeScreen() {
               </View>
             ) : (
               <View className="flex-1 flex-row items-center">
-                <Text className="shrink text-xs font-bold text-black/45" numberOfLines={2}>
+                <Text className="shrink text-xs font-mono-bold text-black/45" numberOfLines={2}>
                   {`Account ${shortenAddress(selectedMultisigKey)}`}
                 </Text>
                 <CopyText text={selectedMultisigKey} accessibilityLabel="Copy account address" />
@@ -238,7 +238,7 @@ export default function HomeScreen() {
                   className="h-11 flex-1 items-center justify-end"
                 >
                   <Text
-                    className={`mb-2 text-sm font-semibold ${isSelected ? 'text-black font-extrabold' : 'text-black/60'}`}
+                    className={`mb-2 text-sm font-mono-semibold ${isSelected ? 'text-black font-mono-extrabold' : 'text-black/60'}`}
                   >
                     {item}
                   </Text>

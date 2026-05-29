@@ -21,8 +21,8 @@ type ProposalDetailsModalProps = {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <View className="flex-row items-start justify-between gap-4 border-b border-black/10 py-3">
-      <Text className="text-xs font-bold uppercase text-black/40">{label}</Text>
-      <Text className="max-w-[68%] text-right text-sm font-bold text-black">{value}</Text>
+      <Text className="text-xs font-mono-bold uppercase text-black/40">{label}</Text>
+      <Text className="max-w-[68%] text-right text-sm font-mono-bold text-black">{value}</Text>
     </View>
   )
 }
@@ -166,7 +166,7 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
         <>
           <View className="flex-row items-start justify-between gap-4">
             <View className="flex-1">
-              <Text className="text-xl font-black text-black">{proposal.title}</Text>
+              <Text className="text-xl font-mono-extrabold text-black">{proposal.title}</Text>
               <Text className="mt-2 text-sm leading-6 text-black/60">
                 {proposal.memo || `${proposal.category} proposal`}
               </Text>
@@ -191,7 +191,7 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
             <Text>{timeAgo}</Text>
           </View>
 
-          {error ? <Text className="mt-4 text-xs font-bold text-red-600">{error}</Text> : null}
+          {error ? <Text className="mt-4 text-xs font-mono-bold text-red-600">{error}</Text> : null}
 
           <View className="mt-6 flex-row gap-3">
             {account ? (
@@ -206,7 +206,7 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
                   ) : (
                     <>
                       <X color={canVote ? '#090A0F' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
-                      <Text className={`ml-2 text-base font-bold ${canVote ? 'text-black' : 'text-black/35'}`}>
+                      <Text className={`ml-2 text-base font-mono-bold ${canVote ? 'text-black' : 'text-black/35'}`}>
                         Reject
                       </Text>
                     </>
@@ -222,7 +222,7 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
                   ) : (
                     <>
                       <Check color={canVote ? '#FFFFFF' : 'rgba(9, 10, 15, 0.35)'} size={16} strokeWidth={2.4} />
-                      <Text className={`ml-2 text-base font-bold ${canVote ? 'text-white' : 'text-black/35'}`}>
+                      <Text className={`ml-2 text-base font-mono-bold ${canVote ? 'text-white' : 'text-black/35'}`}>
                         Approve
                       </Text>
                     </>
@@ -234,7 +234,7 @@ export function ProposalDetailsModal({ proposal, threshold, onClose, onApprove, 
                 onPress={handleConnectWallet}
                 className="h-12 flex-1 items-center justify-center rounded-xl bg-black active:bg-black/80"
               >
-                <Text className="text-base font-bold text-white">Connect Wallet</Text>
+                <Text className="text-base font-mono-bold text-white">Connect Wallet</Text>
               </Pressable>
             )}
           </View>
